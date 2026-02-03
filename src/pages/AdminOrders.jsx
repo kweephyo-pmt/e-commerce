@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { collection, onSnapshot, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { Package, Truck, CheckCircle, Clock, Calendar, User, MapPin, Search } from 'lucide-react';
+import { Package, Truck, CheckCircle, Clock, Calendar, User, MapPin, Search, ShoppingCart } from 'lucide-react';
 
 const AdminOrders = () => {
     const [orders, setOrders] = useState([]);
@@ -119,7 +119,7 @@ const AdminOrders = () => {
             <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
                 <div className="flex items-center space-x-4">
                     <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-                        <Package className="w-8 h-8 text-white" />
+                        <ShoppingCart className="w-8 h-8 text-white" />
                     </div>
                     <div>
                         <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-1">

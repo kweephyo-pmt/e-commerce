@@ -345,21 +345,26 @@ const AdminDashboard = () => {
 
                 {/* Main Content */}
                 <main className="flex-1 overflow-y-auto">
-                    {/* Header */}
-                    <header className="bg-white shadow-sm sticky top-0 z-10">
-                        <div className="px-8 py-6">
-                            <h2 className="text-3xl font-bold text-gray-900">
-                                {menuItems.find(item => item.id === activeTab)?.label || 'Dashboard'}
-                            </h2>
-                            <p className="text-gray-600 mt-1">Manage your store efficiently</p>
-                        </div>
-                    </header>
-
                     {/* Content Area */}
                     <div className="p-8">
                         {/* Dashboard View */}
                         {activeTab === 'dashboard' && (
                             <div className="space-y-6 animate-fade-in">
+                                {/* Header */}
+                                <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+                                    <div className="flex items-center space-x-4">
+                                        <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                                            <LayoutDashboard className="w-8 h-8 text-white" />
+                                        </div>
+                                        <div>
+                                            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-1">
+                                                Dashboard
+                                            </h1>
+                                            <p className="text-gray-600 text-lg">Overview of your store performance</p>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 {/* Stats Cards */}
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div className="card p-6 bg-gradient-to-br from-blue-500 to-blue-600 text-white">
@@ -434,6 +439,21 @@ const AdminDashboard = () => {
                         {/* Products View */}
                         {activeTab === 'products' && (
                             <div className="space-y-6 animate-fade-in">
+                                {/* Header */}
+                                <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 mb-8">
+                                    <div className="flex items-center space-x-4">
+                                        <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                                            <Package className="w-8 h-8 text-white" />
+                                        </div>
+                                        <div>
+                                            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-1">
+                                                Product Management
+                                            </h1>
+                                            <p className="text-gray-600 text-lg">Manage your inventory and catalog</p>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 {/* Toolbar */}
                                 <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
                                     <div className="relative flex-1 max-w-md">
