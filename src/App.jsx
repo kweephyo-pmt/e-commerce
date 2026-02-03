@@ -12,6 +12,7 @@ import Login from './pages/Login';
 import Checkout from './pages/Checkout';
 import OrderSuccess from './pages/OrderSuccess';
 import Orders from './pages/Orders';
+import Profile from './pages/Profile';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 
@@ -32,6 +33,7 @@ function AppContent() {
         <Route path="/admin" element={<AdminLogin />} />
         <Route path="/order-success" element={<OrderSuccess />} />
         <Route path="/orders" element={<Orders />} />
+        <Route path="/profile" element={<Profile />} />
         <Route
           path="/admin/dashboard"
           element={

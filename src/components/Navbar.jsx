@@ -118,13 +118,22 @@ const Navbar = () => {
                                 Products
                             </Link>
                             {user && (
-                                <Link
-                                    to="/orders"
-                                    onClick={() => setIsMenuOpen(false)}
-                                    className="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200"
-                                >
-                                    Orders
-                                </Link>
+                                <>
+                                    <Link
+                                        to="/profile"
+                                        onClick={() => setIsMenuOpen(false)}
+                                        className="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200"
+                                    >
+                                        Profile
+                                    </Link>
+                                    <Link
+                                        to="/orders"
+                                        onClick={() => setIsMenuOpen(false)}
+                                        className="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200"
+                                    >
+                                        Orders
+                                    </Link>
+                                </>
                             )}
                             {isAdmin && (
                                 <Link

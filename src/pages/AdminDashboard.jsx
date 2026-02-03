@@ -5,6 +5,8 @@ import { db } from '../config/firebase';
 import { useAuth } from '../context/AuthContext';
 import CloudinaryUpload from '../components/CloudinaryUpload';
 import AdminOrders from './AdminOrders';
+import AdminCustomers from './AdminCustomers';
+import AdminSettings from './AdminSettings';
 import {
     LayoutDashboard,
     Package,
@@ -300,37 +302,43 @@ const AdminDashboard = () => {
                     </nav>
 
                     {/* User Profile & Logout */}
-                    <div className="p-4 border-t border-blue-500 space-y-2">
-                        {sidebarOpen && (
-                            <div className="mb-3 px-3 py-3 bg-blue-500 bg-opacity-50 rounded-lg flex items-center space-x-3">
-                                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center flex-shrink-0">
-                                    <span className="text-blue-600 font-bold text-sm">
-                                        {user?.email?.charAt(0).toUpperCase()}
-                                    </span>
+                    <div className="p-4 border-t border-blue-500 space-y-3">
+                        {/* Profile Card */}
+                        <div className={`${sidebarOpen ? 'bg-white bg-opacity-10 backdrop-blur-sm' : ''} rounded-xl overflow-hidden transition-all duration-300`}>
+                            {sidebarOpen ? (
+                                <div className="p-4">
+                                    <div className="flex items-center space-x-3 mb-3">
+                                        <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
+                                            <span className="text-blue-600 font-bold text-lg">
+                                                {user?.email?.charAt(0).toUpperCase()}
+                                            </span>
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-xs text-blue-200 font-medium mb-0.5">Admin</p>
+                                            <p className="font-bold text-white text-sm truncate">
+                                                {user?.displayName || user?.email?.split('@')[0] || 'Leo'}
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-xs text-blue-200 mb-0.5">Admin</p>
-                                    <p className="font-medium text-white text-sm truncate">
-                                        {user?.displayName || user?.email?.split('@')[0] || 'Admin'}
-                                    </p>
+                            ) : (
+                                <div className="flex justify-center py-2">
+                                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg">
+                                        <span className="text-blue-600 font-bold text-sm">
+                                            {user?.email?.charAt(0).toUpperCase()}
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
-                        {!sidebarOpen && (
-                            <div className="mb-3 flex justify-center">
-                                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                                    <span className="text-blue-600 font-bold text-sm">
-                                        {user?.email?.charAt(0).toUpperCase()}
-                                    </span>
-                                </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
+
+                        {/* Logout Button */}
                         <button
                             onClick={handleLogout}
-                            className="w-full flex items-center justify-center space-x-3 px-4 py-3 text-blue-100 hover:bg-red-500 rounded-lg transition-colors"
+                            className={`w-full flex items-center ${sidebarOpen ? 'justify-start space-x-3 px-4' : 'justify-center'} py-3 text-white bg-white bg-opacity-10 hover:bg-red-500 rounded-xl transition-all duration-200 group`}
                         >
-                            <LogOut className="w-5 h-5 flex-shrink-0" />
-                            {sidebarOpen && <span className="font-medium">Logout</span>}
+                            <LogOut className="w-5 h-5 flex-shrink-0 group-hover:rotate-12 transition-transform duration-200" />
+                            {sidebarOpen && <span className="font-semibold">Logout</span>}
                         </button>
                     </div>
                 </aside>
@@ -769,16 +777,19 @@ const AdminDashboard = () => {
                             </div>
                         )}
 
-                        {/* Other tabs - Coming Soon */}
-                        {
-                            ['customers', 'settings'].includes(activeTab) && (
-                                <div className="card p-12 text-center animate-fade-in">
-                                    <ShoppingBag className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                                    <h3 className="text-2xl font-bold text-gray-700 mb-2">Coming Soon</h3>
-                                    <p className="text-gray-600">This feature is under development.</p>
-                                </div>
-                            )
-                        }
+                        {/* Customers View */}
+                        {activeTab === 'customers' && (
+                            <div className="animate-fade-in">
+                                <AdminCustomers />
+                            </div>
+                        )}
+
+                        {/* Settings View */}
+                        {activeTab === 'settings' && (
+                            <div className="animate-fade-in">
+                                <AdminSettings />
+                            </div>
+                        )}
                     </div>
                 </main>
             </div>

@@ -114,55 +114,87 @@ const AdminOrders = () => {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 bg-gradient-to-br from-blue-50 via-white to-indigo-50 min-h-screen p-6">
             {/* Header */}
-            <div>
-                <h2 className="text-2xl font-bold mb-2">Order Management</h2>
-                <p className="text-gray-600">Manage and track all customer orders • Real-time updates</p>
+            <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+                <div className="flex items-center space-x-4">
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                        <Package className="w-8 h-8 text-white" />
+                    </div>
+                    <div>
+                        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-1">
+                            Order Management
+                        </h1>
+                        <p className="text-gray-600 text-lg">Manage and track all customer orders • Real-time updates</p>
+                    </div>
+                </div>
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="card p-4">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm text-gray-600">Total Orders</p>
-                            <p className="text-2xl font-bold">{statusCounts.all}</p>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="bg-gradient-to-br from-gray-500 to-gray-600 rounded-2xl shadow-xl p-6 text-white transform hover:scale-105 transition-all duration-300">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                            <Package className="w-7 h-7 text-white" />
                         </div>
-                        <Package className="w-8 h-8 text-gray-400" />
+                        <div className="text-right">
+                            <p className="text-gray-100 text-sm font-medium mb-1">Total Orders</p>
+                            <p className="text-4xl font-bold">{statusCounts.all}</p>
+                        </div>
+                    </div>
+                    <div className="h-1 bg-white/30 rounded-full overflow-hidden">
+                        <div className="h-full bg-white rounded-full" style={{ width: '100%' }}></div>
                     </div>
                 </div>
-                <div className="card p-4 border-l-4 border-yellow-500">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm text-gray-600">Processing</p>
-                            <p className="text-2xl font-bold text-yellow-600">{statusCounts.processing}</p>
+
+                <div className="bg-gradient-to-br from-yellow-500 to-orange-600 rounded-2xl shadow-xl p-6 text-white transform hover:scale-105 transition-all duration-300">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                            <Clock className="w-7 h-7 text-white" />
                         </div>
-                        <Clock className="w-8 h-8 text-yellow-400" />
+                        <div className="text-right">
+                            <p className="text-yellow-100 text-sm font-medium mb-1">Processing</p>
+                            <p className="text-4xl font-bold">{statusCounts.processing}</p>
+                        </div>
+                    </div>
+                    <div className="h-1 bg-white/30 rounded-full overflow-hidden">
+                        <div className="h-full bg-white rounded-full" style={{ width: `${(statusCounts.processing / statusCounts.all * 100) || 0}%` }}></div>
                     </div>
                 </div>
-                <div className="card p-4 border-l-4 border-blue-500">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm text-gray-600">Shipped</p>
-                            <p className="text-2xl font-bold text-blue-600">{statusCounts.shipped}</p>
+
+                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-xl p-6 text-white transform hover:scale-105 transition-all duration-300">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                            <Truck className="w-7 h-7 text-white" />
                         </div>
-                        <Truck className="w-8 h-8 text-blue-400" />
+                        <div className="text-right">
+                            <p className="text-blue-100 text-sm font-medium mb-1">Shipped</p>
+                            <p className="text-4xl font-bold">{statusCounts.shipped}</p>
+                        </div>
+                    </div>
+                    <div className="h-1 bg-white/30 rounded-full overflow-hidden">
+                        <div className="h-full bg-white rounded-full" style={{ width: `${(statusCounts.shipped / statusCounts.all * 100) || 0}%` }}></div>
                     </div>
                 </div>
-                <div className="card p-4 border-l-4 border-green-500">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm text-gray-600">Delivered</p>
-                            <p className="text-2xl font-bold text-green-600">{statusCounts.delivered}</p>
+
+                <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl shadow-xl p-6 text-white transform hover:scale-105 transition-all duration-300">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                            <CheckCircle className="w-7 h-7 text-white" />
                         </div>
-                        <CheckCircle className="w-8 h-8 text-green-400" />
+                        <div className="text-right">
+                            <p className="text-green-100 text-sm font-medium mb-1">Delivered</p>
+                            <p className="text-4xl font-bold">{statusCounts.delivered}</p>
+                        </div>
+                    </div>
+                    <div className="h-1 bg-white/30 rounded-full overflow-hidden">
+                        <div className="h-full bg-white rounded-full" style={{ width: `${(statusCounts.delivered / statusCounts.all * 100) || 0}%` }}></div>
                     </div>
                 </div>
             </div>
 
             {/* Filters */}
-            <div className="card p-4">
+            <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
                 <div className="flex flex-col md:flex-row gap-4">
                     {/* Search */}
                     <div className="flex-1 relative">
@@ -172,23 +204,25 @@ const AdminOrders = () => {
                             placeholder="Search by order ID, customer name, or email..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="input-field pl-10 w-full"
+                            className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors"
                         />
                     </div>
 
                     {/* Status Filter */}
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                         {['all', 'processing', 'shipped', 'delivered'].map((status) => (
                             <button
                                 key={status}
                                 onClick={() => setFilterStatus(status)}
-                                className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${filterStatus === status
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                className={`px-5 py-3 rounded-xl font-semibold text-sm transition-all transform hover:scale-105 ${filterStatus === status
+                                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                     }`}
                             >
                                 {status.charAt(0).toUpperCase() + status.slice(1)}
-                                <span className="ml-1 text-xs">({statusCounts[status]})</span>
+                                <span className={`ml-1 text-xs ${filterStatus === status ? 'text-blue-100' : 'text-gray-500'}`}>
+                                    ({statusCounts[status]})
+                                </span>
                             </button>
                         ))}
                     </div>
@@ -196,27 +230,27 @@ const AdminOrders = () => {
             </div>
 
             {/* Orders Table */}
-            <div className="card overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
                 <div className="overflow-x-auto">
                     <table className="w-full">
-                        <thead className="bg-gray-50 border-b border-gray-200">
+                        <thead className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">
                                     Order
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">
                                     Customer
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">
                                     Date
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">
                                     Total
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">
                                     Status
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">
                                     Actions
                                 </th>
                             </tr>
@@ -244,14 +278,27 @@ const AdminOrders = () => {
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-start space-x-2">
-                                                <User className="w-4 h-4 text-gray-400 mt-0.5" />
-                                                <div>
+                                                <User className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                                <div className="min-w-0">
                                                     <div className="font-semibold text-sm">{order.userName}</div>
                                                     <div className="text-xs text-gray-500">{order.userEmail}</div>
-                                                    <div className="flex items-center text-xs text-gray-500 mt-1">
-                                                        <MapPin className="w-3 h-3 mr-1" />
-                                                        {order.shippingAddress?.city}
-                                                    </div>
+                                                    {order.shippingAddress && (
+                                                        <div className="mt-2 text-xs text-gray-600 space-y-0.5">
+                                                            <div className="flex items-start">
+                                                                <MapPin className="w-3 h-3 mr-1 mt-0.5 flex-shrink-0" />
+                                                                <div className="break-words">
+                                                                    <div>{order.shippingAddress.address}</div>
+                                                                    <div>
+                                                                        {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zipCode}
+                                                                    </div>
+                                                                    <div>{order.shippingAddress.country}</div>
+                                                                    {order.shippingAddress.phone && (
+                                                                        <div className="mt-1">📞 {order.shippingAddress.phone}</div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </td>

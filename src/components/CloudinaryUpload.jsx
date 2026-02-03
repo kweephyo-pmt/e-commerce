@@ -40,9 +40,9 @@ const CloudinaryUpload = ({ onUploadSuccess, currentImage }) => {
                     maxImageHeight: 2000,
                     cropping: true,
                     croppingAspectRatio: 1,
-                    folder: 'products',
+                    folder: 'e-commerce/products',
                     resourceType: 'image',
-                    showSkipCropButton: false,
+                    showSkipCropButton: true,
                     croppingShowDimensions: true
                 },
                 (error, result) => {

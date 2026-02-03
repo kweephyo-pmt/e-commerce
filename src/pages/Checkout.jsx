@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { CreditCard, Lock, MapPin, User as UserIcon, Package, CheckCircle, ArrowLeft, ShieldCheck, Truck } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import StripePaymentForm from '../components/StripePaymentForm';
 
@@ -28,6 +28,35 @@ const Checkout = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [validationErrors, setValidationErrors] = useState({});
+
+    // Fetch user profile data to auto-fill form
+    useEffect(() => {
+        const fetchUserProfile = async () => {
+            if (!user) return;
+
+            try {
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    setFormData(prev => ({
+                        ...prev,
+                        fullName: userData.displayName || user.displayName || '',
+                        email: userData.email || user.email || '',
+                        phone: userData.phone || '',
+                        address: userData.address || '',
+                        city: userData.city || '',
+                        state: userData.state || '',
+                        zipCode: userData.zipCode || '',
+                        country: userData.country || 'Thailand'
+                    }));
+                }
+            } catch (error) {
+                console.error('Error fetching user profile:', error);
+            }
+        };
+
+        fetchUserProfile();
+    }, [user]);
 
     const steps = [
         { id: 1, name: 'Information', icon: UserIcon },
@@ -506,76 +535,74 @@ const Checkout = () => {
 
                     {/* Order Summary - Sticky Sidebar */}
                     <div className="lg:col-span-1">
-                        <div className="card p-6 sticky top-24 animate-fade-in">
-                            <h2 className="text-xl font-bold mb-6 flex items-center space-x-2">
-                                <Package className="w-5 h-5 text-blue-600" />
-                                <span>Order Summary</span>
-                            </h2>
-
-                            {/* Cart Items */}
-                            <div className="space-y-4 mb-6 max-h-72 overflow-y-auto pr-2 custom-scrollbar">
-                                {cartItems.map((item) => (
-                                    <div key={item.id} className="flex space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
-                                        <div className="relative">
-                                            <img
-                                                src={item.image}
-                                                alt={item.name}
-                                                className="w-20 h-20 object-cover rounded-lg"
-                                            />
-                                            <span className="absolute -top-2 -right-2 w-6 h-6 bg-blue-600 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                                                {item.quantity}
-                                            </span>
-                                        </div>
-                                        <div className="flex-grow min-w-0">
-                                            <h4 className="font-semibold text-sm line-clamp-2 mb-1">{item.name}</h4>
-                                            <p className="text-xs text-gray-500 mb-2">{item.category}</p>
-                                            <p className="text-sm font-bold text-blue-600">
-                                                ฿{((item.discount ? item.price * (1 - item.discount / 100) : item.price) * item.quantity).toFixed(2)}
-                                            </p>
-                                        </div>
-                                    </div>
-                                ))}
+                        <div className="bg-white rounded-2xl overflow-hidden sticky top-24 animate-fade-in shadow-xl">
+                            {/* Header with Gradient */}
+                            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-5">
+                                <h2 className="text-xl font-bold text-white flex items-center space-x-2">
+                                    <Package className="w-6 h-6" />
+                                    <span>Order Summary</span>
+                                </h2>
                             </div>
 
-                            {/* Pricing Breakdown */}
-                            <div className="space-y-3 border-t pt-4">
-                                <div className="flex justify-between text-gray-600">
-                                    <span>Subtotal</span>
-                                    <span className="font-semibold">฿{subtotal.toFixed(2)}</span>
+                            <div className="p-6">
+                                {/* Cart Items */}
+                                <div className="space-y-3 mb-6 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
+                                    {cartItems.map((item) => (
+                                        <div key={item.id} className="bg-white border border-gray-200 rounded-xl p-3 hover:shadow-md transition-all duration-200">
+                                            <div className="flex space-x-3">
+                                                <div className="relative flex-shrink-0">
+                                                    <img
+                                                        src={item.image}
+                                                        alt={item.name}
+                                                        className="w-20 h-20 object-cover rounded-lg"
+                                                    />
+                                                    <span className="absolute -top-2 -right-2 w-6 h-6 bg-blue-600 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg">
+                                                        {item.quantity}
+                                                    </span>
+                                                </div>
+                                                <div className="flex-grow min-w-0">
+                                                    <h4 className="font-bold text-gray-900 text-sm mb-1 line-clamp-1">{item.name}</h4>
+                                                    <p className="text-xs text-gray-500 mb-2">{item.category}</p>
+                                                    <p className="text-lg font-bold text-blue-600">
+                                                        ฿{((item.discount ? item.price * (1 - item.discount / 100) : item.price) * item.quantity).toFixed(2)}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
-                                <div className="flex justify-between text-gray-600">
-                                    <span>Shipping</span>
-                                    <span className={`font-semibold ${shipping === 0 ? 'text-green-600' : ''}`}>
-                                        {shipping === 0 ? 'FREE' : `฿${shipping.toFixed(2)}`}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between text-gray-600">
-                                    <span>Tax (7% VAT)</span>
-                                    <span className="font-semibold">฿{tax.toFixed(2)}</span>
-                                </div>
-                                <div className="border-t pt-3">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-lg font-bold">Total</span>
-                                        <span className="text-2xl font-bold text-gradient">
-                                            ฿{total.toFixed(2)}
+
+                                {/* Pricing Breakdown */}
+                                <div className="space-y-3 pt-4 border-t border-gray-200">
+                                    <div className="flex justify-between text-gray-700">
+                                        <span className="font-medium">Subtotal</span>
+                                        <span className="font-bold text-gray-900">฿{subtotal.toFixed(2)}</span>
+                                    </div>
+                                    <div className="flex justify-between text-gray-700">
+                                        <span className="font-medium">Shipping</span>
+                                        <span className={`font-bold ${shipping === 0 ? 'text-green-600' : 'text-gray-900'}`}>
+                                            {shipping === 0 ? 'FREE' : `฿${shipping.toFixed(2)}`}
                                         </span>
                                     </div>
+                                    <div className="flex justify-between text-gray-700">
+                                        <span className="font-medium">Tax (7% VAT)</span>
+                                        <span className="font-bold text-gray-900">฿{tax.toFixed(2)}</span>
+                                    </div>
                                 </div>
-                            </div>
 
-                            {/* Trust Badges */}
-                            <div className="mt-6 pt-6 border-t space-y-3">
-                                <div className="flex items-center space-x-3 text-sm text-gray-600">
-                                    <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-                                    <span>Secure SSL encryption</span>
-                                </div>
-                                <div className="flex items-center space-x-3 text-sm text-gray-600">
-                                    <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-                                    <span>30-day money-back guarantee</span>
-                                </div>
-                                <div className="flex items-center space-x-3 text-sm text-gray-600">
-                                    <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-                                    <span>Free returns & exchanges</span>
+                                {/* Total Section */}
+                                <div className="mt-4 bg-gradient-to-r from-blue-50 to-indigo-50 -mx-6 px-6 py-5 border-t border-gray-200">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-lg font-bold text-gray-800">Total</span>
+                                        <div className="text-right">
+                                            <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                                                ฿{total.toFixed(2)}
+                                            </div>
+                                            <div className="text-xs text-gray-500 mt-1">
+                                                Including VAT
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
