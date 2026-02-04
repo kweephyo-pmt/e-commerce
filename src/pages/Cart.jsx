@@ -95,11 +95,22 @@ const Cart = () => {
                                             </span>
                                             <button
                                                 onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                                className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors duration-200"
+                                                disabled={item.stock && item.quantity >= item.stock}
+                                                className={`p-2 rounded-lg transition-colors duration-200 ${item.stock && item.quantity >= item.stock
+                                                        ? 'bg-gray-100 opacity-50 cursor-not-allowed'
+                                                        : 'bg-gray-100 hover:bg-gray-200'
+                                                    }`}
                                             >
                                                 <Plus className="w-4 h-4" />
                                             </button>
                                         </div>
+
+                                        {/* Stock warning */}
+                                        {item.stock && item.quantity >= item.stock && (
+                                            <div className="text-xs text-orange-600 font-semibold">
+                                                Max stock reached
+                                            </div>
+                                        )}
 
                                         {/* Price */}
                                         <div className="text-right">

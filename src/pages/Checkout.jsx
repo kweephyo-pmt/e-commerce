@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { CreditCard, Lock, MapPin, User as UserIcon, Package, CheckCircle, ArrowLeft, ShieldCheck, Truck } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, getDoc, updateDoc, runTransaction } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import StripePaymentForm from '../components/StripePaymentForm';
 
@@ -461,6 +461,41 @@ const Checkout = () => {
                                         currency="thb"
                                         onSuccess={async (paymentIntent) => {
                                             try {
+                                                // First, update product stock quantities using transactions
+                                                const stockUpdatePromises = cartItems.map(async (item) => {
+                                                    const productRef = doc(db, 'products', item.id);
+
+                                                    try {
+                                                        await runTransaction(db, async (transaction) => {
+                                                            const productDoc = await transaction.get(productRef);
+
+                                                            if (!productDoc.exists()) {
+                                                                console.warn(`Product ${item.name} not found in database`);
+                                                                return;
+                                                            }
+
+                                                            const currentStock = productDoc.data().stock || 0;
+                                                            const newStock = currentStock - item.quantity;
+
+                                                            if (newStock < 0) {
+                                                                console.warn(`Insufficient stock for ${item.name}. Current: ${currentStock}, Requested: ${item.quantity}`);
+                                                                return;
+                                                            }
+
+                                                            transaction.update(productRef, {
+                                                                stock: newStock,
+                                                                updatedAt: new Date()
+                                                            });
+                                                        });
+                                                    } catch (error) {
+                                                        console.error(`Error updating stock for ${item.name}:`, error);
+                                                        // Don't throw - we want order to save even if stock update fails
+                                                    }
+                                                });
+
+                                                // Wait for all stock updates to complete
+                                                await Promise.all(stockUpdatePromises);
+
                                                 // Save order to Firestore
                                                 const orderData = {
                                                     userId: user?.uid || 'guest',

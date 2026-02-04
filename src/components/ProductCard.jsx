@@ -17,6 +17,18 @@ const ProductCard = ({ product }) => {
 
     const handleAddToCart = (e) => {
         e.stopPropagation();
+
+        // Check if product is in stock
+        if (!product.stock || product.stock === 0) {
+            return;
+        }
+
+        // Check if adding one more would exceed available stock
+        if (quantityInCart >= product.stock) {
+            // Could show a toast message here
+            return;
+        }
+
         addToCart(product);
         setShowAddedMessage(true);
         setTimeout(() => setShowAddedMessage(false), 2000);
@@ -120,11 +132,27 @@ const ProductCard = ({ product }) => {
                                 ฿{product.price.toFixed(2)}
                             </span>
                         )}
+                        {/* Stock indicator */}
+                        {product.stock !== undefined && (
+                            <div className="mt-1">
+                                {product.stock === 0 ? (
+                                    <span className="text-xs text-red-600 font-semibold">Out of Stock</span>
+                                ) : product.stock <= 5 ? (
+                                    <span className="text-xs text-orange-600 font-semibold">Only {product.stock} left</span>
+                                ) : (
+                                    <span className="text-xs text-green-600 font-semibold">In Stock</span>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     <button
                         onClick={handleAddToCart}
-                        className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 relative"
+                        disabled={!product.stock || product.stock === 0 || quantityInCart >= product.stock}
+                        className={`bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-3 rounded-lg transition-all duration-300 shadow-lg relative ${!product.stock || product.stock === 0 || quantityInCart >= product.stock
+                                ? 'opacity-50 cursor-not-allowed'
+                                : 'hover:from-blue-700 hover:to-indigo-700 hover:shadow-xl transform hover:-translate-y-1'
+                            }`}
                     >
                         <ShoppingCart className="w-5 h-5" />
                         {quantityInCart > 0 && (

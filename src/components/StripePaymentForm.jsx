@@ -12,14 +12,17 @@ const CheckoutForm = ({ amount, onSuccess, onError }) => {
     const elements = useElements();
     const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    const [paymentSucceeded, setPaymentSucceeded] = useState(false);
+    const processingRef = useRef(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!stripe || !elements) {
+        if (!stripe || !elements || processingRef.current || paymentSucceeded) {
             return;
         }
 
+        processingRef.current = true;
         setLoading(true);
         setErrorMessage('');
 
@@ -32,12 +35,16 @@ const CheckoutForm = ({ amount, onSuccess, onError }) => {
             if (error) {
                 setErrorMessage(error.message);
                 onError(error.message);
+                processingRef.current = false;
             } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+                setPaymentSucceeded(true);
                 onSuccess(paymentIntent);
+                // Don't reset processingRef - keep it true to prevent resubmission
             }
         } catch (err) {
             setErrorMessage(err.message);
             onError(err.message);
+            processingRef.current = false;
         } finally {
             setLoading(false);
         }
@@ -61,10 +68,18 @@ const CheckoutForm = ({ amount, onSuccess, onError }) => {
             {/* Submit Button */}
             <button
                 type="submit"
-                disabled={!stripe || loading}
-                className="btn-primary w-full text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!stripe || loading || paymentSucceeded}
+                className={`btn-primary w-full text-lg disabled:opacity-50 disabled:cursor-not-allowed ${paymentSucceeded ? 'bg-green-600 hover:bg-green-600' : ''
+                    }`}
             >
-                {loading ? (
+                {paymentSucceeded ? (
+                    <span className="flex items-center justify-center space-x-2">
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <span>Payment Successful!</span>
+                    </span>
+                ) : loading ? (
                     <span className="flex items-center justify-center space-x-2">
                         <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />

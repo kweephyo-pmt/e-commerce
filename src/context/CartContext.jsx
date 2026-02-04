@@ -28,14 +28,25 @@ export const CartProvider = ({ children }) => {
 
             if (existingItem) {
                 // Update quantity if item already exists
-                return prevItems.map((item) =>
-                    item.id === product.id
-                        ? { ...item, quantity: item.quantity + quantity }
-                        : item
-                );
+                return prevItems.map((item) => {
+                    if (item.id === product.id) {
+                        const newQuantity = item.quantity + quantity;
+                        // Check if new quantity would exceed stock
+                        if (product.stock && newQuantity > product.stock) {
+                            // Cap at available stock
+                            return { ...item, quantity: product.stock, stock: product.stock };
+                        }
+                        return { ...item, quantity: newQuantity, stock: product.stock };
+                    }
+                    return item;
+                });
             } else {
                 // Add new item to cart
-                return [...prevItems, { ...product, quantity }];
+                // Make sure quantity doesn't exceed stock
+                const safeQuantity = product.stock && quantity > product.stock
+                    ? product.stock
+                    : quantity;
+                return [...prevItems, { ...product, quantity: safeQuantity }];
             }
         });
     };
@@ -53,9 +64,17 @@ export const CartProvider = ({ children }) => {
         }
 
         setCartItems((prevItems) =>
-            prevItems.map((item) =>
-                item.id === productId ? { ...item, quantity } : item
-            )
+            prevItems.map((item) => {
+                if (item.id === productId) {
+                    // Check if trying to exceed available stock
+                    if (item.stock && quantity > item.stock) {
+                        // Don't allow quantity to exceed stock
+                        return { ...item, quantity: item.stock };
+                    }
+                    return { ...item, quantity };
+                }
+                return item;
+            })
         );
     };
 
