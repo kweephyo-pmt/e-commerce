@@ -1,55 +1,63 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Products Collection
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return request.auth != null && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+    
+    // Users collection - users can read/write their own data, admins can write any user data
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+    }
+    
+    // Products collection - anyone can read, admins can write
+    // BUT authenticated users can update ONLY stock and updatedAt (for checkout)
     match /products/{productId} {
-      // Anyone can read products
-      allow read: if true;
+      allow read: if true;  // Public read access
       
-      // Only admins can create and delete products
-      allow create, delete: if request.auth != null && 
-                               get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      // Admins can create and delete products
+      allow create, delete: if isAdmin();
       
-      // Authenticated users can update ONLY stock and updatedAt fields
-      // This allows checkout to reduce stock
+      // Admins can update any field
+      allow update: if isAdmin();
+      
+      // Authenticated users can update ONLY stock and updatedAt fields (for checkout)
       allow update: if request.auth != null && 
                       request.resource.data.diff(resource.data).affectedKeys()
                         .hasOnly(['stock', 'updatedAt']);
     }
     
-    // Orders Collection
+    // Orders collection - users can read/write their own orders, admins can read/write all orders
     match /orders/{orderId} {
-      // Users can read their own orders, admins can read all
+      // Users can read their own orders, admins can read all orders
       allow read: if request.auth != null && 
-                    (request.auth.uid == resource.data.userId || 
-                     get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+                     (resource.data.userId == request.auth.uid || isAdmin());
       
-      // Authenticated users can create orders (during checkout)
-      allow create: if request.auth != null;
+      // Users can create their own orders
+      allow create: if request.auth != null && 
+                       request.resource.data.userId == request.auth.uid;
       
-      // Only admins can update or delete orders
+      // Users can update/delete their own orders, admins can update/delete all orders
       allow update, delete: if request.auth != null && 
-                              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+                               (resource.data.userId == request.auth.uid || isAdmin());
     }
     
-    // Users Collection
-    match /users/{userId} {
-      // Users can read and write their own data
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-      
-      // Admins can read all users
-      allow read: if request.auth != null && 
-                    get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
-    }
-    
-    // Reviews Collection (if you have one)
+    // Reviews collection - anyone can read, authenticated users can create
     match /reviews/{reviewId} {
-      allow read: if true;
+      allow read: if true;  // Public read access
       allow create: if request.auth != null;
       allow update, delete: if request.auth != null && 
-                              (request.auth.uid == resource.data.userId ||
-                               get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+                               (resource.data.userId == request.auth.uid || isAdmin());
+    }
+    
+    // Cart collection - users can read/write their own cart
+    match /carts/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
   }
 }

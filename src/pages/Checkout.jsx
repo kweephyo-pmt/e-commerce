@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { CreditCard, Lock, MapPin, User as UserIcon, Package, CheckCircle, ArrowLeft, ShieldCheck, Truck } from 'lucide-react';
 import { useCart } from '../context/CartContext';
@@ -11,6 +11,9 @@ const Checkout = () => {
     const { cartItems, getCartTotal, clearCart } = useCart();
     const { user } = useAuth();
     const navigate = useNavigate();
+
+    // Track processed payment intents to prevent duplicate orders
+    const processedPayments = useRef(new Set());
 
     const [currentStep, setCurrentStep] = useState(1);
     const [formData, setFormData] = useState({
@@ -460,6 +463,15 @@ const Checkout = () => {
                                         amount={total}
                                         currency="thb"
                                         onSuccess={async (paymentIntent) => {
+                                            // Prevent duplicate order creation
+                                            if (processedPayments.current.has(paymentIntent.id)) {
+                                                console.log('Payment already processed:', paymentIntent.id);
+                                                return;
+                                            }
+
+                                            // Mark this payment as processed
+                                            processedPayments.current.add(paymentIntent.id);
+
                                             try {
                                                 // First, update product stock quantities using transactions
                                                 const stockUpdatePromises = cartItems.map(async (item) => {
@@ -541,6 +553,8 @@ const Checkout = () => {
                                             } catch (error) {
                                                 console.error('Error saving order:', error);
                                                 setError('Payment successful but order save failed. Please contact support with payment ID: ' + paymentIntent.id);
+                                                // Remove from processed set if order creation failed
+                                                processedPayments.current.delete(paymentIntent.id);
                                             }
                                         }}
                                         onError={(error) => {

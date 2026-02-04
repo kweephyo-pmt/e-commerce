@@ -30,7 +30,10 @@ import {
 
 
 const AdminDashboard = () => {
-    const [activeTab, setActiveTab] = useState('products');
+    const [activeTab, setActiveTab] = useState(() => {
+        // Initialize from localStorage or default to 'dashboard'
+        return localStorage.getItem('adminActiveTab') || 'dashboard';
+    });
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [editingProduct, setEditingProduct] = useState(null);
@@ -52,6 +55,11 @@ const AdminDashboard = () => {
 
     const { signOut, user } = useAuth();
     const navigate = useNavigate();
+
+    // Save active tab to localStorage whenever it changes
+    useEffect(() => {
+        localStorage.setItem('adminActiveTab', activeTab);
+    }, [activeTab]);
 
     // Toast notification helper
     const showToast = (message, type = 'success') => {
