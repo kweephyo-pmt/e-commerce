@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: shopping-payment-server
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 18.17.0
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: PORT
+        value: 10000
+      - key: FRONTEND_URL
+        sync: false
