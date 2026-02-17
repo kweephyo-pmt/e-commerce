@@ -77,13 +77,13 @@ const Orders = () => {
 
         return (
             <div className="py-6">
-                <h4 className="font-semibold mb-4">Order Progress</h4>
+                <h4 className="font-black mb-4 text-cyan-400 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(0, 255, 255, 0.5)' }}>Order Progress</h4>
                 <div className="relative">
                     {/* Progress Line */}
-                    <div className="absolute top-5 left-0 right-0 h-1 bg-gray-200">
+                    <div className="absolute top-5 left-0 right-0 h-1 bg-gray-700">
                         <div
-                            className="h-full bg-blue-600 transition-all duration-500"
-                            style={{ width: `${(currentStepIndex / (steps.length - 1)) * 100}%` }}
+                            className="h-full bg-gradient-to-r from-cyan-400 to-magenta-400 transition-all duration-500"
+                            style={{ width: `${(currentStepIndex / (steps.length - 1)) * 100}%`, boxShadow: '0 0 10px rgba(0, 255, 255, 0.8)' }}
                         ></div>
                     </div>
 
@@ -96,14 +96,14 @@ const Orders = () => {
 
                             return (
                                 <div key={step.key} className="flex flex-col items-center">
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${isCompleted
-                                        ? 'bg-blue-600 border-blue-600 text-white'
-                                        : 'bg-white border-gray-300 text-gray-400'
-                                        } ${isCurrent ? 'ring-4 ring-blue-100' : ''}`}>
+                                    <div className={`w-10 h-10 corner-clip-sm flex items-center justify-center border-2 transition-all duration-300 ${isCompleted
+                                        ? 'bg-cyan-500 border-cyan-400 text-white'
+                                        : 'bg-gray-800 border-gray-600 text-gray-500'
+                                        } ${isCurrent ? 'ring-4 ring-cyan-500/30' : ''}`} style={isCompleted ? { boxShadow: '0 0 15px rgba(0, 255, 255, 0.6)' } : {}}>
                                         <StepIcon className="w-5 h-5" />
                                     </div>
-                                    <span className={`mt-2 text-xs font-medium ${isCompleted ? 'text-blue-600' : 'text-gray-500'
-                                        }`}>
+                                    <span className={`mt-2 text-xs font-bold uppercase tracking-wide ${isCompleted ? 'text-cyan-400' : 'text-gray-500'
+                                        }`} style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                         {step.label}
                                     </span>
                                 </div>
@@ -131,13 +131,13 @@ const Orders = () => {
     const getStatusColor = (status) => {
         switch (status) {
             case 'processing':
-                return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+                return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50';
             case 'shipped':
-                return 'bg-blue-100 text-blue-800 border-blue-300';
+                return 'bg-cyan-500/20 text-cyan-400 border-cyan-500/50';
             case 'delivered':
-                return 'bg-green-100 text-green-800 border-green-300';
+                return 'bg-magenta-500/20 text-magenta-400 border-magenta-500/50';
             default:
-                return 'bg-gray-100 text-gray-800 border-gray-300';
+                return 'bg-gray-500/20 text-gray-400 border-gray-500/50';
         }
     };
 
@@ -195,11 +195,11 @@ const Orders = () => {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center animate-fade-in max-w-md">
-                    <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full mb-6">
-                        <Package className="w-16 h-16 text-blue-600" />
+                    <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-cyan-500/20 to-magenta-500/20 corner-clip mb-6 border-2 border-cyan-500/50" style={{ boxShadow: '0 0 40px rgba(0, 255, 255, 0.3)' }}>
+                        <Package className="w-16 h-16 text-cyan-400" style={{ filter: 'drop-shadow(0 0 10px rgba(0, 255, 255, 0.8))' }} />
                     </div>
-                    <h2 className="text-3xl font-bold mb-4">Please Log In</h2>
-                    <p className="text-gray-600 mb-8">
+                    <h2 className="text-4xl font-black mb-4 text-cyan-400 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(0, 255, 255, 0.6)' }}>Please Log In</h2>
+                    <p className="text-gray-400 mb-8 text-lg" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                         You need to be logged in to view your orders.
                     </p>
                     <Link to="/login" className="btn-primary inline-block">
@@ -214,39 +214,40 @@ const Orders = () => {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Loading your orders...</p>
+                    <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-cyan-400 mx-auto" style={{ boxShadow: '0 0 30px rgba(0, 255, 255, 0.5)' }}></div>
+                    <p className="mt-4 text-cyan-400 font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Loading your orders...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen py-12 bg-gray-50">
+        <div className="min-h-screen py-12">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="mb-8 animate-fade-in">
-                    <h1 className="text-4xl font-bold mb-2">
-                        My <span className="text-gradient">Orders</span>
+                    <h1 className="text-6xl font-black mb-2 uppercase tracking-wider" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                        <span className="text-cyan-400" style={{ textShadow: '0 0 20px rgba(0, 255, 255, 0.8)' }}>My</span>{' '}
+                        <span className="text-gradient">Orders</span>
                     </h1>
-                    <p className="text-gray-600">
+                    <p className="text-cyan-400 uppercase tracking-widest font-bold" style={{ fontFamily: 'Rajdhani, sans-serif', textShadow: '0 0 10px rgba(0, 255, 255, 0.5)' }}>
                         {orders.length} {orders.length === 1 ? 'order' : 'orders'} total • Real-time updates
                     </p>
                 </div>
 
                 {error && (
-                    <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 animate-fade-in">
+                    <div className="mb-6 p-4 bg-red-500/10 border-2 border-red-500/50 corner-clip-sm text-red-400 animate-fade-in font-bold" style={{ fontFamily: 'Rajdhani, sans-serif', boxShadow: '0 0 20px rgba(255, 0, 0, 0.3)' }}>
                         {error}
                     </div>
                 )}
 
                 {orders.length === 0 ? (
-                    <div className="text-center py-20 animate-fade-in bg-white rounded-xl shadow-sm">
-                        <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full mb-6">
-                            <ShoppingBag className="w-16 h-16 text-blue-600" />
+                    <div className="text-center py-20 animate-fade-in bg-gradient-to-br from-gray-900 to-gray-800 corner-clip border-2 border-cyan-500/30" style={{ boxShadow: '0 0 30px rgba(0, 255, 255, 0.2)' }}>
+                        <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-cyan-500/20 to-magenta-500/20 corner-clip mb-6 border-2 border-cyan-500/50" style={{ boxShadow: '0 0 40px rgba(0, 255, 255, 0.3)' }}>
+                            <ShoppingBag className="w-16 h-16 text-cyan-400" style={{ filter: 'drop-shadow(0 0 10px rgba(0, 255, 255, 0.8))' }} />
                         </div>
-                        <h2 className="text-3xl font-bold mb-4">No Orders Yet</h2>
-                        <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                        <h2 className="text-4xl font-black mb-4 text-cyan-400 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(0, 255, 255, 0.6)' }}>No Orders Yet</h2>
+                        <p className="text-gray-400 mb-8 max-w-md mx-auto text-lg" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                             You haven't placed any orders yet. Start shopping to see your orders here!
                         </p>
                         <Link to="/products" className="btn-primary inline-block">
@@ -258,10 +259,10 @@ const Orders = () => {
                         {/* Filters & Search */}
                         <div className="mb-6 space-y-4">
                             {/* Search Bar */}
-                            <div className="card p-4">
+                            <div className="card p-4 border-2 border-cyan-500/30" style={{ boxShadow: '0 0 20px rgba(0, 255, 255, 0.2)' }}>
                                 <div className="flex flex-col md:flex-row gap-4">
                                     <div className="flex-1 relative">
-                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-cyan-400 w-5 h-5" style={{ filter: 'drop-shadow(0 0 5px rgba(0, 255, 255, 0.8))' }} />
                                         <input
                                             type="text"
                                             placeholder="Search by order ID or customer name..."
@@ -272,7 +273,7 @@ const Orders = () => {
                                         {searchQuery && (
                                             <button
                                                 onClick={() => setSearchQuery('')}
-                                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-cyan-400 hover:text-cyan-300"
                                             >
                                                 <X className="w-5 h-5" />
                                             </button>
@@ -285,7 +286,7 @@ const Orders = () => {
                                         <Filter className="w-4 h-4" />
                                         <span>Filters</span>
                                         {statusFilter !== 'all' && (
-                                            <span className="bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                            <span className="bg-cyan-500 text-white text-xs corner-clip-sm w-5 h-5 flex items-center justify-center font-bold" style={{ boxShadow: '0 0 10px rgba(0, 255, 255, 0.8)' }}>
                                                 1
                                             </span>
                                         )}
@@ -294,17 +295,18 @@ const Orders = () => {
 
                                 {/* Filter Options */}
                                 {showFilters && (
-                                    <div className="mt-4 pt-4 border-t border-gray-200 animate-fade-in">
+                                    <div className="mt-4 pt-4 border-t border-cyan-500/30 animate-fade-in">
                                         <div className="flex flex-wrap gap-2">
-                                            <span className="text-sm font-semibold text-gray-700 self-center mr-2">Status:</span>
+                                            <span className="text-sm font-black text-cyan-400 self-center mr-2 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif' }}>Status:</span>
                                             {['all', 'processing', 'shipped', 'delivered'].map((status) => (
                                                 <button
                                                     key={status}
                                                     onClick={() => setStatusFilter(status)}
-                                                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${statusFilter === status
-                                                        ? 'bg-blue-600 text-white shadow-md'
-                                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                    className={`px-4 py-2 corner-clip-sm text-sm font-bold uppercase tracking-wide transition-all ${statusFilter === status
+                                                        ? 'bg-cyan-500 text-white border-2 border-cyan-400'
+                                                        : 'bg-gray-800 text-gray-400 border-2 border-gray-600 hover:border-cyan-500/50'
                                                         }`}
+                                                    style={statusFilter === status ? { boxShadow: '0 0 15px rgba(0, 255, 255, 0.6)', fontFamily: 'Rajdhani, sans-serif' } : { fontFamily: 'Rajdhani, sans-serif' }}
                                                 >
                                                     {status.charAt(0).toUpperCase() + status.slice(1)}
                                                     <span className="ml-1.5 text-xs opacity-75">
@@ -320,19 +322,19 @@ const Orders = () => {
                             {/* Active Filters Summary */}
                             {(searchQuery || statusFilter !== 'all') && (
                                 <div className="flex items-center gap-2 text-sm">
-                                    <span className="text-gray-600">Active filters:</span>
+                                    <span className="text-cyan-400 font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Active filters:</span>
                                     {searchQuery && (
-                                        <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full flex items-center gap-1">
+                                        <span className="bg-cyan-500/20 text-cyan-400 px-3 py-1 corner-clip-sm flex items-center gap-1 border border-cyan-500/50 font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                             Search: "{searchQuery}"
-                                            <button onClick={() => setSearchQuery('')} className="hover:text-blue-900">
+                                            <button onClick={() => setSearchQuery('')} className="hover:text-cyan-300">
                                                 <X className="w-3 h-3" />
                                             </button>
                                         </span>
                                     )}
                                     {statusFilter !== 'all' && (
-                                        <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full flex items-center gap-1">
+                                        <span className="bg-cyan-500/20 text-cyan-400 px-3 py-1 corner-clip-sm flex items-center gap-1 border border-cyan-500/50 font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                             Status: {statusFilter}
-                                            <button onClick={() => setStatusFilter('all')} className="hover:text-blue-900">
+                                            <button onClick={() => setStatusFilter('all')} className="hover:text-cyan-300">
                                                 <X className="w-3 h-3" />
                                             </button>
                                         </span>
@@ -342,7 +344,7 @@ const Orders = () => {
                                             setSearchQuery('');
                                             setStatusFilter('all');
                                         }}
-                                        className="text-blue-600 hover:text-blue-700 font-semibold ml-2"
+                                        className="text-cyan-400 hover:text-cyan-300 font-bold ml-2 uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}
                                     >
                                         Clear all
                                     </button>
@@ -350,7 +352,7 @@ const Orders = () => {
                             )}
 
                             {/* Results Count */}
-                            <div className="text-sm text-gray-600">
+                            <div className="text-sm text-cyan-400 font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                 Showing {currentOrders.length} of {filteredOrders.length} orders
                                 {filteredOrders.length !== orders.length && ` (filtered from ${orders.length} total)`}
                             </div>
@@ -358,10 +360,10 @@ const Orders = () => {
 
                         {/* Orders List */}
                         {filteredOrders.length === 0 ? (
-                            <div className="card p-12 text-center">
-                                <Search className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                                <h3 className="text-xl font-bold text-gray-700 mb-2">No orders found</h3>
-                                <p className="text-gray-600 mb-4">Try adjusting your search or filters</p>
+                            <div className="card p-12 text-center border-2 border-cyan-500/30" style={{ boxShadow: '0 0 20px rgba(0, 255, 255, 0.2)' }}>
+                                <Search className="w-16 h-16 mx-auto text-cyan-400 mb-4" style={{ filter: 'drop-shadow(0 0 15px rgba(0, 255, 255, 0.6))' }} />
+                                <h3 className="text-2xl font-black text-cyan-400 mb-2 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(0, 255, 255, 0.5)' }}>No orders found</h3>
+                                <p className="text-gray-400 mb-4 text-lg" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Try adjusting your search or filters</p>
                                 <button
                                     onClick={() => {
                                         setSearchQuery('');
@@ -378,22 +380,22 @@ const Orders = () => {
                                     {currentOrders.map((order, index) => (
                                         <div
                                             key={order.id}
-                                            className="card hover:shadow-lg transition-all duration-300 animate-fade-in overflow-hidden"
-                                            style={{ animationDelay: `${index * 0.05}s` }}
+                                            className="card hover:shadow-lg transition-all duration-300 animate-fade-in overflow-hidden border-2 border-cyan-500/30"
+                                            style={{ animationDelay: `${index * 0.05}s`, boxShadow: '0 0 20px rgba(0, 255, 255, 0.2)' }}
                                         >
                                             {/* Compact Order Header */}
-                                            <div className="p-4 bg-white">
+                                            <div className="p-4 bg-gradient-to-r from-gray-900 to-gray-800">
                                                 <div className="flex flex-col md:flex-row md:items-center gap-4">
                                                     {/* Left: Order Info */}
                                                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                                                        <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                                            <Package className="w-6 h-6 text-blue-600" />
+                                                        <div className="w-12 h-12 bg-cyan-500/20 corner-clip-sm flex items-center justify-center flex-shrink-0 border-2 border-cyan-500/50" style={{ boxShadow: '0 0 15px rgba(0, 255, 255, 0.3)' }}>
+                                                            <Package className="w-6 h-6 text-cyan-400" style={{ filter: 'drop-shadow(0 0 5px rgba(0, 255, 255, 0.8))' }} />
                                                         </div>
                                                         <div className="flex-1 min-w-0">
-                                                            <h3 className="font-bold text-gray-900 truncate">
+                                                            <h3 className="font-black text-cyan-400 truncate uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 10px rgba(0, 255, 255, 0.5)' }}>
                                                                 #{order.id.slice(0, 8).toUpperCase()}
                                                             </h3>
-                                                            <div className="flex items-center text-xs text-gray-500 mt-0.5">
+                                                            <div className="flex items-center text-xs text-gray-400 mt-0.5 font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                                                 <Calendar className="w-3 h-3 mr-1" />
                                                                 {formatDate(order.createdAt)}
                                                             </div>
@@ -401,19 +403,11 @@ const Orders = () => {
                                                     </div>
 
 
-                                                    {/* Middle: Payment Status */}
-                                                    <div className="flex items-center gap-2 flex-wrap">
-                                                        <span className="px-4 py-2 rounded-lg text-sm font-bold bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border-2 border-green-300 flex items-center gap-2 shadow-sm">
-                                                            <CheckCircle className="w-4 h-4" />
-                                                            <span>Payment Successful</span>
-                                                        </span>
-                                                    </div>
-
                                                     {/* Right: Total & Action */}
                                                     <div className="flex items-center gap-4">
                                                         <div className="text-right">
-                                                            <p className="text-xs text-gray-500">Total</p>
-                                                            <p className="text-xl font-bold text-blue-600">
+                                                            <p className="text-xs text-gray-400 uppercase tracking-wide font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Total</p>
+                                                            <p className="text-2xl font-black text-gradient" style={{ textShadow: '0 0 15px rgba(0, 255, 255, 0.5)' }}>
                                                                 ฿{order.total?.toFixed(2)}
                                                             </p>
                                                         </div>
@@ -433,44 +427,51 @@ const Orders = () => {
                                             </div>
 
                                             {/* Order Items Preview */}
-                                            <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
-                                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                                    <ShoppingBag className="w-4 h-4" />
-                                                    <span className="font-medium">{order.items?.length} item(s)</span>
-                                                    <span className="text-gray-400">•</span>
-                                                    <span className="truncate">{order.items?.[0]?.name}{order.items?.length > 1 && `, +${order.items.length - 1} more`}</span>
+                                            <div className="px-4 py-3 bg-gray-900/80 border-t border-cyan-500/30">
+                                                <div className="flex items-center justify-between gap-4">
+                                                    <div className="flex items-center gap-3 text-sm font-bold flex-1 min-w-0" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                        <ShoppingBag className="w-4 h-4 text-cyan-400 flex-shrink-0" style={{ filter: 'drop-shadow(0 0 5px rgba(0, 255, 255, 0.8))' }} />
+                                                        <span className="text-cyan-400 uppercase tracking-wide flex-shrink-0">{order.items?.length} item(s)</span>
+                                                        <span className="text-cyan-400/30 flex-shrink-0">•</span>
+                                                        <span className="text-gray-400 truncate">{order.items?.[0]?.name}{order.items?.length > 1 && `, +${order.items.length - 1} more`}</span>
+                                                    </div>
+                                                    <span className="px-3 py-1.5 corner-clip-sm text-xs font-black bg-magenta-500/20 text-magenta-400 border border-magenta-500/50 flex items-center gap-1.5 uppercase tracking-wide whitespace-nowrap flex-shrink-0" style={{ fontFamily: 'Rajdhani, sans-serif', boxShadow: '0 0 10px rgba(255, 0, 255, 0.3)' }}>
+                                                        <CheckCircle className="w-3.5 h-3.5" style={{ filter: 'drop-shadow(0 0 3px rgba(255, 0, 255, 0.8))' }} />
+                                                        <span className="hidden sm:inline">Payment Successful</span>
+                                                        <span className="sm:hidden">Paid</span>
+                                                    </span>
                                                 </div>
                                             </div>
 
                                             {/* Expanded Details */}
                                             {expandedOrder === order.id && (
-                                                <div className="animate-fade-in border-t border-gray-200">
+                                                <div className="animate-fade-in border-t border-cyan-500/30">
                                                     {/* Order Progress Timeline */}
-                                                    <div className="px-6 py-6 bg-gradient-to-r from-blue-50 to-indigo-50">
+                                                    <div className="px-6 py-6 bg-gradient-to-r from-gray-900 to-gray-800">
                                                         <OrderProgress status={order.orderStatus} />
                                                     </div>
 
                                                     {/* Order Items */}
-                                                    <div className="p-6 bg-white border-t border-gray-200">
-                                                        <h4 className="font-semibold mb-4 flex items-center gap-2">
-                                                            <ShoppingBag className="w-4 h-4 text-gray-600" />
+                                                    <div className="p-6 bg-gray-900 border-t border-cyan-500/30">
+                                                        <h4 className="font-black mb-4 flex items-center gap-2 text-cyan-400 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(0, 255, 255, 0.5)' }}>
+                                                            <ShoppingBag className="w-4 h-4 text-cyan-400" style={{ filter: 'drop-shadow(0 0 5px rgba(0, 255, 255, 0.8))' }} />
                                                             <span>Order Items</span>
                                                         </h4>
                                                         <div className="space-y-3">
                                                             {order.items?.map((item, idx) => (
-                                                                <div key={idx} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+                                                                <div key={idx} className="flex items-center gap-4 p-3 bg-gray-800/50 corner-clip-sm border border-cyan-500/20">
                                                                     <img
                                                                         src={item.image}
                                                                         alt={item.name}
-                                                                        className="w-16 h-16 object-cover rounded-lg"
+                                                                        className="w-16 h-16 object-cover corner-clip-sm"
                                                                     />
                                                                     <div className="flex-1 min-w-0">
-                                                                        <h5 className="font-semibold truncate">{item.name}</h5>
-                                                                        <p className="text-sm text-gray-600">
+                                                                        <h5 className="font-bold truncate text-white" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{item.name}</h5>
+                                                                        <p className="text-sm text-gray-400 font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                                                             Qty: {item.quantity} × ฿{item.price?.toFixed(2)}
                                                                         </p>
                                                                     </div>
-                                                                    <p className="font-bold text-blue-600">
+                                                                    <p className="font-black text-cyan-400" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 10px rgba(0, 255, 255, 0.5)' }}>
                                                                         ฿{(item.quantity * item.price)?.toFixed(2)}
                                                                     </p>
                                                                 </div>
@@ -479,23 +480,23 @@ const Orders = () => {
                                                     </div>
 
                                                     {/* Shipping & Payment Info */}
-                                                    <div className="p-6 border-t border-gray-200 bg-gray-50">
+                                                    <div className="p-6 border-t border-cyan-500/30 bg-gray-800/50">
                                                         <div className="grid md:grid-cols-2 gap-6">
                                                             {/* Shipping Address */}
                                                             <div>
-                                                                <h4 className="font-semibold mb-3 flex items-center gap-2">
-                                                                    <MapPin className="w-4 h-4 text-blue-600" />
+                                                                <h4 className="font-black mb-3 flex items-center gap-2 text-cyan-400 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(0, 255, 255, 0.5)' }}>
+                                                                    <MapPin className="w-4 h-4 text-cyan-400" style={{ filter: 'drop-shadow(0 0 5px rgba(0, 255, 255, 0.8))' }} />
                                                                     <span>Shipping Address</span>
                                                                 </h4>
-                                                                <div className="text-sm text-gray-700 space-y-1 bg-white p-4 rounded-lg">
-                                                                    <p className="font-semibold">{order.userName}</p>
+                                                                <div className="text-sm text-gray-300 space-y-1 bg-gray-900 p-4 corner-clip-sm border border-cyan-500/20" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                                    <p className="font-bold text-white">{order.userName}</p>
                                                                     <p>{order.shippingAddress?.address}</p>
                                                                     <p>
                                                                         {order.shippingAddress?.city}, {order.shippingAddress?.state} {order.shippingAddress?.zipCode}
                                                                     </p>
                                                                     <p>{order.shippingAddress?.country}</p>
                                                                     {order.shippingAddress?.phone && (
-                                                                        <p className="pt-2 border-t border-gray-200">
+                                                                        <p className="pt-2 border-t border-cyan-500/30">
                                                                             📞 {order.shippingAddress.phone}
                                                                         </p>
                                                                     )}
@@ -504,32 +505,32 @@ const Orders = () => {
 
                                                             {/* Payment Summary */}
                                                             <div>
-                                                                <h4 className="font-semibold mb-3 flex items-center gap-2">
-                                                                    <CreditCard className="w-4 h-4 text-green-600" />
+                                                                <h4 className="font-black mb-3 flex items-center gap-2 text-magenta-400 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(255, 0, 255, 0.5)' }}>
+                                                                    <CreditCard className="w-4 h-4 text-magenta-400" style={{ filter: 'drop-shadow(0 0 5px rgba(255, 0, 255, 0.8))' }} />
                                                                     <span>Payment Summary</span>
                                                                 </h4>
-                                                                <div className="text-sm space-y-2 bg-white p-4 rounded-lg">
+                                                                <div className="text-sm space-y-2 bg-gray-900 p-4 corner-clip-sm border border-magenta-500/20" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                                                     <div className="flex justify-between">
-                                                                        <span className="text-gray-600">Subtotal</span>
-                                                                        <span className="font-semibold">฿{order.subtotal?.toFixed(2)}</span>
+                                                                        <span className="text-gray-400 font-bold">Subtotal</span>
+                                                                        <span className="font-bold text-white">฿{order.subtotal?.toFixed(2)}</span>
                                                                     </div>
                                                                     <div className="flex justify-between">
-                                                                        <span className="text-gray-600">Shipping</span>
-                                                                        <span className="font-semibold">
+                                                                        <span className="text-gray-400 font-bold">Shipping</span>
+                                                                        <span className="font-bold text-white">
                                                                             {order.shipping === 0 ? (
-                                                                                <span className="text-green-600">FREE</span>
+                                                                                <span className="text-magenta-400">FREE</span>
                                                                             ) : (
                                                                                 `฿${order.shipping?.toFixed(2)}`
                                                                             )}
                                                                         </span>
                                                                     </div>
                                                                     <div className="flex justify-between">
-                                                                        <span className="text-gray-600">Tax (7%)</span>
-                                                                        <span className="font-semibold">฿{order.tax?.toFixed(2)}</span>
+                                                                        <span className="text-gray-400 font-bold">Tax (7%)</span>
+                                                                        <span className="font-bold text-white">฿{order.tax?.toFixed(2)}</span>
                                                                     </div>
-                                                                    <div className="border-t border-gray-300 pt-2 flex justify-between items-center">
-                                                                        <span className="font-bold">Total</span>
-                                                                        <span className="font-bold text-xl text-blue-600">
+                                                                    <div className="border-t border-cyan-500/30 pt-2 flex justify-between items-center">
+                                                                        <span className="font-black text-cyan-400 uppercase" style={{ fontFamily: 'Orbitron, sans-serif' }}>Total</span>
+                                                                        <span className="font-black text-2xl text-gradient" style={{ textShadow: '0 0 15px rgba(0, 255, 255, 0.5)' }}>
                                                                             ฿{order.total?.toFixed(2)}
                                                                         </span>
                                                                     </div>
@@ -549,7 +550,8 @@ const Orders = () => {
                                         <button
                                             onClick={() => paginate(currentPage - 1)}
                                             disabled={currentPage === 1}
-                                            className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                                            className="px-4 py-2 corner-clip-sm border-2 border-cyan-500/50 text-cyan-400 font-bold uppercase tracking-wide disabled:opacity-50 disabled:cursor-not-allowed hover:bg-cyan-500/20 transition-colors"
+                                            style={{ fontFamily: 'Rajdhani, sans-serif' }}
                                         >
                                             Previous
                                         </button>
@@ -567,10 +569,11 @@ const Orders = () => {
                                                         <button
                                                             key={pageNumber}
                                                             onClick={() => paginate(pageNumber)}
-                                                            className={`w-10 h-10 rounded-lg font-semibold transition-all ${currentPage === pageNumber
-                                                                ? 'bg-blue-600 text-white shadow-md'
-                                                                : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                                                            className={`w-10 h-10 corner-clip-sm font-black transition-all ${currentPage === pageNumber
+                                                                ? 'bg-cyan-500 text-white border-2 border-cyan-400'
+                                                                : 'border-2 border-gray-600 text-gray-400 hover:border-cyan-500/50'
                                                                 }`}
+                                                            style={currentPage === pageNumber ? { boxShadow: '0 0 15px rgba(0, 255, 255, 0.6)', fontFamily: 'Orbitron, sans-serif' } : { fontFamily: 'Orbitron, sans-serif' }}
                                                         >
                                                             {pageNumber}
                                                         </button>
@@ -579,7 +582,7 @@ const Orders = () => {
                                                     pageNumber === currentPage - 2 ||
                                                     pageNumber === currentPage + 2
                                                 ) {
-                                                    return <span key={pageNumber} className="px-2 py-2 text-gray-400">...</span>;
+                                                    return <span key={pageNumber} className="px-2 py-2 text-cyan-400/50 font-bold" style={{ fontFamily: 'Orbitron, sans-serif' }}>...</span>;
                                                 }
                                                 return null;
                                             })}
@@ -588,7 +591,8 @@ const Orders = () => {
                                         <button
                                             onClick={() => paginate(currentPage + 1)}
                                             disabled={currentPage === totalPages}
-                                            className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                                            className="px-4 py-2 corner-clip-sm border-2 border-cyan-500/50 text-cyan-400 font-bold uppercase tracking-wide disabled:opacity-50 disabled:cursor-not-allowed hover:bg-cyan-500/20 transition-colors"
+                                            style={{ fontFamily: 'Rajdhani, sans-serif' }}
                                         >
                                             Next
                                         </button>
@@ -601,9 +605,10 @@ const Orders = () => {
                         <div className="text-center mt-8">
                             <Link
                                 to="/products"
-                                className="text-blue-600 hover:text-blue-700 font-semibold inline-flex items-center gap-2 transition-colors duration-200"
+                                className="text-cyan-400 hover:text-cyan-300 font-black uppercase tracking-wide inline-flex items-center gap-2 transition-colors duration-200"
+                                style={{ fontFamily: 'Rajdhani, sans-serif', textShadow: '0 0 10px rgba(0, 255, 255, 0.5)' }}
                             >
-                                <ShoppingBag className="w-5 h-5" />
+                                <ShoppingBag className="w-5 h-5" style={{ filter: 'drop-shadow(0 0 5px rgba(0, 255, 255, 0.8))' }} />
                                 <span>Continue Shopping</span>
                             </Link>
                         </div>

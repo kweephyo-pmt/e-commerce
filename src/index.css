@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,103 +6,180 @@
 
 @layer base {
   body {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Rajdhani', sans-serif;
     min-height: 100vh;
-    background: linear-gradient(to bottom right, #f8fafc, #eff6ff, #eef2ff);
+    background: #0a0e27;
+    background-image:
+      linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+      radial-gradient(ellipse at center, rgba(138, 43, 226, 0.15) 0%, transparent 70%);
+    background-size: 50px 50px, 50px 50px, 100% 100%;
+    background-position: 0 0, 0 0, center;
+    color: #e0e7ff;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #00ffff #1a1f3a;
   }
 }
 
 @layer components {
   .btn-primary {
-    background: linear-gradient(to right, #2563eb, #4f46e5);
-    color: white;
+    background: linear-gradient(135deg, #00ffff, #ff00ff);
+    color: #0a0e27;
     padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    font-weight: 600;
+    border-radius: 0;
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+    font-weight: 700;
+    font-family: 'Orbitron', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     transition: all 0.3s;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+  }
+
+  .btn-primary:hover::before {
+    left: 100%;
   }
 
   .btn-primary:hover {
-    background: linear-gradient(to right, #1d4ed8, #4338ca);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.8), 0 0 60px rgba(255, 0, 255, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.2);
     transform: translateY(-2px);
   }
 
   .btn-secondary {
-    background: white;
-    color: #374151;
+    background: rgba(26, 31, 58, 0.8);
+    color: #00ffff;
     padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    font-weight: 600;
-    border: 2px solid #e5e7eb;
+    border-radius: 0;
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+    font-weight: 700;
+    font-family: 'Orbitron', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: 2px solid #00ffff;
     transition: all 0.3s;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
   }
 
   .btn-secondary:hover {
-    border-color: #3b82f6;
-    color: #2563eb;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    background: rgba(0, 255, 255, 0.1);
+    border-color: #ff00ff;
+    color: #ff00ff;
+    box-shadow: 0 0 25px rgba(255, 0, 255, 0.5);
   }
 
   .card {
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(8px);
-    border-radius: 1rem;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, rgba(26, 31, 58, 0.95), rgba(15, 23, 42, 0.95));
+    backdrop-filter: blur(10px);
+    border-radius: 0;
+    clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+    box-shadow:
+      0 0 30px rgba(0, 255, 255, 0.2),
+      inset 0 0 50px rgba(0, 255, 255, 0.05);
     transition: all 0.3s;
-    border: 1px solid #f3f4f6;
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #00ffff, #ff00ff, #00ffff);
+    clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .card:hover::before {
+    opacity: 0.3;
   }
 
   .card:hover {
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    box-shadow:
+      0 0 40px rgba(0, 255, 255, 0.4),
+      0 0 80px rgba(255, 0, 255, 0.2),
+      inset 0 0 50px rgba(0, 255, 255, 0.1);
+    transform: translateY(-5px);
   }
 
   .input-field {
     width: 100%;
     padding: 0.75rem 1rem;
-    border-radius: 0.5rem;
-    border: 2px solid #e5e7eb;
+    border-radius: 0;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+    background: rgba(26, 31, 58, 0.6);
+    border: 2px solid rgba(0, 255, 255, 0.3);
+    color: #e0e7ff;
     transition: all 0.2s;
     outline: none;
+    font-family: 'Rajdhani', sans-serif;
+  }
+
+  .input-field::placeholder {
+    color: rgba(224, 231, 255, 0.4);
   }
 
   .input-field:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    border-color: #00ffff;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+    background: rgba(26, 31, 58, 0.8);
   }
 
   .glassmorphism {
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(26, 31, 58, 0.7);
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
   }
 
   .text-gradient {
-    background: linear-gradient(to right, #2563eb, #4f46e5);
+    background: linear-gradient(135deg, #00ffff, #ff00ff);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 800;
   }
 
   .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
-    background: #f1f5f9;
+    background: rgba(26, 31, 58, 0.5);
     border-radius: 10px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: linear-gradient(to bottom, #3b82f6, #2563eb);
+    background: linear-gradient(to bottom, #00ffff, #ff00ff);
     border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(to bottom, #2563eb, #1d4ed8);
+    background: linear-gradient(to bottom, #ff00ff, #00ffff);
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.7);
   }
 }
 
@@ -152,6 +229,173 @@
     to {
       opacity: 1;
       transform: translateX(0);
+    }
+  }
+
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite;
+  }
+
+  @keyframes glow {
+
+    0%,
+    100% {
+      text-shadow: 0 0 10px rgba(0, 255, 255, 0.5), 0 0 20px rgba(0, 255, 255, 0.3);
+    }
+
+    50% {
+      text-shadow: 0 0 20px rgba(0, 255, 255, 0.8), 0 0 30px rgba(0, 255, 255, 0.5), 0 0 40px rgba(255, 0, 255, 0.3);
+    }
+  }
+
+  .animate-pulse-glow {
+    animation: pulseGlow 3s ease-in-out infinite;
+  }
+
+  @keyframes pulseGlow {
+
+    0%,
+    100% {
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+    }
+
+    50% {
+      box-shadow: 0 0 40px rgba(0, 255, 255, 0.6), 0 0 60px rgba(255, 0, 255, 0.3);
+    }
+  }
+
+  /* Custom Range Slider Styling - Gaming Theme */
+  input[type="range"].slider {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  input[type="range"].slider::-webkit-slider-track {
+    background: linear-gradient(to right, #00ffff, #ff00ff);
+    height: 6px;
+    border-radius: 0;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+  }
+
+  input[type="range"].slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    background: linear-gradient(135deg, #00ffff, #ff00ff);
+    height: 18px;
+    width: 18px;
+    border-radius: 0;
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    border: 2px solid #0a0e27;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+    transition: all 0.2s;
+  }
+
+  input[type="range"].slider::-webkit-slider-thumb:hover {
+    transform: scale(1.3);
+    box-shadow: 0 0 25px rgba(0, 255, 255, 1), 0 0 35px rgba(255, 0, 255, 0.6);
+  }
+
+  input[type="range"].slider::-moz-range-track {
+    background: linear-gradient(to right, #00ffff, #ff00ff);
+    height: 6px;
+    border-radius: 0;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+  }
+
+  input[type="range"].slider::-moz-range-thumb {
+    background: linear-gradient(135deg, #00ffff, #ff00ff);
+    height: 18px;
+    width: 18px;
+    border-radius: 0;
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    border: 2px solid #0a0e27;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+    transition: all 0.2s;
+  }
+
+  input[type="range"].slider::-moz-range-thumb:hover {
+    transform: scale(1.3);
+    box-shadow: 0 0 25px rgba(0, 255, 255, 1), 0 0 35px rgba(255, 0, 255, 0.6);
+  }
+
+  /* Hexagonal clip paths for gaming aesthetic */
+  .hex-clip {
+    clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+  }
+
+  .corner-clip {
+    clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+  }
+
+  .corner-clip-sm {
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  }
+
+  /* Custom Gaming Checkboxes */
+  input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    background: rgba(15, 23, 42, 0.8);
+    border: 2px solid rgba(0, 255, 255, 0.4);
+    clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+  }
+
+  input[type="checkbox"]:hover {
+    border-color: rgba(0, 255, 255, 0.8);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+    background: rgba(0, 255, 255, 0.1);
+  }
+
+  input[type="checkbox"]:checked {
+    background: linear-gradient(135deg, rgba(0, 255, 255, 0.3), rgba(255, 0, 255, 0.3));
+    border-color: rgba(0, 255, 255, 0.8);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.6), inset 0 0 10px rgba(0, 255, 255, 0.3);
+  }
+
+  input[type="checkbox"]:checked::before {
+    content: "✓";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #00ffff;
+    font-size: 14px;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 1);
+  }
+
+  input[type="checkbox"]:focus {
+    outline: none;
+    border-color: rgba(0, 255, 255, 1);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+  }
+
+  /* Navbar animations */
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes scan {
+    0% {
+      transform: translateY(0);
+    }
+
+    100% {
+      transform: translateY(100%);
     }
   }
 }

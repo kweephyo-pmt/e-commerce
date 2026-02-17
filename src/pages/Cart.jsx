@@ -20,11 +20,11 @@ const Cart = () => {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center animate-fade-in">
-                    <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full mb-6">
-                        <ShoppingBag className="w-16 h-16 text-blue-600" />
+                    <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-cyan-500/20 to-magenta-500/20 corner-clip mb-6 border-2 border-cyan-500/50" style={{ boxShadow: '0 0 40px rgba(0, 255, 255, 0.3)' }}>
+                        <ShoppingBag className="w-16 h-16 text-cyan-400" style={{ filter: 'drop-shadow(0 0 10px rgba(0, 255, 255, 0.8))' }} />
                     </div>
-                    <h2 className="text-3xl font-bold mb-4">Your cart is empty</h2>
-                    <p className="text-gray-600 mb-8">Add some products to get started!</p>
+                    <h2 className="text-4xl font-bold mb-4 text-cyan-400 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(0, 255, 255, 0.6)' }}>Your cart is empty</h2>
+                    <p className="text-gray-400 mb-8 text-lg" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Add some products to get started!</p>
                     <Link to="/products" className="btn-primary inline-flex items-center space-x-2">
                         <span>Continue Shopping</span>
                         <ArrowRight className="w-5 h-5" />
@@ -39,10 +39,11 @@ const Cart = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="mb-8 animate-fade-in">
-                    <h1 className="text-4xl font-bold mb-2">
-                        Shopping <span className="text-gradient">Cart</span>
+                    <h1 className="text-5xl font-black mb-3 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                        <span className="text-cyan-400" style={{ textShadow: '0 0 20px rgba(0, 255, 255, 0.8)' }}>Shopping</span>{' '}
+                        <span className="text-magenta-400" style={{ textShadow: '0 0 20px rgba(255, 0, 255, 0.8)' }}>Cart</span>
                     </h1>
-                    <p className="text-gray-600">
+                    <p className="text-cyan-300 text-lg font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                         {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'} in your cart
                     </p>
                 </div>
@@ -53,14 +54,16 @@ const Cart = () => {
                         {cartItems.map((item) => (
                             <div
                                 key={item.id}
-                                className="card p-6 flex flex-col sm:flex-row gap-6 animate-fade-in"
+                                className="card p-6 flex flex-col sm:flex-row gap-6 animate-fade-in border-2 border-cyan-500/30 hover:border-cyan-500/60 transition-all"
+                                style={{ boxShadow: '0 0 20px rgba(0, 255, 255, 0.2)' }}
                             >
                                 {/* Product Image */}
-                                <div className="w-full sm:w-32 h-32 flex-shrink-0">
+                                <div className="w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 mx-auto sm:mx-0">
                                     <img
                                         src={item.image}
                                         alt={item.name}
-                                        className="w-full h-full object-cover rounded-lg"
+                                        className="w-full h-full object-cover corner-clip-sm border-2 border-cyan-500/30"
+                                        style={{ boxShadow: '0 0 15px rgba(0, 255, 255, 0.2)' }}
                                     />
                                 </div>
 
@@ -68,16 +71,17 @@ const Cart = () => {
                                 <div className="flex-grow">
                                     <div className="flex justify-between items-start mb-2">
                                         <div>
-                                            <h3 className="text-lg font-bold text-gray-900 mb-1">
+                                            <h3 className="text-lg font-bold text-white mb-1" style={{ textShadow: '0 0 10px rgba(0, 255, 255, 0.3)' }}>
                                                 {item.name}
                                             </h3>
-                                            <p className="text-sm text-gray-600">{item.category}</p>
+                                            <p className="text-sm text-cyan-400 uppercase tracking-wide font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{item.category}</p>
                                         </div>
                                         <button
                                             onClick={() => removeFromCart(item.id)}
-                                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                                            className="p-2 text-red-400 hover:bg-red-500/20 corner-clip-sm transition-all duration-200 border-2 border-transparent hover:border-red-500/50"
+                                            style={{ boxShadow: '0 0 10px rgba(255, 0, 0, 0.2)' }}
                                         >
-                                            <Trash2 className="w-5 h-5" />
+                                            <Trash2 className="w-5 h-5" style={{ filter: 'drop-shadow(0 0 3px rgba(255, 0, 0, 0.8))' }} />
                                         </button>
                                     </div>
 
@@ -86,28 +90,28 @@ const Cart = () => {
                                         <div className="flex items-center space-x-3">
                                             <button
                                                 onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                                className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors duration-200"
+                                                className="p-2 corner-clip-sm bg-cyan-500/20 hover:bg-cyan-500/30 transition-all duration-200 border-2 border-cyan-500/50"
                                             >
-                                                <Minus className="w-4 h-4" />
+                                                <Minus className="w-4 h-4 text-cyan-400" />
                                             </button>
-                                            <span className="w-12 text-center font-semibold">
+                                            <span className="w-12 text-center font-bold text-cyan-400 text-lg" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                                                 {item.quantity}
                                             </span>
                                             <button
                                                 onClick={() => updateQuantity(item.id, item.quantity + 1)}
                                                 disabled={item.stock && item.quantity >= item.stock}
-                                                className={`p-2 rounded-lg transition-colors duration-200 ${item.stock && item.quantity >= item.stock
-                                                        ? 'bg-gray-100 opacity-50 cursor-not-allowed'
-                                                        : 'bg-gray-100 hover:bg-gray-200'
+                                                className={`p-2 corner-clip-sm transition-all duration-200 border-2 ${item.stock && item.quantity >= item.stock
+                                                    ? 'bg-gray-600 opacity-50 cursor-not-allowed border-gray-500'
+                                                    : 'bg-cyan-500/20 hover:bg-cyan-500/30 border-cyan-500/50'
                                                     }`}
                                             >
-                                                <Plus className="w-4 h-4" />
+                                                <Plus className="w-4 h-4 text-cyan-400" />
                                             </button>
                                         </div>
 
                                         {/* Stock warning */}
                                         {item.stock && item.quantity >= item.stock && (
-                                            <div className="text-xs text-orange-600 font-semibold">
+                                            <div className="text-xs text-magenta-400 font-bold uppercase tracking-wide" style={{ textShadow: '0 0 10px rgba(255, 0, 255, 0.8)' }}>
                                                 Max stock reached
                                             </div>
                                         )}
@@ -117,12 +121,12 @@ const Cart = () => {
                                             <div className="text-2xl font-bold text-gradient">
                                                 ฿{((item.discount ? item.price * (1 - item.discount / 100) : item.price) * item.quantity).toFixed(2)}
                                             </div>
-                                            <div className="text-sm text-gray-600">
+                                            <div className="text-sm text-gray-400">
                                                 {item.discount ? (
                                                     <>
-                                                        <span className="text-red-600 font-semibold">฿{(item.price * (1 - item.discount / 100)).toFixed(2)}</span>
+                                                        <span className="text-magenta-400 font-bold">฿{(item.price * (1 - item.discount / 100)).toFixed(2)}</span>
                                                         {' '}
-                                                        <span className="line-through text-gray-400">฿{item.price.toFixed(2)}</span>
+                                                        <span className="line-through text-gray-500">฿{item.price.toFixed(2)}</span>
                                                         {' each'}
                                                     </>
                                                 ) : (
@@ -138,36 +142,37 @@ const Cart = () => {
                         {/* Clear Cart Button */}
                         <button
                             onClick={clearCart}
-                            className="text-red-600 hover:text-red-700 font-semibold flex items-center space-x-2 transition-colors duration-200"
+                            className="text-red-400 hover:text-red-300 font-bold flex items-center space-x-2 transition-all duration-200 uppercase tracking-wide"
+                            style={{ fontFamily: 'Rajdhani, sans-serif', textShadow: '0 0 10px rgba(255, 0, 0, 0.5)' }}
                         >
-                            <Trash2 className="w-5 h-5" />
+                            <Trash2 className="w-5 h-5" style={{ filter: 'drop-shadow(0 0 5px rgba(255, 0, 0, 0.8))' }} />
                             <span>Clear Cart</span>
                         </button>
                     </div>
 
                     {/* Order Summary */}
                     <div className="lg:col-span-1">
-                        <div className="card p-6 sticky top-24 animate-fade-in">
-                            <h2 className="text-2xl font-bold mb-6">Order Summary</h2>
+                        <div className="card p-6 sticky top-24 animate-fade-in border-2 border-magenta-500/30" style={{ boxShadow: '0 0 30px rgba(255, 0, 255, 0.2)' }}>
+                            <h2 className="text-3xl font-black mb-6 text-magenta-400 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(255, 0, 255, 0.6)' }}>Order Summary</h2>
 
                             <div className="space-y-4 mb-6">
-                                <div className="flex justify-between text-gray-600">
-                                    <span>Subtotal</span>
-                                    <span className="font-semibold">฿{getCartTotal().toFixed(2)}</span>
+                                <div className="flex justify-between text-gray-300">
+                                    <span className="font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Subtotal</span>
+                                    <span className="font-bold text-cyan-400">฿{getCartTotal().toFixed(2)}</span>
                                 </div>
-                                <div className="flex justify-between text-gray-600">
-                                    <span>Shipping</span>
-                                    <span className="font-semibold text-green-600">FREE</span>
+                                <div className="flex justify-between text-gray-300">
+                                    <span className="font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Shipping</span>
+                                    <span className="font-bold text-cyan-400">FREE</span>
                                 </div>
-                                <div className="flex justify-between text-gray-600">
-                                    <span>Tax (estimated)</span>
-                                    <span className="font-semibold">฿{(getCartTotal() * 0.07).toFixed(2)}</span>
+                                <div className="flex justify-between text-gray-300">
+                                    <span className="font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Tax (estimated)</span>
+                                    <span className="font-bold text-cyan-400">฿{(getCartTotal() * 0.07).toFixed(2)}</span>
                                 </div>
 
-                                <div className="border-t pt-4">
+                                <div className="border-t border-cyan-500/30 pt-4">
                                     <div className="flex justify-between items-center">
-                                        <span className="text-xl font-bold">Total</span>
-                                        <span className="text-3xl font-bold text-gradient">
+                                        <span className="text-xl font-black text-magenta-400 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif' }}>Total</span>
+                                        <span className="text-3xl font-black text-gradient" style={{ textShadow: '0 0 20px rgba(0, 255, 255, 0.5)' }}>
                                             ฿{(getCartTotal() * 1.07).toFixed(2)}
                                         </span>
                                     </div>
@@ -187,28 +192,6 @@ const Cart = () => {
                             >
                                 Continue Shopping
                             </Link>
-
-                            {/* Trust Badges */}
-                            <div className="mt-6 pt-6 border-t space-y-3">
-                                <div className="flex items-center space-x-3 text-sm text-gray-600">
-                                    <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                    </svg>
-                                    <span>Secure checkout</span>
-                                </div>
-                                <div className="flex items-center space-x-3 text-sm text-gray-600">
-                                    <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                    </svg>
-                                    <span>Free shipping on orders over ฿1,500</span>
-                                </div>
-                                <div className="flex items-center space-x-3 text-sm text-gray-600">
-                                    <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                    </svg>
-                                    <span>30-day return policy</span>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>

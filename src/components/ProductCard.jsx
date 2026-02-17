@@ -73,16 +73,16 @@ const ProductCard = ({ product }) => {
             {/* Product Info */}
             <div className="p-6">
                 <div className="mb-2">
-                    <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">
+                    <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 10px rgba(0, 255, 255, 0.5)' }}>
                         {product.category}
                     </span>
                 </div>
 
-                <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors duration-200">
+                <h3 className="text-lg font-bold text-white mb-2 line-clamp-2 group-hover:text-cyan-400 transition-colors duration-200" style={{ textShadow: '0 0 10px rgba(0, 255, 255, 0.3)' }}>
                     {product.name}
                 </h3>
 
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                <p className="text-gray-300 text-sm mb-4 line-clamp-2">
                     {product.description}
                 </p>
 
@@ -94,9 +94,10 @@ const ProductCard = ({ product }) => {
                                 <svg
                                     key={i}
                                     className={`w-4 h-4 ${i < Math.floor(rating)
-                                        ? 'text-yellow-400 fill-current'
-                                        : 'text-gray-300'
+                                        ? 'text-cyan-400 fill-current'
+                                        : 'text-gray-600'
                                         }`}
+                                    style={i < Math.floor(rating) ? { filter: 'drop-shadow(0 0 3px rgba(0, 255, 255, 0.8))' } : {}}
                                     xmlns="http://www.w3.org/2000/svg"
                                     viewBox="0 0 20 20"
                                     fill="currentColor"
@@ -105,18 +106,18 @@ const ProductCard = ({ product }) => {
                                 </svg>
                             ))}
                         </div>
-                        <span className="ml-2 text-sm text-gray-600">
+                        <span className="ml-2 text-sm text-cyan-300 font-semibold">
                             {rating.toFixed(1)} ({reviewCount})
                         </span>
                     </div>
                 ) : (
                     <div className="flex items-center mb-4">
-                        <span className="text-sm text-gray-400">No reviews yet</span>
+                        <span className="text-sm text-gray-500">No reviews yet</span>
                     </div>
                 )}
 
                 {/* Price and Add to Cart */}
-                <div className="flex items-center justify-between">
+                <div className="space-y-3">
                     <div>
                         {product.discount ? (
                             <div className="flex items-center space-x-2">
@@ -136,11 +137,11 @@ const ProductCard = ({ product }) => {
                         {product.stock !== undefined && (
                             <div className="mt-1">
                                 {product.stock === 0 ? (
-                                    <span className="text-xs text-red-600 font-semibold">Out of Stock</span>
+                                    <span className="text-xs text-red-400 font-bold uppercase tracking-wide" style={{ textShadow: '0 0 10px rgba(255, 0, 0, 0.8)' }}>Out of Stock</span>
                                 ) : product.stock <= 5 ? (
-                                    <span className="text-xs text-orange-600 font-semibold">Only {product.stock} left</span>
+                                    <span className="text-xs text-magenta-400 font-bold uppercase tracking-wide" style={{ textShadow: '0 0 10px rgba(255, 0, 255, 0.8)' }}>Only {product.stock} left</span>
                                 ) : (
-                                    <span className="text-xs text-green-600 font-semibold">In Stock</span>
+                                    <span className="text-xs text-cyan-400 font-bold uppercase tracking-wide" style={{ textShadow: '0 0 10px rgba(0, 255, 255, 0.8)' }}>In Stock</span>
                                 )}
                             </div>
                         )}
@@ -149,14 +150,16 @@ const ProductCard = ({ product }) => {
                     <button
                         onClick={handleAddToCart}
                         disabled={!product.stock || product.stock === 0 || quantityInCart >= product.stock}
-                        className={`bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-3 rounded-lg transition-all duration-300 shadow-lg relative ${!product.stock || product.stock === 0 || quantityInCart >= product.stock
-                                ? 'opacity-50 cursor-not-allowed'
-                                : 'hover:from-blue-700 hover:to-indigo-700 hover:shadow-xl transform hover:-translate-y-1'
+                        className={`w-full relative corner-clip-sm py-3.5 px-4 transition-all duration-300 font-bold uppercase tracking-wider flex items-center justify-center gap-2 ${!product.stock || product.stock === 0 || quantityInCart >= product.stock
+                            ? 'opacity-50 cursor-not-allowed bg-gray-600 border-2 border-gray-500'
+                            : 'bg-gradient-to-r from-cyan-600 to-magenta-600 hover:from-cyan-500 hover:to-magenta-500 border-2 border-cyan-500/50 hover:border-cyan-400 transform hover:scale-[1.02]'
                             }`}
+                        style={!product.stock || product.stock === 0 || quantityInCart >= product.stock ? {} : { boxShadow: '0 0 25px rgba(0, 255, 255, 0.5), 0 0 50px rgba(255, 0, 255, 0.25)', fontFamily: 'Rajdhani, sans-serif', fontSize: '0.95rem' }}
                     >
-                        <ShoppingCart className="w-5 h-5" />
+                        <ShoppingCart className="w-5 h-5" style={{ filter: 'drop-shadow(0 0 5px rgba(255, 255, 255, 1))' }} />
+                        <span className="text-white" style={{ textShadow: '0 0 10px rgba(255, 255, 255, 0.5)' }}>Add to Cart</span>
                         {quantityInCart > 0 && (
-                            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+                            <span className="absolute -top-2 -right-2 bg-gradient-to-r from-cyan-500 to-magenta-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center animate-pulse border-2 border-white" style={{ fontFamily: 'Orbitron, sans-serif', boxShadow: '0 0 20px rgba(0, 255, 255, 1)' }}>
                                 {quantityInCart}
                             </span>
                         )}
@@ -165,7 +168,7 @@ const ProductCard = ({ product }) => {
 
                 {/* Added to Cart Message */}
                 {showAddedMessage && (
-                    <div className="mt-3 text-center text-sm text-green-600 font-semibold animate-fade-in">
+                    <div className="mt-3 text-center text-sm font-bold animate-fade-in uppercase tracking-wide" style={{ color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.8)', fontFamily: 'Rajdhani, sans-serif' }}>
                         Added to cart!
                     </div>
                 )}

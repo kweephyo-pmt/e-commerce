@@ -184,7 +184,7 @@ const ProductDetails = () => {
     if (loading) {
         return (
             <div className="min-h-screen flex justify-center items-center">
-                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-cyan-400" style={{ boxShadow: '0 0 30px rgba(0, 255, 255, 0.5)' }}></div>
             </div>
         );
     }
@@ -192,8 +192,8 @@ const ProductDetails = () => {
     if (!product) {
         return (
             <div className="min-h-screen flex flex-col justify-center items-center">
-                <Package className="w-24 h-24 text-gray-300 mb-4" />
-                <h2 className="text-2xl font-bold text-gray-700 mb-2">Product Not Found</h2>
+                <Package className="w-24 h-24 text-cyan-400 mb-4" style={{ filter: 'drop-shadow(0 0 20px rgba(0, 255, 255, 0.6))' }} />
+                <h2 className="text-3xl font-bold text-cyan-400 mb-2 uppercase" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(0, 255, 255, 0.6)' }}>Product Not Found</h2>
                 <Link to="/products" className="btn-primary mt-4">
                     Back to Products
                 </Link>
@@ -216,24 +216,25 @@ const ProductDetails = () => {
                     {/* Back Button */}
                     <button
                         onClick={() => navigate(-1)}
-                        className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 mb-8 transition-colors"
+                        className="flex items-center space-x-2 text-cyan-400 hover:text-cyan-300 mb-8 transition-all font-bold uppercase tracking-wide"
+                        style={{ fontFamily: 'Rajdhani, sans-serif', textShadow: '0 0 10px rgba(0, 255, 255, 0.5)' }}
                     >
-                        <ArrowLeft className="w-5 h-5" />
-                        <span className="font-semibold">Back</span>
+                        <ArrowLeft className="w-5 h-5" style={{ filter: 'drop-shadow(0 0 5px rgba(0, 255, 255, 0.8))' }} />
+                        <span>Back</span>
                     </button>
 
                     {/* Product Details */}
-                    <div className="grid md:grid-cols-2 gap-12 mb-16">
+                    <div className="grid md:grid-cols-2 gap-8 md:gap-12 mb-12 md:mb-16">
                         {/* Product Image */}
                         <div className="animate-fade-in">
-                            <div className="relative rounded-2xl overflow-hidden bg-gray-100 shadow-xl">
+                            <div className="relative corner-clip overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-cyan-500/50" style={{ boxShadow: '0 0 40px rgba(0, 255, 255, 0.3)' }}>
                                 <img
                                     src={product.image}
                                     alt={product.name}
-                                    className="w-full h-[500px] object-contain"
+                                    className="w-full h-64 sm:h-80 md:h-96 lg:h-[500px] object-contain"
                                 />
                                 {product.discount > 0 && (
-                                    <div className="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-full font-bold shadow-lg">
+                                    <div className="absolute top-4 right-4 bg-gradient-to-r from-magenta-500 to-red-500 text-white px-3 py-1.5 sm:px-4 sm:py-2 corner-clip-sm font-black uppercase text-sm sm:text-base" style={{ fontFamily: 'Orbitron, sans-serif', boxShadow: '0 0 20px rgba(255, 0, 255, 0.8)' }}>
                                         -{product.discount}%
                                     </div>
                                 )}
@@ -243,12 +244,12 @@ const ProductDetails = () => {
                         {/* Product Info */}
                         <div className="animate-slide-up">
                             {/* Category Badge */}
-                            <div className="inline-block bg-blue-100 text-blue-600 px-4 py-1 rounded-full text-sm font-semibold mb-4">
+                            <div className="inline-block bg-cyan-500/20 text-cyan-400 px-3 py-1 sm:px-4 corner-clip-sm text-xs sm:text-sm font-black mb-3 sm:mb-4 uppercase tracking-wider border-2 border-cyan-500/50" style={{ fontFamily: 'Orbitron, sans-serif', boxShadow: '0 0 15px rgba(0, 255, 255, 0.3)' }}>
                                 {product.category}
                             </div>
 
                             {/* Product Name */}
-                            <h1 className="text-4xl font-bold mb-4">{product.name}</h1>
+                            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black mb-3 md:mb-4 text-white uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(0, 255, 255, 0.4)' }}>{product.name}</h1>
 
                             {/* Rating */}
                             {product.rating > 0 && (
@@ -258,26 +259,27 @@ const ProductDetails = () => {
                                             <Star
                                                 key={i}
                                                 className={`w-5 h-5 ${i < Math.floor(product.rating)
-                                                    ? 'text-yellow-400 fill-yellow-400'
-                                                    : 'text-gray-300'
+                                                    ? 'text-cyan-400 fill-cyan-400'
+                                                    : 'text-gray-600'
                                                     }`}
+                                                style={i < Math.floor(product.rating) ? { filter: 'drop-shadow(0 0 5px rgba(0, 255, 255, 0.8))' } : {}}
                                             />
                                         ))}
                                     </div>
-                                    <span className="text-gray-600">
+                                    <span className="text-gray-300 font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                         {product.rating.toFixed(1)} {product.reviews > 0 && `(${product.reviews} reviews)`}
                                     </span>
                                 </div>
                             )}
 
                             {/* Price */}
-                            <div className="mb-6">
-                                <div className="flex items-center space-x-4">
-                                    <span className="text-4xl font-bold text-blue-600">
+                            <div className="mb-4 md:mb-6">
+                                <div className="flex items-center space-x-3 md:space-x-4">
+                                    <span className="text-3xl sm:text-4xl md:text-5xl font-black text-gradient" style={{ textShadow: '0 0 20px rgba(0, 255, 255, 0.5)' }}>
                                         ฿{calculateDiscountedPrice().toFixed(2)}
                                     </span>
                                     {product.discount > 0 && (
-                                        <span className="text-2xl text-gray-400 line-through">
+                                        <span className="text-lg sm:text-xl md:text-2xl text-gray-500 line-through">
                                             ฿{product.price.toFixed(2)}
                                         </span>
                                     )}
@@ -288,40 +290,40 @@ const ProductDetails = () => {
                             <div className="mb-6">
                                 {product.stock > 0 ? (
                                     <div className="flex items-center space-x-2">
-                                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                                        <span className="text-green-600 font-semibold">
+                                        <div className="w-3 h-3 bg-cyan-400 rounded-full" style={{ boxShadow: '0 0 10px rgba(0, 255, 255, 0.8)' }}></div>
+                                        <span className="text-cyan-400 font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif', textShadow: '0 0 10px rgba(0, 255, 255, 0.5)' }}>
                                             In Stock ({product.stock} available)
                                         </span>
                                     </div>
                                 ) : (
                                     <div className="flex items-center space-x-2">
-                                        <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                                        <span className="text-red-600 font-semibold">Out of Stock</span>
+                                        <div className="w-3 h-3 bg-red-400 rounded-full" style={{ boxShadow: '0 0 10px rgba(255, 0, 0, 0.8)' }}></div>
+                                        <span className="text-red-400 font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif', textShadow: '0 0 10px rgba(255, 0, 0, 0.5)' }}>Out of Stock</span>
                                     </div>
                                 )}
                             </div>
 
                             {/* Description */}
                             <div className="mb-8">
-                                <h3 className="text-lg font-bold mb-2">Description</h3>
-                                <p className="text-gray-600 leading-relaxed">{product.description}</p>
+                                <h3 className="text-xl font-black mb-3 text-magenta-400 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(255, 0, 255, 0.5)' }}>Description</h3>
+                                <p className="text-gray-300 leading-relaxed" style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: '1.05rem' }}>{product.description}</p>
                             </div>
 
                             {/* Quantity Selector */}
                             {product.stock > 0 && (
                                 <div className="mb-6">
-                                    <label className="block text-sm font-semibold mb-2">Quantity</label>
+                                    <label className="block text-sm font-black mb-3 text-cyan-400 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif' }}>Quantity</label>
                                     <div className="flex items-center space-x-4">
                                         <button
                                             onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                            className="w-10 h-10 rounded-lg border-2 border-gray-300 hover:border-blue-600 transition-colors font-bold"
+                                            className="w-10 h-10 corner-clip-sm border-2 border-cyan-500/50 hover:border-cyan-400 transition-all font-bold bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400"
                                         >
                                             -
                                         </button>
-                                        <span className="text-xl font-bold w-12 text-center">{quantity}</span>
+                                        <span className="text-2xl font-black w-12 text-center text-cyan-400" style={{ fontFamily: 'Orbitron, sans-serif' }}>{quantity}</span>
                                         <button
                                             onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                                            className="w-10 h-10 rounded-lg border-2 border-gray-300 hover:border-blue-600 transition-colors font-bold"
+                                            className="w-10 h-10 corner-clip-sm border-2 border-cyan-500/50 hover:border-cyan-400 transition-all font-bold bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400"
                                         >
                                             +
                                         </button>
@@ -341,18 +343,18 @@ const ProductDetails = () => {
 
                             {/* Features */}
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
-                                    <Truck className="w-6 h-6 text-blue-600" />
+                                <div className="flex items-center space-x-3 p-4 bg-cyan-500/10 corner-clip-sm border-2 border-cyan-500/30">
+                                    <Truck className="w-6 h-6 text-cyan-400" style={{ filter: 'drop-shadow(0 0 5px rgba(0, 255, 255, 0.8))' }} />
                                     <div>
-                                        <p className="font-semibold text-sm">Free Shipping</p>
-                                        <p className="text-xs text-gray-600">On orders over ฿1,500</p>
+                                        <p className="font-bold text-sm text-cyan-300 uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Free Shipping</p>
+                                        <p className="text-xs text-gray-400">On orders over ฿1,500</p>
                                     </div>
                                 </div>
-                                <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
-                                    <Shield className="w-6 h-6 text-blue-600" />
+                                <div className="flex items-center space-x-3 p-4 bg-magenta-500/10 corner-clip-sm border-2 border-magenta-500/30">
+                                    <Shield className="w-6 h-6 text-magenta-400" style={{ filter: 'drop-shadow(0 0 5px rgba(255, 0, 255, 0.8))' }} />
                                     <div>
-                                        <p className="font-semibold text-sm">Secure Payment</p>
-                                        <p className="text-xs text-gray-600">100% protected</p>
+                                        <p className="font-bold text-sm text-magenta-300 uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Secure Payment</p>
+                                        <p className="text-xs text-gray-400">100% protected</p>
                                     </div>
                                 </div>
                             </div>
@@ -360,21 +362,22 @@ const ProductDetails = () => {
                     </div>
 
                     {/* Reviews & Ratings Section */}
-                    <div className="mt-16 bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+                    <div className="mt-16 bg-gradient-to-br from-gray-900 to-gray-800 corner-clip p-8 border-2 border-cyan-500/30" style={{ boxShadow: '0 0 30px rgba(0, 255, 255, 0.2)' }}>
                         <div className="flex items-center space-x-3 mb-8">
-                            <MessageSquare className="w-8 h-8 text-blue-600" />
-                            <h2 className="text-3xl font-bold">
-                                Reviews & <span className="text-gradient">Ratings</span>
+                            <MessageSquare className="w-8 h-8 text-cyan-400" style={{ filter: 'drop-shadow(0 0 10px rgba(0, 255, 255, 0.8))' }} />
+                            <h2 className="text-4xl font-black uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                                <span className="text-cyan-400" style={{ textShadow: '0 0 20px rgba(0, 255, 255, 0.6)' }}>Reviews</span>{' '}
+                                <span className="text-magenta-400" style={{ textShadow: '0 0 20px rgba(255, 0, 255, 0.6)' }}>& Ratings</span>
                             </h2>
                         </div>
 
                         {/* Rating Summary */}
                         {reviews.length > 0 && (
-                            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-8">
+                            <div className="bg-gradient-to-r from-cyan-500/10 to-magenta-500/10 corner-clip-sm p-6 mb-8 border-2 border-cyan-500/30">
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <div className="flex items-center space-x-2 mb-2">
-                                            <span className="text-5xl font-bold text-blue-600">
+                                            <span className="text-6xl font-black text-gradient" style={{ textShadow: '0 0 20px rgba(0, 255, 255, 0.5)' }}>
                                                 {product.rating?.toFixed(1) || '0.0'}
                                             </span>
                                             <div>
@@ -383,13 +386,14 @@ const ProductDetails = () => {
                                                         <Star
                                                             key={i}
                                                             className={`w-6 h-6 ${i < Math.floor(product.rating || 0)
-                                                                ? 'text-yellow-400 fill-yellow-400'
-                                                                : 'text-gray-300'
+                                                                ? 'text-cyan-400 fill-cyan-400'
+                                                                : 'text-gray-600'
                                                                 }`}
+                                                            style={i < Math.floor(product.rating || 0) ? { filter: 'drop-shadow(0 0 5px rgba(0, 255, 255, 0.8))' } : {}}
                                                         />
                                                     ))}
                                                 </div>
-                                                <p className="text-sm text-gray-600 mt-1">
+                                                <p className="text-sm text-gray-300 mt-1 font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                                     Based on {reviews.length} {reviews.length === 1 ? 'review' : 'reviews'}
                                                 </p>
                                             </div>
@@ -401,12 +405,12 @@ const ProductDetails = () => {
 
                         {/* Write a Review */}
                         {user ? (
-                            <div className="bg-gray-50 rounded-xl p-6 mb-8">
-                                <h3 className="text-xl font-bold mb-4">Write a Review</h3>
+                            <div className="bg-gradient-to-br from-gray-800 to-gray-900 corner-clip-sm p-6 mb-8 border-2 border-magenta-500/30" style={{ boxShadow: '0 0 20px rgba(255, 0, 255, 0.2)' }}>
+                                <h3 className="text-2xl font-black mb-4 text-magenta-400 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(255, 0, 255, 0.6)' }}>Write a Review</h3>
 
                                 {/* Star Rating Input */}
                                 <div className="mb-4">
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    <label className="block text-sm font-black text-cyan-400 mb-3 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                                         Your Rating
                                     </label>
                                     <div className="flex space-x-2">
@@ -419,9 +423,10 @@ const ProductDetails = () => {
                                             >
                                                 <Star
                                                     className={`w-8 h-8 ${star <= userRating
-                                                        ? 'text-yellow-400 fill-yellow-400'
-                                                        : 'text-gray-300'
+                                                        ? 'text-cyan-400 fill-cyan-400'
+                                                        : 'text-gray-600'
                                                         }`}
+                                                    style={star <= userRating ? { filter: 'drop-shadow(0 0 8px rgba(0, 255, 255, 1))' } : {}}
                                                 />
                                             </button>
                                         ))}
@@ -430,15 +435,16 @@ const ProductDetails = () => {
 
                                 {/* Review Text */}
                                 <div className="mb-4">
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    <label className="block text-sm font-black text-cyan-400 mb-3 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                                         Your Review
                                     </label>
                                     <textarea
                                         value={userReview}
                                         onChange={(e) => setUserReview(e.target.value)}
                                         rows="4"
-                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none resize-none"
+                                        className="w-full px-4 py-3 border-2 border-cyan-500/50 corner-clip-sm focus:border-cyan-400 focus:outline-none resize-none bg-gray-900 text-gray-200 placeholder-gray-500"
                                         placeholder="Share your thoughts about this product..."
+                                        style={{ fontFamily: 'Rajdhani, sans-serif' }}
                                     />
                                 </div>
 
@@ -453,30 +459,30 @@ const ProductDetails = () => {
                                 </button>
                             </div>
                         ) : (
-                            <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 mb-8 text-center">
-                                <p className="text-blue-800 font-medium">
-                                    Please <Link to="/login" className="text-blue-600 font-bold hover:underline">login</Link> to write a review
+                            <div className="bg-cyan-500/10 border-2 border-cyan-500/50 corner-clip-sm p-6 mb-8 text-center">
+                                <p className="text-cyan-300 font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                    Please <Link to="/login" className="text-cyan-400 font-black hover:text-cyan-300 transition-colors" style={{ textShadow: '0 0 10px rgba(0, 255, 255, 0.8)' }}>login</Link> to write a review
                                 </p>
                             </div>
                         )}
 
                         {/* Reviews List */}
                         <div className="space-y-6">
-                            <h3 className="text-xl font-bold">Customer Reviews ({reviews.length})</h3>
+                            <h3 className="text-2xl font-black text-cyan-400 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(0, 255, 255, 0.5)' }}>Customer Reviews ({reviews.length})</h3>
 
                             {reviews.length === 0 ? (
                                 <div className="text-center py-12">
-                                    <MessageSquare className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                                    <p className="text-gray-600 font-medium">No reviews yet</p>
-                                    <p className="text-sm text-gray-500 mt-1">Be the first to review this product!</p>
+                                    <MessageSquare className="w-16 h-16 text-cyan-400 mx-auto mb-4" style={{ filter: 'drop-shadow(0 0 15px rgba(0, 255, 255, 0.6))' }} />
+                                    <p className="text-gray-300 font-bold text-lg" style={{ fontFamily: 'Rajdhani, sans-serif' }}>No reviews yet</p>
+                                    <p className="text-sm text-gray-400 mt-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Be the first to review this product!</p>
                                 </div>
                             ) : (
                                 reviews.map((review) => (
-                                    <div key={review.id} className="border-b border-gray-200 pb-6 last:border-b-0">
+                                    <div key={review.id} className="border-b border-cyan-500/30 pb-6 last:border-b-0">
                                         <div className="flex items-start space-x-4">
                                             {/* User Avatar */}
-                                            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center flex-shrink-0">
-                                                <span className="text-white font-bold text-lg">
+                                            <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-magenta-500 corner-clip-sm flex items-center justify-center flex-shrink-0" style={{ boxShadow: '0 0 15px rgba(0, 255, 255, 0.5)' }}>
+                                                <span className="text-white font-black text-lg" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                                                     {review.userName?.charAt(0)?.toUpperCase() || 'U'}
                                                 </span>
                                             </div>
@@ -485,26 +491,27 @@ const ProductDetails = () => {
                                             <div className="flex-1">
                                                 <div className="flex items-center justify-between mb-2">
                                                     <div>
-                                                        <p className="font-bold text-gray-900">{review.userName}</p>
+                                                        <p className="font-black text-white text-lg" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{review.userName}</p>
                                                         <div className="flex items-center space-x-2 mt-1">
                                                             <div className="flex">
                                                                 {[...Array(5)].map((_, i) => (
                                                                     <Star
                                                                         key={i}
                                                                         className={`w-4 h-4 ${i < review.rating
-                                                                            ? 'text-yellow-400 fill-yellow-400'
-                                                                            : 'text-gray-300'
+                                                                            ? 'text-cyan-400 fill-cyan-400'
+                                                                            : 'text-gray-600'
                                                                             }`}
+                                                                        style={i < review.rating ? { filter: 'drop-shadow(0 0 3px rgba(0, 255, 255, 0.8))' } : {}}
                                                                     />
                                                                 ))}
                                                             </div>
-                                                            <span className="text-sm text-gray-500">
+                                                            <span className="text-sm text-gray-400 font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                                                 {review.createdAt?.toLocaleDateString()}
                                                             </span>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <p className="text-gray-700 leading-relaxed">{review.review}</p>
+                                                <p className="text-gray-300 leading-relaxed" style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: '1.05rem' }}>{review.review}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -516,8 +523,9 @@ const ProductDetails = () => {
                     {/* Related Products */}
                     {relatedProducts.length > 0 && (
                         <section className="mt-16">
-                            <h2 className="text-3xl font-bold mb-8">
-                                Related <span className="text-gradient">Products</span>
+                            <h2 className="text-4xl font-black mb-8 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                                <span className="text-cyan-400" style={{ textShadow: '0 0 20px rgba(0, 255, 255, 0.6)' }}>Related</span>{' '}
+                                <span className="text-magenta-400" style={{ textShadow: '0 0 20px rgba(255, 0, 255, 0.6)' }}>Products</span>
                             </h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                                 {relatedProducts.map((relatedProduct) => (

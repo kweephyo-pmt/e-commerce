@@ -53,15 +53,15 @@ const CheckoutForm = ({ amount, onSuccess, onError }) => {
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             {/* Payment Element */}
-            <div className="bg-white rounded-lg p-4 border-2 border-gray-200">
+            <div className="bg-gray-800/50 corner-clip-sm p-4 border-2 border-cyan-500/30" style={{ boxShadow: '0 0 20px rgba(0, 255, 255, 0.2)' }}>
                 <PaymentElement />
             </div>
 
             {/* Error Message */}
             {errorMessage && (
-                <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start space-x-3 animate-fade-in">
-                    <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
-                    <p className="text-sm text-red-600">{errorMessage}</p>
+                <div className="p-4 bg-red-900/20 border-2 border-red-500/50 corner-clip-sm flex items-start space-x-3 animate-fade-in" style={{ boxShadow: '0 0 20px rgba(255, 0, 0, 0.3)' }}>
+                    <AlertCircle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" style={{ filter: 'drop-shadow(0 0 5px rgba(255, 0, 0, 0.8))' }} />
+                    <p className="text-sm text-red-400 font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{errorMessage}</p>
                 </div>
             )}
 
@@ -96,8 +96,8 @@ const CheckoutForm = ({ amount, onSuccess, onError }) => {
             </button>
 
             {/* Security Notice */}
-            <div className="text-center text-xs text-gray-500">
-                <Lock className="w-4 h-4 inline mr-1" />
+            <div className="text-center text-xs text-gray-400 font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                <Lock className="w-4 h-4 inline mr-1" style={{ filter: 'drop-shadow(0 0 3px rgba(0, 255, 255, 0.6))' }} />
                 Secured by Stripe • Your payment information is encrypted
             </div>
         </form>
@@ -152,28 +152,32 @@ const StripePaymentForm = ({ amount, currency = 'thb', onSuccess, onError }) => 
 
     // Stripe Elements appearance customization
     const appearance = {
-        theme: 'stripe',
+        theme: 'night',
         variables: {
-            colorPrimary: '#2563eb',
-            colorBackground: '#ffffff',
-            colorText: '#1f2937',
+            colorPrimary: '#06b6d4',
+            colorBackground: '#1f2937',
+            colorText: '#e5e7eb',
             colorDanger: '#ef4444',
-            fontFamily: 'Inter, system-ui, sans-serif',
+            fontFamily: 'Rajdhani, sans-serif',
             spacingUnit: '4px',
-            borderRadius: '8px',
+            borderRadius: '4px',
         },
         rules: {
             '.Input': {
-                border: '2px solid #e5e7eb',
-                boxShadow: 'none',
+                border: '2px solid rgba(6, 182, 212, 0.3)',
+                boxShadow: '0 0 10px rgba(0, 255, 255, 0.1)',
+                backgroundColor: 'rgba(31, 41, 55, 0.5)',
             },
             '.Input:focus': {
-                border: '2px solid #3b82f6',
-                boxShadow: '0 0 0 4px rgba(59, 130, 246, 0.1)',
+                border: '2px solid rgba(6, 182, 212, 0.6)',
+                boxShadow: '0 0 20px rgba(0, 255, 255, 0.3)',
             },
             '.Label': {
-                fontWeight: '600',
+                fontWeight: '700',
                 marginBottom: '8px',
+                color: '#06b6d4',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
             },
         },
     };
@@ -186,21 +190,21 @@ const StripePaymentForm = ({ amount, currency = 'thb', onSuccess, onError }) => 
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-                <p className="text-gray-600">Initializing secure payment...</p>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-400 mb-4" style={{ filter: 'drop-shadow(0 0 10px rgba(0, 255, 255, 0.6))' }}></div>
+                <p className="text-gray-300 font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Initializing secure payment...</p>
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="p-6 bg-red-50 border border-red-200 rounded-lg">
+            <div className="p-6 bg-red-900/20 border-2 border-red-500/50 corner-clip-sm" style={{ boxShadow: '0 0 30px rgba(255, 0, 0, 0.3)' }}>
                 <div className="flex items-start space-x-3">
-                    <AlertCircle className="w-6 h-6 text-red-600 mt-0.5 flex-shrink-0" />
+                    <AlertCircle className="w-6 h-6 text-red-400 mt-0.5 flex-shrink-0" style={{ filter: 'drop-shadow(0 0 5px rgba(255, 0, 0, 0.8))' }} />
                     <div>
-                        <h3 className="font-semibold text-red-900 mb-1">Payment Setup Error</h3>
-                        <p className="text-sm text-red-700 mb-3">{error}</p>
-                        <p className="text-xs text-red-600">
+                        <h3 className="font-black text-red-400 mb-1 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif' }}>Payment Setup Error</h3>
+                        <p className="text-sm text-red-400 mb-3 font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{error}</p>
+                        <p className="text-xs text-red-500 font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                             Please make sure your backend is running and the Stripe configuration is correct.
                             See STRIPE_INTEGRATION.md for setup instructions.
                         </p>

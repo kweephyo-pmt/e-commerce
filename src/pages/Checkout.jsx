@@ -133,32 +133,33 @@ const Checkout = () => {
     const total = subtotal + shipping + tax;
 
     return (
-        <div className="min-h-screen py-8 md:py-12 bg-gradient-to-br from-gray-50 to-blue-50">
+        <div className="min-h-screen py-8 md:py-12">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="mb-8 animate-fade-in">
                     <Link
                         to="/cart"
-                        className="inline-flex items-center space-x-2 text-gray-600 hover:text-blue-600 mb-4 transition-colors duration-200"
+                        className="inline-flex items-center space-x-2 text-cyan-400 hover:text-cyan-300 mb-4 transition-colors duration-200 font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}
                     >
                         <ArrowLeft className="w-5 h-5" />
-                        <span className="font-medium">Back to Cart</span>
+                        <span className="uppercase tracking-wide">Back to Cart</span>
                     </Link>
-                    <h1 className="text-3xl md:text-4xl font-bold mb-2">
-                        Secure <span className="text-gradient">Checkout</span>
+                    <h1 className="text-4xl md:text-5xl font-black mb-2 uppercase tracking-wider" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                        <span className="text-cyan-400" style={{ textShadow: '0 0 20px rgba(0, 255, 255, 0.8)' }}>Secure </span>
+                        <span className="text-gradient" style={{ textShadow: '0 0 20px rgba(255, 0, 255, 0.6)' }}>Checkout</span>
                     </h1>
-                    <p className="text-gray-600">Complete your order in just a few steps</p>
+                    <p className="text-gray-400 text-lg font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Complete your order in just a few steps</p>
                 </div>
 
                 {/* Progress Steps */}
                 <div className="mb-8 md:mb-12 animate-fade-in">
-                    <div className="card p-6 md:p-8">
+                    <div className="card p-6 md:p-8 bg-gray-900/50 border-2 border-cyan-500/30" style={{ boxShadow: '0 0 30px rgba(0, 255, 255, 0.2)' }}>
                         <div className="flex items-center justify-between relative">
                             {/* Progress Line */}
-                            <div className="absolute top-6 left-0 right-0 h-1 bg-gray-200 -z-10">
+                            <div className="absolute top-6 left-0 right-0 h-1 bg-gray-700 -z-10">
                                 <div
-                                    className="h-full bg-gradient-to-r from-blue-600 to-indigo-600 transition-all duration-500"
-                                    style={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }}
+                                    className="h-full bg-gradient-to-r from-cyan-400 to-magenta-400 transition-all duration-500"
+                                    style={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%`, boxShadow: '0 0 10px rgba(0, 255, 255, 0.6)' }}
                                 />
                             </div>
 
@@ -170,21 +171,24 @@ const Checkout = () => {
                                 return (
                                     <div key={step.id} className="flex flex-col items-center flex-1">
                                         <div
-                                            className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-all duration-300 ${isCompleted
-                                                ? 'bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg scale-110'
-                                                : isActive
-                                                    ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg scale-110 ring-4 ring-blue-100'
-                                                    : 'bg-gray-200 text-gray-500'
+                                            className={`w-12 h-12 corner-clip-sm flex items-center justify-center mb-2 transition-all duration-300 border-2 ${isCompleted
+                                                    ? 'bg-gradient-to-br from-magenta-500 to-magenta-600 text-white border-magenta-500/50 scale-110'
+                                                    : isActive
+                                                        ? 'bg-gradient-to-br from-cyan-500 to-cyan-600 text-white border-cyan-500/50 scale-110'
+                                                        : 'bg-gray-800 text-gray-500 border-gray-700'
                                                 }`}
+                                            style={{
+                                                boxShadow: isActive || isCompleted ? '0 0 20px rgba(0, 255, 255, 0.5)' : 'none'
+                                            }}
                                         >
                                             {isCompleted ? (
-                                                <CheckCircle className="w-6 h-6" />
+                                                <CheckCircle className="w-6 h-6" style={{ filter: 'drop-shadow(0 0 5px rgba(255, 0, 255, 0.8))' }} />
                                             ) : (
-                                                <Icon className="w-6 h-6" />
+                                                <Icon className="w-6 h-6" style={{ filter: isActive ? 'drop-shadow(0 0 5px rgba(0, 255, 255, 0.8))' : 'none' }} />
                                             )}
                                         </div>
-                                        <span className={`text-xs md:text-sm font-semibold text-center ${isActive ? 'text-blue-600' : isCompleted ? 'text-green-600' : 'text-gray-500'
-                                            }`}>
+                                        <span className={`text-xs md:text-sm font-black text-center uppercase tracking-wide ${isActive ? 'text-cyan-400' : isCompleted ? 'text-magenta-400' : 'text-gray-500'
+                                            }`} style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                             {step.name}
                                         </span>
                                     </div>
@@ -200,17 +204,17 @@ const Checkout = () => {
                         <form onSubmit={handleSubmit} className="space-y-6">
                             {/* Step 1: Contact Information */}
                             {currentStep === 1 && (
-                                <div className="card p-6 md:p-8 animate-fade-in">
+                                <div className="card p-6 md:p-8 animate-fade-in bg-gray-900/50 border-2 border-cyan-500/30" style={{ boxShadow: '0 0 30px rgba(0, 255, 255, 0.2)' }}>
                                     <div className="flex items-center space-x-3 mb-6">
-                                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
-                                            <UserIcon className="w-5 h-5 text-white" />
+                                        <div className="w-10 h-10 corner-clip-sm bg-gradient-to-br from-cyan-500 to-magenta-500 flex items-center justify-center border-2 border-cyan-500/50" style={{ boxShadow: '0 0 15px rgba(0, 255, 255, 0.4)' }}>
+                                            <UserIcon className="w-5 h-5 text-white" style={{ filter: 'drop-shadow(0 0 3px rgba(255, 255, 255, 0.8))' }} />
                                         </div>
-                                        <h2 className="text-2xl font-bold">Contact Information</h2>
+                                        <h2 className="text-2xl font-black text-cyan-400 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(0, 255, 255, 0.6)' }}>Contact Information</h2>
                                     </div>
 
                                     <div className="space-y-5">
                                         <div>
-                                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                            <label className="block text-sm font-semibold text-gray-300 mb-2">
                                                 Full Name *
                                             </label>
                                             <input
@@ -228,7 +232,7 @@ const Checkout = () => {
 
                                         <div className="grid md:grid-cols-2 gap-5">
                                             <div>
-                                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                                <label className="block text-sm font-semibold text-gray-300 mb-2">
                                                     Email Address *
                                                 </label>
                                                 <input
@@ -245,7 +249,7 @@ const Checkout = () => {
                                             </div>
 
                                             <div>
-                                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                                <label className="block text-sm font-semibold text-gray-300 mb-2">
                                                     Phone Number *
                                                 </label>
                                                 <input
@@ -270,7 +274,7 @@ const Checkout = () => {
                                                 onChange={handleInputChange}
                                                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                                             />
-                                            <label className="ml-2 text-sm text-gray-700">
+                                            <label className="ml-2 text-sm text-gray-300 font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                                 Save this information for next time
                                             </label>
                                         </div>
@@ -290,17 +294,17 @@ const Checkout = () => {
 
                             {/* Step 2: Shipping Address */}
                             {currentStep === 2 && (
-                                <div className="card p-6 md:p-8 animate-fade-in">
+                                <div className="card p-6 md:p-8 animate-fade-in bg-gray-900/50 border-2 border-cyan-500/30" style={{ boxShadow: '0 0 30px rgba(0, 255, 255, 0.2)' }}>
                                     <div className="flex items-center space-x-3 mb-6">
-                                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
-                                            <MapPin className="w-5 h-5 text-white" />
+                                        <div className="w-10 h-10 corner-clip-sm bg-gradient-to-br from-cyan-500 to-magenta-500 flex items-center justify-center border-2 border-cyan-500/50" style={{ boxShadow: '0 0 15px rgba(0, 255, 255, 0.4)' }}>
+                                            <MapPin className="w-5 h-5 text-white" style={{ filter: 'drop-shadow(0 0 3px rgba(255, 255, 255, 0.8))' }} />
                                         </div>
-                                        <h2 className="text-2xl font-bold">Shipping Address</h2>
+                                        <h2 className="text-2xl font-black text-cyan-400 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(0, 255, 255, 0.6)' }}>Shipping Address</h2>
                                     </div>
 
                                     <div className="space-y-5">
                                         <div>
-                                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                            <label className="block text-sm font-semibold text-gray-300 mb-2">
                                                 Street Address *
                                             </label>
                                             <input
@@ -318,7 +322,7 @@ const Checkout = () => {
 
                                         <div className="grid md:grid-cols-2 gap-5">
                                             <div>
-                                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                                <label className="block text-sm font-semibold text-gray-300 mb-2">
                                                     City *
                                                 </label>
                                                 <input
@@ -335,7 +339,7 @@ const Checkout = () => {
                                             </div>
 
                                             <div>
-                                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                                <label className="block text-sm font-semibold text-gray-300 mb-2">
                                                     State / Province *
                                                 </label>
                                                 <input
@@ -354,7 +358,7 @@ const Checkout = () => {
 
                                         <div className="grid md:grid-cols-2 gap-5">
                                             <div>
-                                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                                <label className="block text-sm font-semibold text-gray-300 mb-2">
                                                     ZIP / Postal Code *
                                                 </label>
                                                 <input
@@ -371,7 +375,7 @@ const Checkout = () => {
                                             </div>
 
                                             <div>
-                                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                                <label className="block text-sm font-semibold text-gray-300 mb-2">
                                                     Country *
                                                 </label>
                                                 <select
@@ -386,27 +390,6 @@ const Checkout = () => {
                                                     <option value="Singapore">Singapore</option>
                                                     <option value="Malaysia">Malaysia</option>
                                                 </select>
-                                            </div>
-                                        </div>
-
-                                        {/* Shipping Info */}
-                                        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4 mt-6">
-                                            <div className="flex items-start space-x-3">
-                                                <Truck className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                                                <div>
-                                                    <p className="text-sm font-semibold text-green-900 mb-1">
-                                                        {shipping === 0 ? 'Free Shipping!' : 'Standard Shipping'}
-                                                    </p>
-                                                    <p className="text-sm text-green-700">
-                                                        {shipping === 0
-                                                            ? 'Your order qualifies for free shipping!'
-                                                            : `Add ฿${(1500 - subtotal).toFixed(2)} more for free shipping`
-                                                        }
-                                                    </p>
-                                                    <p className="text-xs text-green-600 mt-1">
-                                                        Estimated delivery: 3-5 business days
-                                                    </p>
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -434,23 +417,23 @@ const Checkout = () => {
                         {/* Step 3: Payment */}
                         {currentStep === 3 && (
                             <div className="space-y-6 animate-fade-in">
-                                <div className="card p-6 md:p-8">
+                                <div className="card p-6 md:p-8 bg-gray-900/50 border-2 border-cyan-500/30" style={{ boxShadow: '0 0 30px rgba(0, 255, 255, 0.2)' }}>
                                     <div className="flex items-center space-x-3 mb-6">
-                                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
-                                            <CreditCard className="w-5 h-5 text-white" />
+                                        <div className="w-10 h-10 corner-clip-sm bg-gradient-to-br from-cyan-500 to-magenta-500 flex items-center justify-center border-2 border-cyan-500/50" style={{ boxShadow: '0 0 15px rgba(0, 255, 255, 0.4)' }}>
+                                            <CreditCard className="w-5 h-5 text-white" style={{ filter: 'drop-shadow(0 0 3px rgba(255, 255, 255, 0.8))' }} />
                                         </div>
-                                        <h2 className="text-2xl font-bold">Payment Information</h2>
+                                        <h2 className="text-2xl font-black text-cyan-400 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(0, 255, 255, 0.6)' }}>Payment Information</h2>
                                     </div>
 
                                     {/* Security Badge */}
-                                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-5 mb-6">
+                                    <div className="bg-gradient-to-r from-cyan-500/10 to-magenta-500/10 border-2 border-cyan-500/30 corner-clip-sm p-5 mb-6" style={{ boxShadow: '0 0 20px rgba(0, 255, 255, 0.2)' }}>
                                         <div className="flex items-start space-x-3">
-                                            <ShieldCheck className="w-6 h-6 text-blue-600 mt-0.5 flex-shrink-0" />
+                                            <ShieldCheck className="w-6 h-6 text-cyan-400 mt-0.5 flex-shrink-0" style={{ filter: 'drop-shadow(0 0 5px rgba(0, 255, 255, 0.8))' }} />
                                             <div>
-                                                <p className="text-sm font-bold text-blue-900 mb-1">
+                                                <p className="text-sm font-black text-cyan-400 mb-1 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                                                     🔒 Secure Payment Processing
                                                 </p>
-                                                <p className="text-sm text-blue-700">
+                                                <p className="text-sm text-gray-300 font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                                     Your payment information is encrypted with 256-bit SSL security.
                                                     We never store your card details.
                                                 </p>
@@ -564,7 +547,7 @@ const Checkout = () => {
                                 </div>
 
                                 {error && (
-                                    <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm animate-fade-in">
+                                    <div className="p-4 bg-red-900/20 border-2 border-red-500/50 corner-clip-sm text-red-400 text-sm animate-fade-in font-bold" style={{ fontFamily: 'Rajdhani, sans-serif', boxShadow: '0 0 20px rgba(255, 0, 0, 0.3)' }}>
                                         {error}
                                     </div>
                                 )}
@@ -584,11 +567,11 @@ const Checkout = () => {
 
                     {/* Order Summary - Sticky Sidebar */}
                     <div className="lg:col-span-1">
-                        <div className="bg-white rounded-2xl overflow-hidden sticky top-24 animate-fade-in shadow-xl">
+                        <div className="bg-gray-900 corner-clip-lg overflow-hidden sticky top-24 animate-fade-in border-2 border-cyan-500/30" style={{ boxShadow: '0 0 30px rgba(0, 255, 255, 0.3)' }}>
                             {/* Header with Gradient */}
-                            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-5">
-                                <h2 className="text-xl font-bold text-white flex items-center space-x-2">
-                                    <Package className="w-6 h-6" />
+                            <div className="bg-gradient-to-r from-cyan-600 to-magenta-600 p-5">
+                                <h2 className="text-xl font-black text-white flex items-center space-x-2 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(255, 255, 255, 0.5)' }}>
+                                    <Package className="w-6 h-6" style={{ filter: 'drop-shadow(0 0 5px rgba(255, 255, 255, 0.8))' }} />
                                     <span>Order Summary</span>
                                 </h2>
                             </div>
@@ -597,22 +580,22 @@ const Checkout = () => {
                                 {/* Cart Items */}
                                 <div className="space-y-3 mb-6 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
                                     {cartItems.map((item) => (
-                                        <div key={item.id} className="bg-white border border-gray-200 rounded-xl p-3 hover:shadow-md transition-all duration-200">
+                                        <div key={item.id} className="bg-gray-800/50 border border-cyan-500/30 corner-clip-sm p-3 hover:border-cyan-500/60 transition-all duration-200">
                                             <div className="flex space-x-3">
                                                 <div className="relative flex-shrink-0">
                                                     <img
                                                         src={item.image}
                                                         alt={item.name}
-                                                        className="w-20 h-20 object-cover rounded-lg"
+                                                        className="w-20 h-20 object-cover corner-clip-sm"
                                                     />
-                                                    <span className="absolute -top-2 -right-2 w-6 h-6 bg-blue-600 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg">
+                                                    <span className="absolute -top-2 -right-2 w-6 h-6 bg-cyan-500 text-white text-xs font-black corner-clip-sm flex items-center justify-center" style={{ boxShadow: '0 0 10px rgba(0, 255, 255, 0.6)', fontFamily: 'Rajdhani, sans-serif' }}>
                                                         {item.quantity}
                                                     </span>
                                                 </div>
                                                 <div className="flex-grow min-w-0">
-                                                    <h4 className="font-bold text-gray-900 text-sm mb-1 line-clamp-1">{item.name}</h4>
-                                                    <p className="text-xs text-gray-500 mb-2">{item.category}</p>
-                                                    <p className="text-lg font-bold text-blue-600">
+                                                    <h4 className="font-black text-white text-sm mb-1 line-clamp-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{item.name}</h4>
+                                                    <p className="text-xs text-gray-400 mb-2 font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{item.category}</p>
+                                                    <p className="text-lg font-black text-cyan-400" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                                                         ฿{((item.discount ? item.price * (1 - item.discount / 100) : item.price) * item.quantity).toFixed(2)}
                                                     </p>
                                                 </div>
@@ -622,32 +605,32 @@ const Checkout = () => {
                                 </div>
 
                                 {/* Pricing Breakdown */}
-                                <div className="space-y-3 pt-4 border-t border-gray-200">
-                                    <div className="flex justify-between text-gray-700">
-                                        <span className="font-medium">Subtotal</span>
-                                        <span className="font-bold text-gray-900">฿{subtotal.toFixed(2)}</span>
+                                <div className="space-y-3 pt-4 border-t border-cyan-500/30">
+                                    <div className="flex justify-between text-gray-300">
+                                        <span className="font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Subtotal</span>
+                                        <span className="font-black text-white" style={{ fontFamily: 'Orbitron, sans-serif' }}>฿{subtotal.toFixed(2)}</span>
                                     </div>
-                                    <div className="flex justify-between text-gray-700">
-                                        <span className="font-medium">Shipping</span>
-                                        <span className={`font-bold ${shipping === 0 ? 'text-green-600' : 'text-gray-900'}`}>
+                                    <div className="flex justify-between text-gray-300">
+                                        <span className="font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Shipping</span>
+                                        <span className={`font-black ${shipping === 0 ? 'text-magenta-400' : 'text-white'}`} style={{ fontFamily: 'Orbitron, sans-serif' }}>
                                             {shipping === 0 ? 'FREE' : `฿${shipping.toFixed(2)}`}
                                         </span>
                                     </div>
-                                    <div className="flex justify-between text-gray-700">
-                                        <span className="font-medium">Tax (7% VAT)</span>
-                                        <span className="font-bold text-gray-900">฿{tax.toFixed(2)}</span>
+                                    <div className="flex justify-between text-gray-300">
+                                        <span className="font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Tax (7% VAT)</span>
+                                        <span className="font-black text-white" style={{ fontFamily: 'Orbitron, sans-serif' }}>฿{tax.toFixed(2)}</span>
                                     </div>
                                 </div>
 
                                 {/* Total Section */}
-                                <div className="mt-4 bg-gradient-to-r from-blue-50 to-indigo-50 -mx-6 px-6 py-5 border-t border-gray-200">
+                                <div className="mt-4 bg-gradient-to-r from-cyan-500/20 to-magenta-500/20 -mx-6 px-6 py-5 border-t border-cyan-500/50">
                                     <div className="flex justify-between items-center">
-                                        <span className="text-lg font-bold text-gray-800">Total</span>
+                                        <span className="text-lg font-black text-cyan-400 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif' }}>Total</span>
                                         <div className="text-right">
-                                            <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                                            <div className="text-3xl font-black text-gradient" style={{ textShadow: '0 0 20px rgba(0, 255, 255, 0.6)' }}>
                                                 ฿{total.toFixed(2)}
                                             </div>
-                                            <div className="text-xs text-gray-500 mt-1">
+                                            <div className="text-xs text-gray-400 mt-1 font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                                 Including VAT
                                             </div>
                                         </div>

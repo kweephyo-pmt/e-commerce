@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext';
 import { AdminProvider } from './context/AdminContext';
 import { CartProvider } from './context/CartContext';
 import Navbar from './components/Navbar';
+import ScrollToTop from './components/ScrollToTop';
 import ProtectedAdminRoute from './components/ProtectedAdminRoute';
 import Home from './pages/Home';
 import Products from './pages/Products';
@@ -22,6 +23,7 @@ function AppContent() {
 
   return (
     <div className="min-h-screen">
+      <ScrollToTop />
       {!isAdminRoute && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
