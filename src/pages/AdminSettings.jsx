@@ -67,10 +67,10 @@ const AdminSettings = () => {
                 />
             )}
 
-            <div className="space-y-6">
+            <div className="space-y-4 md:space-y-6">
 
-                {/* ── Header ─────────────────────────────────────────────── */}
-                <div className="bg-gray-900 corner-clip p-8 border-2 border-cyan-500/30 relative overflow-hidden"
+                {/* ── Header — hidden on mobile (shown in AdminDashboard top bar) */}
+                <div className="hidden md:block bg-gray-900 corner-clip p-8 border-2 border-cyan-500/30 relative overflow-hidden"
                     style={{ boxShadow: '0 0 40px rgba(0,255,255,0.2)' }}>
                     <div className="absolute inset-0 opacity-5"
                         style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,255,0.1) 2px, rgba(0,255,255,0.1) 4px)' }}></div>
@@ -107,7 +107,7 @@ const AdminSettings = () => {
                 </div>
 
                 {/* ── Stats Row ───────────────────────────────────────────── */}
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
                     {[
                         { label: 'Total Users', value: users.length, color: 'cyan', glow: 'rgba(0,255,255,0.4)' },
                         { label: 'Admins', value: adminCount, color: 'yellow', glow: 'rgba(234,179,8,0.4)' },

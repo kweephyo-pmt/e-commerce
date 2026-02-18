@@ -154,7 +154,7 @@ const AdminCategories = () => {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 md:space-y-6">
             {/* Toast */}
             {toast && (
                 <div className="fixed top-4 right-4 z-50">
@@ -171,8 +171,8 @@ const AdminCategories = () => {
                 </div>
             )}
 
-            {/* ── Header ─────────────────────────────────────────────────────── */}
-            <div className="bg-gray-900 corner-clip p-8 border-2 border-orange-500/50 relative overflow-hidden"
+            {/* ── Header — hidden on mobile */}
+            <div className="hidden md:block bg-gray-900 corner-clip p-8 border-2 border-orange-500/50 relative overflow-hidden"
                 style={{ boxShadow: '0 0 40px rgba(249,115,22,0.4)' }}>
                 <div className="absolute inset-0 opacity-10"
                     style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(249,115,22,0.1) 2px, rgba(249,115,22,0.1) 4px)' }}></div>

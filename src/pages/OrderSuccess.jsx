@@ -1,156 +1,366 @@
 import { useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { CheckCircle, Package, Truck, Home, ShoppingBag, Zap, Trophy } from 'lucide-react';
+import {
+    CheckCircle, Package, Truck, Home, ShoppingBag,
+    Banknote, Clock, Shield, Zap, ArrowRight, Mail
+} from 'lucide-react';
 
 const OrderSuccess = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const { orderId, orderTotal } = location.state || {};
+    const { orderId, orderTotal, paymentMethod } = location.state || {};
+    const isBankTransfer = paymentMethod === 'bank_transfer';
 
     useEffect(() => {
-        // If no order data, redirect to home
-        if (!orderId) {
-            navigate('/');
-        }
+        if (!orderId) navigate('/');
     }, [orderId, navigate]);
 
-    if (!orderId) {
-        return null;
-    }`  `
+    if (!orderId) return null;
+
+    // Steps differ based on payment method
+    const steps = isBankTransfer
+        ? [
+            {
+                num: 1,
+                icon: Banknote,
+                title: 'Payment Verification',
+                desc: 'Our team will verify your bank transfer slip within 1–2 business hours.',
+                color: 'yellow',
+                glow: 'rgba(234,179,8,0.5)',
+                border: 'border-yellow-500/50',
+                bg: 'from-yellow-500 to-orange-500',
+                textColor: 'text-yellow-400',
+                active: true,
+            },
+            {
+                num: 2,
+                icon: Package,
+                title: 'Order Processing',
+                desc: 'Once payment is confirmed, your gear will be prepared for deployment.',
+                color: 'cyan',
+                glow: 'rgba(0,255,255,0.4)',
+                border: 'border-cyan-500/30',
+                bg: 'from-gray-600 to-gray-700',
+                textColor: 'text-gray-400',
+                active: false,
+            },
+            {
+                num: 3,
+                icon: Truck,
+                title: 'Shipping',
+                desc: 'Tracking code dispatched within 24 hours of processing.',
+                color: 'cyan',
+                glow: 'rgba(0,255,255,0.4)',
+                border: 'border-cyan-500/30',
+                bg: 'from-gray-600 to-gray-700',
+                textColor: 'text-gray-400',
+                active: false,
+            },
+            {
+                num: 4,
+                icon: CheckCircle,
+                title: 'Delivery',
+                desc: 'ETA: 3–5 business days.',
+                color: 'cyan',
+                glow: 'rgba(0,255,255,0.4)',
+                border: 'border-cyan-500/30',
+                bg: 'from-gray-600 to-gray-700',
+                textColor: 'text-gray-400',
+                active: false,
+            },
+        ]
+        : [
+            {
+                num: 1,
+                icon: Package,
+                title: 'Order Processing',
+                desc: 'Preparing your gear for deployment.',
+                color: 'cyan',
+                glow: 'rgba(0,255,255,0.5)',
+                border: 'border-cyan-500/50',
+                bg: 'from-cyan-500 to-blue-500',
+                textColor: 'text-cyan-400',
+                active: true,
+            },
+            {
+                num: 2,
+                icon: Truck,
+                title: 'Shipping Confirmation',
+                desc: 'Tracking code incoming within 24 hours.',
+                color: 'cyan',
+                glow: 'rgba(0,255,255,0.4)',
+                border: 'border-cyan-500/30',
+                bg: 'from-gray-600 to-gray-700',
+                textColor: 'text-gray-400',
+                active: false,
+            },
+            {
+                num: 3,
+                icon: CheckCircle,
+                title: 'Delivery',
+                desc: 'ETA: 3–5 business days.',
+                color: 'cyan',
+                glow: 'rgba(0,255,255,0.4)',
+                border: 'border-cyan-500/30',
+                bg: 'from-gray-600 to-gray-700',
+                textColor: 'text-gray-400',
+                active: false,
+            },
+        ];
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#0a0e27] via-[#0f172a] to-[#1a1f3a] py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto">
-                {/* Success Animation */}
+
+            {/* Ambient background glows */}
+            <div className="fixed inset-0 pointer-events-none overflow-hidden">
+                <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full opacity-5"
+                    style={{ background: isBankTransfer ? 'radial-gradient(circle, rgba(234,179,8,1) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(0,255,255,1) 0%, transparent 70%)' }} />
+                <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full opacity-5"
+                    style={{ background: 'radial-gradient(circle, rgba(255,0,255,1) 0%, transparent 70%)' }} />
+            </div>
+
+            <div className="max-w-3xl mx-auto relative z-10">
+
+                {/* ── Hero icon + title ─────────────────────────────────── */}
                 <div className="text-center mb-10 sm:mb-12 animate-fade-in">
-                    <div className="inline-flex items-center justify-center w-28 h-28 sm:w-32 sm:h-32 bg-gradient-to-br from-cyan-500 to-green-500 corner-clip mb-6 sm:mb-8 relative" style={{ boxShadow: '0 0 60px rgba(0, 255, 255, 0.6), 0 0 100px rgba(0, 255, 0, 0.3)' }}>
-                        <CheckCircle className="w-16 h-16 sm:w-20 sm:h-20 text-white animate-pulse" style={{ filter: 'drop-shadow(0 0 10px rgba(255, 255, 255, 1))' }} />
-                        {/* Pulsing rings */}
-                        <div className="absolute inset-0 corner-clip border-4 border-cyan-400 animate-ping"></div>
-                        <div className="absolute -inset-4 corner-clip border-2 border-green-400 animate-ping" style={{ animationDelay: '0.3s' }}></div>
+
+                    {/* Icon */}
+                    <div className="relative inline-flex items-center justify-center mb-8">
+                        {/* Outer ping rings */}
+                        <div className="absolute w-40 h-40 corner-clip border-2 animate-ping opacity-20"
+                            style={{ borderColor: isBankTransfer ? 'rgba(234,179,8,0.8)' : 'rgba(0,255,255,0.8)', animationDuration: '2s' }} />
+                        <div className="absolute w-32 h-32 corner-clip border-2 animate-ping opacity-30"
+                            style={{ borderColor: isBankTransfer ? 'rgba(234,179,8,0.8)' : 'rgba(0,255,255,0.8)', animationDuration: '2s', animationDelay: '0.4s' }} />
+
+                        {/* Main icon box */}
+                        <div className="relative w-28 h-28 corner-clip flex items-center justify-center border-2"
+                            style={{
+                                background: isBankTransfer
+                                    ? 'linear-gradient(135deg, rgba(234,179,8,0.3) 0%, rgba(249,115,22,0.2) 100%)'
+                                    : 'linear-gradient(135deg, rgba(0,255,255,0.3) 0%, rgba(0,200,100,0.2) 100%)',
+                                borderColor: isBankTransfer ? 'rgba(234,179,8,0.6)' : 'rgba(0,255,255,0.6)',
+                                boxShadow: isBankTransfer
+                                    ? '0 0 60px rgba(234,179,8,0.5), inset 0 0 30px rgba(234,179,8,0.1)'
+                                    : '0 0 60px rgba(0,255,255,0.5), inset 0 0 30px rgba(0,255,255,0.1)',
+                            }}>
+                            {isBankTransfer
+                                ? <Clock className="w-14 h-14 text-yellow-400" style={{ filter: 'drop-shadow(0 0 12px rgba(234,179,8,1))' }} />
+                                : <CheckCircle className="w-14 h-14 text-cyan-400" style={{ filter: 'drop-shadow(0 0 12px rgba(0,255,255,1))' }} />
+                            }
+                        </div>
                     </div>
-                    <h1 className="text-4xl sm:text-5xl md:text-6xl font-black mb-4 sm:mb-6 uppercase tracking-wider" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                        <span className="text-cyan-400" style={{ textShadow: '0 0 30px rgba(0, 255, 255, 1), 0 0 60px rgba(0, 255, 255, 0.6)' }}>Order </span>
-                        <span className="text-gradient" style={{ textShadow: '0 0 30px rgba(0, 255, 0, 0.8)' }}>Confirmed!</span>
+
+                    {/* Title */}
+                    <h1 className="text-4xl sm:text-5xl md:text-6xl font-black mb-4 uppercase tracking-wider"
+                        style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                        {isBankTransfer ? (
+                            <>
+                                <span className="text-yellow-400"
+                                    style={{ textShadow: '0 0 30px rgba(234,179,8,0.9), 0 0 60px rgba(234,179,8,0.4)' }}>
+                                    Order{' '}
+                                </span>
+                                <span className="text-orange-400"
+                                    style={{ textShadow: '0 0 30px rgba(249,115,22,0.8)' }}>
+                                    Placed
+                                </span>
+                            </>
+                        ) : (
+                            <>
+                                <span className="text-cyan-400"
+                                    style={{ textShadow: '0 0 30px rgba(0,255,255,0.9), 0 0 60px rgba(0,255,255,0.4)' }}>
+                                    Order{' '}
+                                </span>
+                                <span className="text-gradient"
+                                    style={{ textShadow: '0 0 30px rgba(0,255,0,0.6)' }}>
+                                    Confirmed
+                                </span>
+                            </>
+                        )}
                     </h1>
-                    <p className="text-lg sm:text-xl md:text-2xl text-cyan-300 font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif', textShadow: '0 0 10px rgba(0, 255, 255, 0.5)' }}>
-                        Victory! Your order is locked in! 🎮🎉
-                    </p>
+
+                    {/* Subtitle */}
+                    <div className="inline-flex items-center gap-2 px-5 py-2.5 corner-clip-sm border"
+                        style={{
+                            background: isBankTransfer ? 'rgba(234,179,8,0.08)' : 'rgba(0,255,255,0.08)',
+                            borderColor: isBankTransfer ? 'rgba(234,179,8,0.3)' : 'rgba(0,255,255,0.3)',
+                            boxShadow: isBankTransfer ? '0 0 20px rgba(234,179,8,0.15)' : '0 0 20px rgba(0,255,255,0.15)',
+                        }}>
+                        {isBankTransfer
+                            ? <Clock className="w-4 h-4 text-yellow-400 flex-shrink-0" />
+                            : <Zap className="w-4 h-4 text-cyan-400 flex-shrink-0" />
+                        }
+                        <span className="font-black uppercase tracking-widest text-sm"
+                            style={{
+                                fontFamily: 'Rajdhani, sans-serif',
+                                color: isBankTransfer ? '#fbbf24' : '#67e8f9',
+                                textShadow: isBankTransfer ? '0 0 8px rgba(234,179,8,0.5)' : '0 0 8px rgba(0,255,255,0.5)',
+                            }}>
+                            {isBankTransfer ? 'Awaiting Payment Verification' : 'Your order is locked in'}
+                        </span>
+                    </div>
                 </div>
 
-                {/* Order Details Card */}
-                <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-sm p-6 sm:p-8 mb-6 animate-slide-up border-2 border-cyan-500/30 corner-clip relative overflow-hidden" style={{ boxShadow: '0 0 40px rgba(0, 255, 255, 0.3), inset 0 0 30px rgba(0, 255, 255, 0.05)' }}>
-                    {/* Background pattern */}
-                    <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 255, 0.1) 2px, rgba(0, 255, 255, 0.1) 4px)' }}></div>
+                {/* ── Order Details Card ────────────────────────────────── */}
+                <div className="bg-gray-900/80 backdrop-blur-sm corner-clip border-2 border-cyan-500/30 relative overflow-hidden mb-6 animate-slide-up"
+                    style={{ boxShadow: '0 0 40px rgba(0,255,255,0.15), inset 0 0 30px rgba(0,255,255,0.03)' }}>
+                    {/* Scanline */}
+                    <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
+                        style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,255,0.5) 2px, rgba(0,255,255,0.5) 4px)' }} />
 
-                    <div className="border-b-2 border-cyan-500/30 pb-6 mb-6 relative z-10">
-                        <h2 className="text-2xl sm:text-3xl font-black mb-2 text-cyan-400 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(0, 255, 255, 0.8)' }}>
+                    {/* Header */}
+                    <div className="px-6 sm:px-8 py-5 border-b-2 border-cyan-500/20 bg-gray-800/40 flex items-center gap-3 relative z-10">
+                        <Shield className="w-5 h-5 text-cyan-400" style={{ filter: 'drop-shadow(0 0 6px rgba(0,255,255,0.8))' }} />
+                        <h2 className="text-xl font-black text-cyan-400 uppercase tracking-wide"
+                            style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(0,255,255,0.6)' }}>
                             Order Details
                         </h2>
-                        <p className="text-gray-300 font-bold text-base sm:text-lg" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                            Confirmation email dispatched to your inbox! 📧
-                        </p>
                     </div>
 
-                    <div className="space-y-4 relative z-10">
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-4 sm:p-6 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 corner-clip-sm border-2 border-cyan-500/50 relative overflow-hidden" style={{ boxShadow: '0 0 20px rgba(0, 255, 255, 0.3)' }}>
-                            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-transparent"></div>
-                            <div className="relative z-10 flex-1">
-                                <p className="text-xs sm:text-sm text-gray-400 mb-1 uppercase tracking-wide font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Order Number</p>
-                                <p className="font-mono font-black text-lg sm:text-xl text-cyan-400" style={{ textShadow: '0 0 10px rgba(0, 255, 255, 0.8)' }}>#{orderId.slice(0, 8).toUpperCase()}</p>
-                            </div>
-                            <Package className="w-10 h-10 sm:w-12 sm:h-12 text-cyan-400 relative z-10" style={{ filter: 'drop-shadow(0 0 10px rgba(0, 255, 255, 0.8))' }} />
-                        </div>
+                    <div className="p-6 sm:p-8 space-y-4 relative z-10">
 
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-4 sm:p-6 bg-gradient-to-r from-green-500/10 to-cyan-500/10 corner-clip-sm border-2 border-green-500/50 relative overflow-hidden" style={{ boxShadow: '0 0 20px rgba(0, 255, 0, 0.3)' }}>
-                            <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-transparent"></div>
-                            <div className="relative z-10 flex-1">
-                                <p className="text-xs sm:text-sm text-gray-400 mb-1 uppercase tracking-wide font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Total Amount</p>
-                                <p className="font-black text-2xl sm:text-3xl text-gradient" style={{ textShadow: '0 0 20px rgba(0, 255, 0, 0.8)' }}>฿{orderTotal?.toFixed(2)}</p>
-                            </div>
-                            <Trophy className="w-10 h-10 sm:w-12 sm:h-12 text-green-400 relative z-10" style={{ filter: 'drop-shadow(0 0 10px rgba(0, 255, 0, 0.8))' }} />
-                        </div>
-                    </div>
-                </div>
-
-                {/* What's Next */}
-                <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-sm p-6 sm:p-8 mb-6 animate-slide-up border-2 border-magenta-500/30 corner-clip relative overflow-hidden" style={{ animationDelay: '0.1s', boxShadow: '0 0 40px rgba(255, 0, 255, 0.3), inset 0 0 30px rgba(255, 0, 255, 0.05)' }}>
-                    {/* Background pattern */}
-                    <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 0, 255, 0.1) 2px, rgba(255, 0, 255, 0.1) 4px)' }}></div>
-
-                    <h3 className="text-xl sm:text-2xl font-black mb-6 sm:mb-8 flex items-center space-x-2 text-magenta-400 uppercase tracking-wide relative z-10" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(255, 0, 255, 0.8)' }}>
-                        <Truck className="w-6 h-6 sm:w-7 sm:h-7" style={{ filter: 'drop-shadow(0 0 10px rgba(255, 0, 255, 0.8))' }} />
-                        <span>Mission Progress</span>
-                    </h3>
-
-                    <div className="space-y-6 relative z-10">
-                        <div className="flex items-start space-x-4">
-                            <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-500 corner-clip-sm flex items-center justify-center border-2 border-cyan-500/50" style={{ boxShadow: '0 0 15px rgba(0, 255, 255, 0.5)' }}>
-                                <span className="text-white font-black" style={{ fontFamily: 'Orbitron, sans-serif' }}>1</span>
-                            </div>
+                        {/* Order ID */}
+                        <div className="flex items-center justify-between p-4 sm:p-5 bg-cyan-500/5 corner-clip-sm border-2 border-cyan-500/30"
+                            style={{ boxShadow: '0 0 15px rgba(0,255,255,0.1)' }}>
                             <div>
-                                <h4 className="font-black mb-1 text-cyan-400 uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: '1.1rem' }}>Order Processing</h4>
-                                <p className="text-sm text-gray-300 font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                    Preparing your gear for deployment.
+                                <p className="text-xs text-gray-500 font-black uppercase tracking-widest mb-1"
+                                    style={{ fontFamily: 'Rajdhani, sans-serif' }}>Order ID</p>
+                                <p className="font-black text-xl text-cyan-400"
+                                    style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 10px rgba(0,255,255,0.7)', letterSpacing: '0.1em' }}>
+                                    #{orderId.slice(0, 8).toUpperCase()}
                                 </p>
                             </div>
-                        </div>
-
-                        <div className="flex items-start space-x-4">
-                            <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-500 corner-clip-sm flex items-center justify-center border-2 border-cyan-500/50" style={{ boxShadow: '0 0 15px rgba(0, 255, 255, 0.5)' }}>
-                                <span className="text-white font-black" style={{ fontFamily: 'Orbitron, sans-serif' }}>2</span>
-                            </div>
-                            <div>
-                                <h4 className="font-black mb-1 text-cyan-400 uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: '1.1rem' }}>Shipping Confirmation</h4>
-                                <p className="text-sm text-gray-300 font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                    Tracking code incoming within 24 hours.
-                                </p>
+                            <div className="w-12 h-12 corner-clip-sm bg-cyan-500/10 border-2 border-cyan-500/30 flex items-center justify-center">
+                                <Package className="w-6 h-6 text-cyan-400" style={{ filter: 'drop-shadow(0 0 6px rgba(0,255,255,0.8))' }} />
                             </div>
                         </div>
 
-                        <div className="flex items-start space-x-4">
-                            <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-500 corner-clip-sm flex items-center justify-center border-2 border-cyan-500/50" style={{ boxShadow: '0 0 15px rgba(0, 255, 255, 0.5)' }}>
-                                <span className="text-white font-black" style={{ fontFamily: 'Orbitron, sans-serif' }}>3</span>
-                            </div>
+                        {/* Total */}
+                        <div className="flex items-center justify-between p-4 sm:p-5 bg-magenta-500/5 corner-clip-sm border-2 border-magenta-500/30"
+                            style={{ boxShadow: '0 0 15px rgba(255,0,255,0.1)' }}>
                             <div>
-                                <h4 className="font-black mb-1 text-cyan-400 uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: '1.1rem' }}>Delivery</h4>
-                                <p className="text-sm text-gray-300 font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                    ETA: 3-5 business days. Game on! 🚀
+                                <p className="text-xs text-gray-500 font-black uppercase tracking-widest mb-1"
+                                    style={{ fontFamily: 'Rajdhani, sans-serif' }}>Total Amount</p>
+                                <p className="font-black text-3xl text-gradient"
+                                    style={{ textShadow: '0 0 20px rgba(0,255,255,0.5)' }}>
+                                    ฿{orderTotal?.toFixed(2)}
                                 </p>
                             </div>
+                            <div className="w-12 h-12 corner-clip-sm bg-magenta-500/10 border-2 border-magenta-500/30 flex items-center justify-center">
+                                {isBankTransfer
+                                    ? <Banknote className="w-6 h-6 text-magenta-400" style={{ filter: 'drop-shadow(0 0 6px rgba(255,0,255,0.8))' }} />
+                                    : <CheckCircle className="w-6 h-6 text-magenta-400" style={{ filter: 'drop-shadow(0 0 6px rgba(255,0,255,0.8))' }} />
+                                }
+                            </div>
+                        </div>
+
+                        {/* Email notice */}
+                        <div className="flex items-center gap-3 p-3 bg-gray-800/60 corner-clip-sm border border-gray-700/50">
+                            <Mail className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                            <p className="text-sm text-gray-400 font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                Confirmation details dispatched to your inbox.
+                            </p>
                         </div>
                     </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="grid sm:grid-cols-2 gap-4 animate-slide-up mb-6" style={{ animationDelay: '0.2s' }}>
-                    <Link
-                        to="/orders"
-                        className="btn-primary text-center flex items-center justify-center space-x-2"
-                    >
+                {/* ── Mission Progress ──────────────────────────────────── */}
+                <div className="bg-gray-900/80 backdrop-blur-sm corner-clip border-2 border-magenta-500/30 relative overflow-hidden mb-6 animate-slide-up"
+                    style={{ animationDelay: '0.1s', boxShadow: '0 0 40px rgba(255,0,255,0.15), inset 0 0 30px rgba(255,0,255,0.03)' }}>
+                    {/* Scanline */}
+                    <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
+                        style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,0,255,0.5) 2px, rgba(255,0,255,0.5) 4px)' }} />
+
+                    {/* Header */}
+                    <div className="px-6 sm:px-8 py-5 border-b-2 border-magenta-500/20 bg-gray-800/40 flex items-center gap-3 relative z-10">
+                        <Truck className="w-5 h-5 text-magenta-400" style={{ filter: 'drop-shadow(0 0 6px rgba(255,0,255,0.8))' }} />
+                        <h2 className="text-xl font-black text-magenta-400 uppercase tracking-wide"
+                            style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(255,0,255,0.6)' }}>
+                            Mission Progress
+                        </h2>
+                    </div>
+
+                    <div className="p-6 sm:p-8 relative z-10">
+                        <div className="relative">
+                            {/* Vertical connector line */}
+                            <div className="absolute left-5 top-10 bottom-10 w-px bg-gradient-to-b from-magenta-500/40 via-cyan-500/20 to-transparent" />
+
+                            <div className="space-y-6">
+                                {steps.map((step, idx) => {
+                                    const Icon = step.icon;
+                                    return (
+                                        <div key={idx} className="flex items-start gap-4 relative">
+                                            {/* Step icon */}
+                                            <div className={`flex-shrink-0 w-10 h-10 corner-clip-sm flex items-center justify-center border-2 bg-gradient-to-br ${step.bg} ${step.border} relative z-10`}
+                                                style={{ boxShadow: step.active ? `0 0 20px ${step.glow}` : 'none' }}>
+                                                <Icon className={`w-5 h-5 ${step.active ? 'text-white' : 'text-gray-500'}`}
+                                                    style={{ filter: step.active ? `drop-shadow(0 0 4px rgba(255,255,255,0.8))` : 'none' }} />
+                                            </div>
+
+                                            {/* Step content */}
+                                            <div className={`flex-1 p-4 corner-clip-sm border ${step.active
+                                                ? isBankTransfer && idx === 0
+                                                    ? 'bg-yellow-500/5 border-yellow-500/30'
+                                                    : 'bg-cyan-500/5 border-cyan-500/30'
+                                                : 'bg-gray-800/30 border-gray-700/30'
+                                                }`}
+                                                style={{ boxShadow: step.active ? `0 0 15px ${step.glow}20` : 'none' }}>
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <h4 className={`font-black uppercase tracking-wide text-sm ${step.textColor}`}
+                                                        style={{ fontFamily: 'Rajdhani, sans-serif', textShadow: step.active ? `0 0 8px ${step.glow}` : 'none' }}>
+                                                        {step.title}
+                                                    </h4>
+                                                    {step.active && (
+                                                        <span className="px-2 py-0.5 text-xs font-black uppercase corner-clip-sm border"
+                                                            style={{
+                                                                fontFamily: 'Rajdhani, sans-serif',
+                                                                background: isBankTransfer && idx === 0 ? 'rgba(234,179,8,0.15)' : 'rgba(0,255,255,0.15)',
+                                                                borderColor: isBankTransfer && idx === 0 ? 'rgba(234,179,8,0.4)' : 'rgba(0,255,255,0.4)',
+                                                                color: isBankTransfer && idx === 0 ? '#fbbf24' : '#67e8f9',
+                                                            }}>
+                                                            Active
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <p className="text-sm text-gray-400 font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                    {step.desc}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* ── Action Buttons ────────────────────────────────────── */}
+                <div className="grid sm:grid-cols-2 gap-4 mb-6 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+                    <Link to="/orders"
+                        className="group flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-black uppercase tracking-wide corner-clip border-2 border-cyan-400/60 hover:from-cyan-400 hover:to-blue-500 transition-all"
+                        style={{ fontFamily: 'Rajdhani, sans-serif', boxShadow: '0 0 25px rgba(0,255,255,0.35)' }}>
                         <Package className="w-5 h-5" />
-                        <span>View Order Details</span>
+                        <span>View My Orders</span>
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </Link>
-                    <Link
-                        to="/products"
-                        className="btn-secondary text-center flex items-center justify-center space-x-2"
-                    >
+                    <Link to="/products"
+                        className="group flex items-center justify-center gap-2 px-6 py-4 bg-gray-800 text-gray-200 font-black uppercase tracking-wide corner-clip border-2 border-gray-600/60 hover:bg-gray-700 hover:border-gray-500 transition-all"
+                        style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                         <ShoppingBag className="w-5 h-5" />
                         <span>Continue Shopping</span>
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </Link>
                 </div>
 
-                {/* Back to Home */}
+                {/* ── Back to Home ──────────────────────────────────────── */}
                 <div className="text-center animate-fade-in" style={{ animationDelay: '0.3s' }}>
-                    <Link
-                        to="/"
-                        className="inline-flex items-center space-x-2 text-cyan-300 hover:text-cyan-400 transition-all duration-200 font-bold uppercase tracking-wide p-3 corner-clip-sm hover:bg-cyan-500/10 border-2 border-transparent hover:border-cyan-500/30"
-                        style={{ fontFamily: 'Rajdhani, sans-serif', textShadow: '0 0 10px rgba(0, 255, 255, 0.3)' }}
-                    >
-                        <Home className="w-5 h-5" style={{ filter: 'drop-shadow(0 0 3px rgba(0, 255, 255, 0.8))' }} />
+                    <Link to="/"
+                        className="inline-flex items-center gap-2 text-gray-400 hover:text-cyan-400 transition-all duration-200 font-bold uppercase tracking-wide px-4 py-2 corner-clip-sm hover:bg-cyan-500/10 border-2 border-transparent hover:border-cyan-500/30"
+                        style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                        <Home className="w-4 h-4" />
                         <span>Back to Home</span>
                     </Link>
                 </div>
+
             </div>
         </div>
     );

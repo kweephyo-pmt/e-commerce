@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAuth } from '../context/AuthContext';
-import { Package, Truck, CheckCircle, Clock, ShoppingBag, ChevronDown, ChevronUp, Calendar, MapPin, CreditCard, Search, Filter, X } from 'lucide-react';
+import { Package, Truck, CheckCircle, Clock, ShoppingBag, ChevronDown, ChevronUp, Calendar, MapPin, CreditCard, Search, Filter, X, Banknote, AlertCircle } from 'lucide-react';
 
 const Orders = () => {
     const { user } = useAuth();
@@ -435,11 +435,34 @@ const Orders = () => {
                                                         <span className="text-cyan-400/30 flex-shrink-0">•</span>
                                                         <span className="text-gray-400 truncate">{order.items?.[0]?.name}{order.items?.length > 1 && `, +${order.items.length - 1} more`}</span>
                                                     </div>
-                                                    <span className="px-3 py-1.5 corner-clip-sm text-xs font-black bg-magenta-500/20 text-magenta-400 border border-magenta-500/50 flex items-center gap-1.5 uppercase tracking-wide whitespace-nowrap flex-shrink-0" style={{ fontFamily: 'Rajdhani, sans-serif', boxShadow: '0 0 10px rgba(255, 0, 255, 0.3)' }}>
-                                                        <CheckCircle className="w-3.5 h-3.5" style={{ filter: 'drop-shadow(0 0 3px rgba(255, 0, 255, 0.8))' }} />
-                                                        <span className="hidden sm:inline">Payment Successful</span>
-                                                        <span className="sm:hidden">Paid</span>
-                                                    </span>
+                                                    {/* Payment status badge */}
+                                                    {order.paymentMethod === 'bank_transfer' ? (
+                                                        order.paymentStatus === 'pending_verification' ? (
+                                                            <span className="px-3 py-1.5 corner-clip-sm text-xs font-black bg-yellow-500/20 text-yellow-400 border border-yellow-500/50 flex items-center gap-1.5 uppercase tracking-wide whitespace-nowrap flex-shrink-0 animate-pulse" style={{ fontFamily: 'Rajdhani, sans-serif', boxShadow: '0 0 10px rgba(255,200,0,0.3)' }}>
+                                                                <Clock className="w-3.5 h-3.5" />
+                                                                <span className="hidden sm:inline">Awaiting Verification</span>
+                                                                <span className="sm:hidden">Pending</span>
+                                                            </span>
+                                                        ) : order.paymentStatus === 'rejected' ? (
+                                                            <span className="px-3 py-1.5 corner-clip-sm text-xs font-black bg-red-500/20 text-red-400 border border-red-500/50 flex items-center gap-1.5 uppercase tracking-wide whitespace-nowrap flex-shrink-0" style={{ fontFamily: 'Rajdhani, sans-serif', boxShadow: '0 0 10px rgba(255,0,0,0.3)' }}>
+                                                                <AlertCircle className="w-3.5 h-3.5" />
+                                                                <span className="hidden sm:inline">Payment Rejected</span>
+                                                                <span className="sm:hidden">Rejected</span>
+                                                            </span>
+                                                        ) : (
+                                                            <span className="px-3 py-1.5 corner-clip-sm text-xs font-black bg-green-500/20 text-green-400 border border-green-500/50 flex items-center gap-1.5 uppercase tracking-wide whitespace-nowrap flex-shrink-0" style={{ fontFamily: 'Rajdhani, sans-serif', boxShadow: '0 0 10px rgba(0,255,0,0.3)' }}>
+                                                                <CheckCircle className="w-3.5 h-3.5" />
+                                                                <span className="hidden sm:inline">Payment Verified</span>
+                                                                <span className="sm:hidden">Verified</span>
+                                                            </span>
+                                                        )
+                                                    ) : (
+                                                        <span className="px-3 py-1.5 corner-clip-sm text-xs font-black bg-magenta-500/20 text-magenta-400 border border-magenta-500/50 flex items-center gap-1.5 uppercase tracking-wide whitespace-nowrap flex-shrink-0" style={{ fontFamily: 'Rajdhani, sans-serif', boxShadow: '0 0 10px rgba(255, 0, 255, 0.3)' }}>
+                                                            <CheckCircle className="w-3.5 h-3.5" style={{ filter: 'drop-shadow(0 0 3px rgba(255, 0, 255, 0.8))' }} />
+                                                            <span className="hidden sm:inline">Payment Successful</span>
+                                                            <span className="sm:hidden">Paid</span>
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </div>
 
@@ -506,10 +529,28 @@ const Orders = () => {
                                                             {/* Payment Summary */}
                                                             <div>
                                                                 <h4 className="font-black mb-3 flex items-center gap-2 text-magenta-400 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(255, 0, 255, 0.5)' }}>
-                                                                    <CreditCard className="w-4 h-4 text-magenta-400" style={{ filter: 'drop-shadow(0 0 5px rgba(255, 0, 255, 0.8))' }} />
+                                                                    {order.paymentMethod === 'bank_transfer' ? (
+                                                                        <Banknote className="w-4 h-4 text-magenta-400" style={{ filter: 'drop-shadow(0 0 5px rgba(255, 0, 255, 0.8))' }} />
+                                                                    ) : (
+                                                                        <CreditCard className="w-4 h-4 text-magenta-400" style={{ filter: 'drop-shadow(0 0 5px rgba(255, 0, 255, 0.8))' }} />
+                                                                    )}
                                                                     <span>Payment Summary</span>
                                                                 </h4>
                                                                 <div className="text-sm space-y-2 bg-gray-900 p-4 corner-clip-sm border border-magenta-500/20" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                                    {order.paymentMethod === 'bank_transfer' && (
+                                                                        <div className="flex justify-between items-center pb-2 border-b border-magenta-500/20">
+                                                                            <span className="text-gray-400 font-bold">Method</span>
+                                                                            <span className="font-bold text-magenta-400 flex items-center gap-1"><Banknote className="w-3.5 h-3.5" /> Bank Transfer</span>
+                                                                        </div>
+                                                                    )}
+                                                                    {order.paymentMethod === 'bank_transfer' && order.slipUrl && (
+                                                                        <div className="pb-2 border-b border-magenta-500/20">
+                                                                            <p className="text-gray-400 font-bold mb-2">Payment Slip</p>
+                                                                            <a href={order.slipUrl} target="_blank" rel="noopener noreferrer">
+                                                                                <img src={order.slipUrl} alt="Payment slip" className="w-24 h-24 object-cover corner-clip-sm border border-magenta-500/40 hover:border-magenta-400 transition-all" />
+                                                                            </a>
+                                                                        </div>
+                                                                    )}
                                                                     <div className="flex justify-between">
                                                                         <span className="text-gray-400 font-bold">Subtotal</span>
                                                                         <span className="font-bold text-white">฿{order.subtotal?.toFixed(2)}</span>
