@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { Settings as SettingsIcon, Users, Mail, Crown, UserX, RefreshCw, Shield, Lock } from 'lucide-react';
+import { Settings as SettingsIcon, Users, Mail, Crown, UserX, RefreshCw, Shield, Lock, Truck, Save } from 'lucide-react';
 import Toast from '../components/Toast';
 import { useAuth } from '../context/AuthContext';
 
@@ -12,8 +12,14 @@ const AdminSettings = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const { user: currentUser } = useAuth();
 
+    // Shipping settings
+    const [shippingForm, setShippingForm] = useState({ flatFee: 100, freeThreshold: 1500 });
+    const [shippingLoading, setShippingLoading] = useState(false);
+    const [shippingSaving, setShippingSaving] = useState(false);
+
     useEffect(() => {
         fetchUsers();
+        fetchShippingSettings();
     }, []);
 
     const fetchUsers = async () => {
@@ -30,6 +36,48 @@ const AdminSettings = () => {
             setToast({ message: 'Failed to load users', type: 'error' });
         } finally {
             setLoadingUsers(false);
+        }
+    };
+
+    const fetchShippingSettings = async () => {
+        setShippingLoading(true);
+        try {
+            const snap = await getDoc(doc(db, 'settings', 'shipping'));
+            if (snap.exists()) {
+                const d = snap.data();
+                setShippingForm({
+                    flatFee: d.flatFee ?? 100,
+                    freeThreshold: d.freeThreshold ?? 1500,
+                });
+            }
+        } catch (e) {
+            console.error('Failed to load shipping settings:', e);
+        } finally {
+            setShippingLoading(false);
+        }
+    };
+
+    const saveShippingSettings = async () => {
+        const flatFee = parseFloat(shippingForm.flatFee);
+        const freeThreshold = parseFloat(shippingForm.freeThreshold);
+        if (isNaN(flatFee) || flatFee < 0) {
+            setToast({ message: 'Flat fee must be a valid non-negative number', type: 'error' });
+            return;
+        }
+        if (isNaN(freeThreshold) || freeThreshold < 0) {
+            setToast({ message: 'Free shipping threshold must be a valid non-negative number', type: 'error' });
+            return;
+        }
+        setShippingSaving(true);
+        try {
+            await setDoc(doc(db, 'settings', 'shipping'), { flatFee, freeThreshold }, { merge: true });
+            setShippingForm({ flatFee, freeThreshold });
+            setToast({ message: 'Shipping settings saved!', type: 'success' });
+        } catch (e) {
+            console.error('Failed to save shipping settings:', e);
+            setToast({ message: 'Failed to save shipping settings', type: 'error' });
+        } finally {
+            setShippingSaving(false);
         }
     };
 
@@ -279,6 +327,100 @@ const AdminSettings = () => {
                             </p>
                         </div>
                     )}
+                </div>
+
+                {/* ── Shipping Settings ───────────────────────────────────── */}
+                <div className="bg-gray-900 corner-clip border-2 border-cyan-500/30 relative overflow-hidden"
+                    style={{ boxShadow: '0 0 30px rgba(0,255,255,0.1)' }}>
+                    <div className="absolute inset-0 opacity-5"
+                        style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,255,0.1) 2px, rgba(0,255,255,0.1) 4px)' }}></div>
+
+                    {/* Panel Header */}
+                    <div className="flex items-center justify-between px-8 py-5 border-b-2 border-cyan-500/20 relative z-10 bg-gray-800/40">
+                        <div className="flex items-center space-x-3">
+                            <Truck className="w-5 h-5 text-cyan-400" style={{ filter: 'drop-shadow(0 0 6px rgba(0,255,255,0.8))' }} />
+                            <h2 className="text-xl font-black text-cyan-400 uppercase tracking-wide"
+                                style={{ fontFamily: 'Rajdhani, sans-serif', textShadow: '0 0 10px rgba(0,255,255,0.6)' }}>
+                                Shipping Settings
+                            </h2>
+                        </div>
+                    </div>
+
+                    <div className="px-8 py-6 relative z-10 space-y-6">
+                        {shippingLoading ? (
+                            <div className="text-center py-8">
+                                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-cyan-500 mx-auto"></div>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="grid sm:grid-cols-2 gap-6">
+                                    {/* Flat Fee */}
+                                    <div>
+                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2"
+                                            style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                            Flat Shipping Fee (฿)
+                                        </label>
+                                        <p className="text-xs text-gray-500 font-bold mb-3" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                            Charged when order is below the free threshold.
+                                        </p>
+                                        <div className="relative">
+                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400 font-black text-lg">฿</span>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                step="1"
+                                                value={shippingForm.flatFee}
+                                                onChange={e => setShippingForm(prev => ({ ...prev, flatFee: e.target.value }))}
+                                                className="w-full pl-9 pr-4 py-3 bg-gray-800 border-2 border-cyan-500/30 corner-clip-sm text-white font-black text-lg focus:outline-none focus:border-cyan-400 transition-all"
+                                                style={{ fontFamily: 'Orbitron, sans-serif' }}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Free Threshold */}
+                                    <div>
+                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2"
+                                            style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                            Free Shipping Threshold (฿)
+                                        </label>
+                                        <p className="text-xs text-gray-500 font-bold mb-3" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                            Orders at or above this amount get free shipping.
+                                        </p>
+                                        <div className="relative">
+                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400 font-black text-lg">฿</span>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                step="1"
+                                                value={shippingForm.freeThreshold}
+                                                onChange={e => setShippingForm(prev => ({ ...prev, freeThreshold: e.target.value }))}
+                                                className="w-full pl-9 pr-4 py-3 bg-gray-800 border-2 border-cyan-500/30 corner-clip-sm text-white font-black text-lg focus:outline-none focus:border-cyan-400 transition-all"
+                                                style={{ fontFamily: 'Orbitron, sans-serif' }}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Preview */}
+                                <div className="p-4 bg-cyan-500/5 corner-clip-sm border border-cyan-500/20 text-sm font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                    <span className="text-gray-400">Preview: </span>
+                                    <span className="text-cyan-400">
+                                        Orders under ฿{parseFloat(shippingForm.freeThreshold) || 0} → ฿{parseFloat(shippingForm.flatFee) || 0} shipping fee.
+                                        Orders ฿{parseFloat(shippingForm.freeThreshold) || 0}+ → FREE shipping.
+                                    </span>
+                                </div>
+
+                                <button
+                                    onClick={saveShippingSettings}
+                                    disabled={shippingSaving}
+                                    className="flex items-center gap-2 px-6 py-3 bg-cyan-500/20 text-cyan-400 font-black uppercase tracking-widest corner-clip-sm border-2 border-cyan-500/60 hover:bg-cyan-500/30 transition-all disabled:opacity-50"
+                                    style={{ fontFamily: 'Rajdhani, sans-serif', boxShadow: '0 0 15px rgba(0,255,255,0.2)' }}>
+                                    <Save className="w-4 h-4" />
+                                    {shippingSaving ? 'Saving...' : 'Save Shipping Settings'}
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
         </>

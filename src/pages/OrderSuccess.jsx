@@ -302,31 +302,62 @@ const OrderSuccess = () => {
                         </div>
 
                         {/* Total */}
-                        <div className="flex items-center justify-between p-4 sm:p-5 bg-magenta-500/5 corner-clip-sm border-2 border-magenta-500/30"
-                            style={{ boxShadow: '0 0 15px rgba(255,0,255,0.1)' }}>
-                            <div>
-                                <p className="text-xs text-gray-500 font-black uppercase tracking-widest mb-1"
-                                    style={{ fontFamily: 'Rajdhani, sans-serif' }}>Total Amount</p>
-                                <p className="font-black text-3xl text-gradient"
-                                    style={{ textShadow: '0 0 20px rgba(0,255,255,0.5)' }}>
-                                    ฿{orderTotal?.toFixed(2) ?? '—'}
+                        {paymentStatus === 'rejected' ? (
+                            <div className="p-4 sm:p-5 bg-red-500/5 corner-clip-sm border-2 border-red-500/30"
+                                style={{ boxShadow: '0 0 15px rgba(239,68,68,0.1)' }}>
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-xs text-gray-500 font-black uppercase tracking-widest mb-1"
+                                            style={{ fontFamily: 'Rajdhani, sans-serif' }}>Amount Charged</p>
+                                        <p className="font-black text-3xl text-red-400"
+                                            style={{ textShadow: '0 0 20px rgba(239,68,68,0.5)' }}>
+                                            ฿0.00
+                                        </p>
+                                        <p className="text-xs text-gray-500 font-bold mt-1 line-through" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                            Original: ฿{orderTotal?.toFixed(2) ?? '—'}
+                                        </p>
+                                    </div>
+                                    <div className="w-12 h-12 corner-clip-sm bg-red-500/10 border-2 border-red-500/30 flex items-center justify-center">
+                                        <XCircle className="w-6 h-6 text-red-400" style={{ filter: 'drop-shadow(0 0 6px rgba(239,68,68,0.8))' }} />
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="flex items-center justify-between p-4 sm:p-5 bg-magenta-500/5 corner-clip-sm border-2 border-magenta-500/30"
+                                style={{ boxShadow: '0 0 15px rgba(255,0,255,0.1)' }}>
+                                <div>
+                                    <p className="text-xs text-gray-500 font-black uppercase tracking-widest mb-1"
+                                        style={{ fontFamily: 'Rajdhani, sans-serif' }}>Total Amount</p>
+                                    <p className="font-black text-3xl text-gradient"
+                                        style={{ textShadow: '0 0 20px rgba(0,255,255,0.5)' }}>
+                                        ฿{orderTotal?.toFixed(2) ?? '—'}
+                                    </p>
+                                </div>
+                                <div className="w-12 h-12 corner-clip-sm bg-magenta-500/10 border-2 border-magenta-500/30 flex items-center justify-center">
+                                    {isBankTransfer
+                                        ? <Banknote className="w-6 h-6 text-magenta-400" style={{ filter: 'drop-shadow(0 0 6px rgba(255,0,255,0.8))' }} />
+                                        : <CheckCircle className="w-6 h-6 text-magenta-400" style={{ filter: 'drop-shadow(0 0 6px rgba(255,0,255,0.8))' }} />
+                                    }
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Email / Rejection notice */}
+                        {paymentStatus === 'rejected' ? (
+                            <div className="flex items-start gap-3 p-4 bg-red-500/5 corner-clip-sm border border-red-500/30">
+                                <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+                                <p className="text-sm text-red-300 font-bold leading-relaxed" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                    Your payment slip was rejected. No charges were made. Please contact support or place a new order with a valid payment slip.
                                 </p>
                             </div>
-                            <div className="w-12 h-12 corner-clip-sm bg-magenta-500/10 border-2 border-magenta-500/30 flex items-center justify-center">
-                                {isBankTransfer
-                                    ? <Banknote className="w-6 h-6 text-magenta-400" style={{ filter: 'drop-shadow(0 0 6px rgba(255,0,255,0.8))' }} />
-                                    : <CheckCircle className="w-6 h-6 text-magenta-400" style={{ filter: 'drop-shadow(0 0 6px rgba(255,0,255,0.8))' }} />
-                                }
+                        ) : (
+                            <div className="flex items-center gap-3 p-3 bg-gray-800/60 corner-clip-sm border border-gray-700/50">
+                                <Mail className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                                <p className="text-sm text-gray-400 font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                    Confirmation details dispatched to your inbox.
+                                </p>
                             </div>
-                        </div>
-
-                        {/* Email notice */}
-                        <div className="flex items-center gap-3 p-3 bg-gray-800/60 corner-clip-sm border border-gray-700/50">
-                            <Mail className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                            <p className="text-sm text-gray-400 font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                Confirmation details dispatched to your inbox.
-                            </p>
-                        </div>
+                        )}
                     </div>
                 </div>
 

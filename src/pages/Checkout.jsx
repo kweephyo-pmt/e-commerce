@@ -40,6 +40,9 @@ const Checkout = () => {
     const [bankInfo, setBankInfo] = useState(null);
     const [bankLoading, setBankLoading] = useState(true);
 
+    // Shipping settings from Firestore
+    const [shippingSettings, setShippingSettings] = useState({ flatFee: 100, freeThreshold: 1500 });
+
     // Auto-fill from user profile
     useEffect(() => {
         const fetchUserProfile = async () => {
@@ -85,6 +88,25 @@ const Checkout = () => {
         fetchBankAccount();
     }, []);
 
+    // Fetch shipping settings
+    useEffect(() => {
+        const fetchShippingSettings = async () => {
+            try {
+                const snap = await getDoc(doc(db, 'settings', 'shipping'));
+                if (snap.exists()) {
+                    const d = snap.data();
+                    setShippingSettings({
+                        flatFee: d.flatFee ?? 100,
+                        freeThreshold: d.freeThreshold ?? 1500,
+                    });
+                }
+            } catch (e) {
+                console.error('Failed to load shipping settings:', e);
+            }
+        };
+        fetchShippingSettings();
+    }, []);
+
     const steps = [
         { id: 1, name: 'Information', icon: UserIcon },
         { id: 2, name: 'Shipping', icon: Truck },
@@ -92,7 +114,7 @@ const Checkout = () => {
     ];
 
     const subtotal = getCartTotal();
-    const shipping = subtotal >= 1500 ? 0 : 100;
+    const shipping = subtotal >= shippingSettings.freeThreshold ? 0 : shippingSettings.flatFee;
     const tax = subtotal * 0.07;
     const total = subtotal + shipping + tax;
 
