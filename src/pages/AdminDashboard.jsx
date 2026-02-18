@@ -708,28 +708,33 @@ const AdminDashboard = () => {
                                                     <button
                                                         key={index}
                                                         onClick={() => targetTab && setActiveTab(targetTab)}
-                                                        className={`w-full text-left flex items-center space-x-4 p-4 bg-gray-800/50 corner-clip-sm border ${colors.border} transition-all group ${targetTab ? 'cursor-pointer' : 'cursor-default'}`}
+                                                        className={`w-full text-left flex items-start sm:items-center gap-3 md:gap-4 p-3 md:p-4 bg-gray-800/50 corner-clip-sm border ${colors.border} transition-all group ${targetTab ? 'cursor-pointer' : 'cursor-default'}`}
                                                     >
-                                                        <div className={`w-10 h-10 bg-gradient-to-br ${colors.bg} corner-clip-sm flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110`} style={{ boxShadow: colors.shadow }}>
-                                                            <IconComponent className="w-5 h-5 text-white" />
+                                                        <div className={`w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br ${colors.bg} corner-clip-sm flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110`} style={{ boxShadow: colors.shadow }}>
+                                                            <IconComponent className="w-5 h-5 md:w-6 md:h-6 text-white" />
                                                         </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <p className="text-white font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{activity.title}</p>
-                                                            <p className={`${colors.text} text-sm truncate`} style={{ fontFamily: 'Rajdhani, sans-serif' }}>{activity.description}</p>
+                                                        <div className="flex-1 min-w-0 py-0.5">
+                                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1">
+                                                                <p className="text-white font-bold text-sm md:text-base leading-tight" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{activity.title}</p>
+                                                                <span className="text-gray-500 text-[10px] md:text-xs font-bold sm:hidden" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                                    {getTimeAgo(activity.timestamp)}
+                                                                </span>
+                                                            </div>
+                                                            <p className={`${colors.text} text-xs md:text-sm break-words line-clamp-2 md:line-clamp-1`} style={{ fontFamily: 'Rajdhani, sans-serif' }}>{activity.description}</p>
                                                             {activity.adminName && (
-                                                                <div className="flex items-center gap-1.5 mt-1">
+                                                                <div className="flex items-center gap-1.5 mt-2">
                                                                     <div className="w-4 h-4 rounded-full bg-purple-500/30 border border-purple-500/50 flex items-center justify-center flex-shrink-0">
                                                                         <span className="text-purple-300 font-black" style={{ fontSize: '8px', fontFamily: 'Orbitron, sans-serif' }}>
                                                                             {activity.adminName.charAt(0).toUpperCase()}
                                                                         </span>
                                                                     </div>
-                                                                    <span className="text-gray-500 text-xs font-bold truncate" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                                    <span className="text-gray-400 text-[10px] md:text-xs font-bold truncate" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                                                         {activity.adminName}
                                                                     </span>
                                                                 </div>
                                                             )}
                                                         </div>
-                                                        <div className="flex items-center gap-2 flex-shrink-0">
+                                                        <div className="hidden sm:flex items-center gap-2 flex-shrink-0">
                                                             <span className="text-gray-500 text-xs font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                                                 {getTimeAgo(activity.timestamp)}
                                                             </span>
@@ -737,6 +742,9 @@ const AdminDashboard = () => {
                                                                 <span className={`${colors.arrow} opacity-0 group-hover:opacity-100 transition-opacity text-sm`}>→</span>
                                                             )}
                                                         </div>
+                                                        {targetTab && (
+                                                            <span className={`${colors.arrow} sm:hidden self-center text-xs opacity-50`}>→</span>
+                                                        )}
                                                     </button>
                                                 );
                                             })
