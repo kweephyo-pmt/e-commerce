@@ -210,21 +210,7 @@ const Checkout = () => {
             const slipUrl = await uploadSlipToCloudinary(slipFile);
             setUploading(false);
 
-            // Update stock
-            await Promise.all(cartItems.map(async (item) => {
-                const productRef = doc(db, 'products', item.id);
-                try {
-                    await runTransaction(db, async (transaction) => {
-                        const productDoc = await transaction.get(productRef);
-                        if (!productDoc.exists()) return;
-                        const currentStock = productDoc.data().stock || 0;
-                        const newStock = Math.max(0, currentStock - item.quantity);
-                        transaction.update(productRef, { stock: newStock, updatedAt: new Date() });
-                    });
-                } catch (e) { console.error(`Stock update failed for ${item.name}:`, e); }
-            }));
 
-            // Save order
             const orderData = {
                 userId: user?.uid || 'guest',
                 userEmail: formData.email,

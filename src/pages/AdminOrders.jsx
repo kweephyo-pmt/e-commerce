@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, onSnapshot, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, onSnapshot, doc, updateDoc, serverTimestamp, runTransaction } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { logActivity } from '../utils/logActivity';
 import { useAuth } from '../context/AuthContext';
@@ -79,6 +79,21 @@ const AdminOrders = () => {
     const confirmPayment = async (orderId, orderData) => {
         try {
             setPaymentUpdating(orderId);
+
+            // Decrement stock for each item in the order
+            await Promise.all((orderData.items || []).map(async (item) => {
+                const productRef = doc(db, 'products', item.id);
+                try {
+                    await runTransaction(db, async (transaction) => {
+                        const productDoc = await transaction.get(productRef);
+                        if (!productDoc.exists()) return;
+                        const currentStock = productDoc.data().stock || 0;
+                        const newStock = Math.max(0, currentStock - item.quantity);
+                        transaction.update(productRef, { stock: newStock, updatedAt: new Date() });
+                    });
+                } catch (e) { console.error(`Stock decrement failed for ${item.name}:`, e); }
+            }));
+
             await updateDoc(doc(db, 'orders', orderId), {
                 paymentStatus: 'paid',
                 orderStatus: 'processing',
@@ -100,7 +115,7 @@ const AdminOrders = () => {
         }
     };
 
-    const rejectPayment = (orderId) => {
+    const rejectPayment = (orderId, orderData) => {
         setConfirmDialog({
             title: 'Reject Payment',
             message: 'Are you sure you want to reject this payment? The order will be marked as payment rejected and the order status will be set to cancelled.',
@@ -536,7 +551,7 @@ const AdminOrders = () => {
                                                                                             <button onClick={(e) => { e.stopPropagation(); confirmPayment(order.id, order); }} disabled={paymentUpdating === order.id} className="flex items-center gap-1.5 px-4 py-2 bg-green-500/20 border-2 border-green-500/60 text-green-400 hover:bg-green-500/30 hover:border-green-400 corner-clip-sm font-black text-sm uppercase tracking-wide transition-all disabled:opacity-50" style={{ fontFamily: 'Rajdhani, sans-serif', boxShadow: '0 0 10px rgba(0,255,0,0.2)' }}>
                                                                                                 <CheckCircle className="w-4 h-4" />{paymentUpdating === order.id ? 'Confirming...' : 'Confirm Payment'}
                                                                                             </button>
-                                                                                            <button onClick={(e) => { e.stopPropagation(); rejectPayment(order.id); }} disabled={paymentUpdating === order.id} className="flex items-center gap-1.5 px-4 py-2 bg-red-500/20 border-2 border-red-500/60 text-red-400 hover:bg-red-500/30 hover:border-red-400 corner-clip-sm font-black text-sm uppercase tracking-wide transition-all disabled:opacity-50" style={{ fontFamily: 'Rajdhani, sans-serif', boxShadow: '0 0 10px rgba(255,0,0,0.2)' }}>
+                                                                                            <button onClick={(e) => { e.stopPropagation(); rejectPayment(order.id, order); }} disabled={paymentUpdating === order.id} className="flex items-center gap-1.5 px-4 py-2 bg-red-500/20 border-2 border-red-500/60 text-red-400 hover:bg-red-500/30 hover:border-red-400 corner-clip-sm font-black text-sm uppercase tracking-wide transition-all disabled:opacity-50" style={{ fontFamily: 'Rajdhani, sans-serif', boxShadow: '0 0 10px rgba(255,0,0,0.2)' }}>
                                                                                                 <XCircle className="w-4 h-4" /> Reject
                                                                                             </button>
                                                                                         </div>
@@ -675,7 +690,7 @@ const AdminOrders = () => {
                                                                     <button onClick={(e) => { e.stopPropagation(); confirmPayment(order.id, order); }} disabled={paymentUpdating === order.id} className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-green-500/20 border border-green-500/60 text-green-400 corner-clip-sm font-black text-xs uppercase transition-all disabled:opacity-50" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                                                         <CheckCircle className="w-3.5 h-3.5" />{paymentUpdating === order.id ? '...' : 'Confirm'}
                                                                     </button>
-                                                                    <button onClick={(e) => { e.stopPropagation(); rejectPayment(order.id); }} disabled={paymentUpdating === order.id} className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-red-500/20 border border-red-500/60 text-red-400 corner-clip-sm font-black text-xs uppercase transition-all disabled:opacity-50" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                                    <button onClick={(e) => { e.stopPropagation(); rejectPayment(order.id, order); }} disabled={paymentUpdating === order.id} className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-red-500/20 border border-red-500/60 text-red-400 corner-clip-sm font-black text-xs uppercase transition-all disabled:opacity-50" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                                                         <XCircle className="w-3.5 h-3.5" /> Reject
                                                                     </button>
                                                                 </div>
