@@ -3,6 +3,8 @@ import {
     doc, getDoc, setDoc, serverTimestamp
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
+import { logActivity } from '../utils/logActivity';
+import { useAuth } from '../context/AuthContext';
 import {
     Banknote, Plus, Edit2, Trash2, Save, X,
     CheckCircle, Star, RefreshCw, AlertCircle, Copy, Check
@@ -38,6 +40,8 @@ const EMPTY_FORM = {
 const FIRESTORE_DOC = 'bankAccounts'; // settings/bankAccounts
 
 const AdminBankAccounts = () => {
+    const { userProfile } = useAuth();
+    const adminInfo = { uid: userProfile?.uid, name: userProfile?.displayName, email: userProfile?.email };
     const [accounts, setAccounts] = useState([]);   // array of account objects
     const [activeId, setActiveId] = useState(null); // id of the active account
     const [loading, setLoading] = useState(true);
@@ -145,6 +149,23 @@ const AdminBankAccounts = () => {
         setAccounts(newAccounts);
         setActiveId(newActiveId);
         await persist(newAccounts, newActiveId);
+        if (editingId) {
+            await logActivity({
+                type: 'settings', icon: 'Settings',
+                title: 'Bank Account Updated',
+                description: `"${form.bankName}" account details updated`,
+                color: 'cyan',
+                admin: adminInfo
+            });
+        } else {
+            await logActivity({
+                type: 'settings', icon: 'Settings',
+                title: 'Bank Account Added',
+                description: `"${form.bankName}" — ${form.accountName} added`,
+                color: 'cyan',
+                admin: adminInfo
+            });
+        }
         showToast(editingId ? 'Account updated!' : 'Account added!');
         closeForm();
     };
@@ -152,18 +173,34 @@ const AdminBankAccounts = () => {
     const handleDelete = async (id) => {
         if (!window.confirm('Delete this bank account?')) return;
         const newAccounts = accounts.filter(a => a.id !== id);
+        const deletedAcc = accounts.find(a => a.id === id);
         const newActiveId = activeId === id
             ? (newAccounts[0]?.id || null)
             : activeId;
         setAccounts(newAccounts);
         setActiveId(newActiveId);
         await persist(newAccounts, newActiveId);
+        await logActivity({
+            type: 'settings', icon: 'Settings',
+            title: 'Bank Account Deleted',
+            description: `"${deletedAcc?.bankName || 'Account'}" removed`,
+            color: 'red',
+            admin: adminInfo
+        });
         showToast('Account deleted');
     };
 
     const handleSetActive = async (id) => {
         setActiveId(id);
         await persist(accounts, id);
+        const acc = accounts.find(a => a.id === id);
+        await logActivity({
+            type: 'settings', icon: 'Settings',
+            title: 'Active Bank Account Changed',
+            description: `"${acc?.bankName || 'Account'}" set as active checkout account`,
+            color: 'yellow',
+            admin: adminInfo
+        });
         showToast('Active account updated!');
     };
 

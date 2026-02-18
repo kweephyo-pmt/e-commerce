@@ -4,13 +4,15 @@ import { db } from '../config/firebase';
 import { Settings as SettingsIcon, Users, Mail, Crown, UserX, RefreshCw, Shield, Lock, Truck, Save } from 'lucide-react';
 import Toast from '../components/Toast';
 import { useAuth } from '../context/AuthContext';
+import { logActivity } from '../utils/logActivity';
 
 const AdminSettings = () => {
     const [toast, setToast] = useState(null);
     const [users, setUsers] = useState([]);
     const [loadingUsers, setLoadingUsers] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const { user: currentUser } = useAuth();
+    const { userProfile } = useAuth();
+    const adminInfo = { uid: userProfile?.uid, name: userProfile?.displayName, email: userProfile?.email };
 
     // Shipping settings
     const [shippingForm, setShippingForm] = useState({ flatFee: 100, freeThreshold: 1500 });
@@ -72,6 +74,13 @@ const AdminSettings = () => {
         try {
             await setDoc(doc(db, 'settings', 'shipping'), { flatFee, freeThreshold }, { merge: true });
             setShippingForm({ flatFee, freeThreshold });
+            await logActivity({
+                type: 'settings', icon: 'Settings',
+                title: 'Shipping Settings Updated',
+                description: `Flat fee: ฿${flatFee} · Free shipping above ฿${freeThreshold}`,
+                color: 'yellow',
+                admin: adminInfo
+            });
             setToast({ message: 'Shipping settings saved!', type: 'success' });
         } catch (e) {
             console.error('Failed to save shipping settings:', e);
@@ -85,9 +94,17 @@ const AdminSettings = () => {
         try {
             const userRef = doc(db, 'users', userId);
             await updateDoc(userRef, { isAdmin: !currentStatus });
+            const targetUser = users.find(u => u.id === userId);
             setUsers(users.map(user =>
                 user.id === userId ? { ...user, isAdmin: !currentStatus } : user
             ));
+            await logActivity({
+                type: 'settings', icon: 'Settings',
+                title: !currentStatus ? 'Admin Access Granted' : 'Admin Access Revoked',
+                description: `${targetUser?.displayName || targetUser?.email || userId} — admin ${!currentStatus ? 'granted' : 'revoked'}`,
+                color: !currentStatus ? 'cyan' : 'red',
+                admin: adminInfo
+            });
             setToast({
                 message: `Admin access ${!currentStatus ? 'granted' : 'revoked'} successfully!`,
                 type: 'success'
