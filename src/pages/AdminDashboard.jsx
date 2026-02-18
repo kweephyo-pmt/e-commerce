@@ -95,7 +95,7 @@ const AdminDashboard = () => {
                     if (orderTime > dashboardStartTime) {
                         notificationSound.play().catch(e => console.log('Audio play blocked:', e));
 
-                        if (document.visibilityState === 'hidden' && Notification.permission === 'granted') {
+                        if (typeof Notification !== 'undefined' && document.visibilityState === 'hidden' && Notification.permission === 'granted') {
                             new Notification('New Order Received!', {
                                 body: `${order.userName} placed an order for ฿${order.total.toFixed(2)}`,
                                 icon: '/favicon.ico'
@@ -112,7 +112,7 @@ const AdminDashboard = () => {
             });
         });
 
-        if (Notification.permission === 'default') {
+        if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
             Notification.requestPermission();
         }
 
