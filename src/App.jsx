@@ -5,6 +5,7 @@ import { CartProvider } from './context/CartContext';
 import Navbar from './components/Navbar';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedAdminRoute from './components/ProtectedAdminRoute';
+import { WishlistProvider } from './context/WishlistContext';
 import Home from './pages/Home';
 import Products from './pages/Products';
 import ProductDetails from './pages/ProductDetails';
@@ -17,6 +18,7 @@ import Profile from './pages/Profile';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import ResetPassword from './pages/ResetPassword';
+import Wishlist from './pages/Wishlist';
 
 function AppContent() {
   const location = useLocation();
@@ -38,6 +40,7 @@ function AppContent() {
         <Route path="/orders" element={<Orders />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/wishlist" element={<Wishlist />} />
         <Route
           path="/admin/dashboard"
           element={
@@ -57,7 +60,9 @@ function App() {
       <AuthProvider>
         <AdminProvider>
           <CartProvider>
-            <AppContent />
+            <WishlistProvider>
+              <AppContent />
+            </WishlistProvider>
           </CartProvider>
         </AdminProvider>
       </AuthProvider>

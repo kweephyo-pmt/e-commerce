@@ -2,14 +2,21 @@ import { ShoppingCart, Heart } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
+import { useAuth } from '../context/AuthContext';
 import { useProductRating } from '../hooks/useProductRating';
 
 const ProductCard = ({ product }) => {
-    const [isLiked, setIsLiked] = useState(false);
     const [showAddedMessage, setShowAddedMessage] = useState(false);
+    const [heartPop, setHeartPop] = useState(false);
+    const [showLoginTip, setShowLoginTip] = useState(false);
     const { addToCart, cartItems } = useCart();
+    const { isWishlisted, toggleWishlist } = useWishlist();
+    const { user } = useAuth();
     const navigate = useNavigate();
     const { rating, reviewCount } = useProductRating(product.id);
+
+    const wishlisted = isWishlisted(product.id);
 
     // Get quantity of this product in cart
     const cartItem = cartItems.find(item => item.id === product.id);
@@ -17,21 +24,23 @@ const ProductCard = ({ product }) => {
 
     const handleAddToCart = (e) => {
         e.stopPropagation();
-
-        // Check if product is in stock
-        if (!product.stock || product.stock === 0) {
-            return;
-        }
-
-        // Check if adding one more would exceed available stock
-        if (quantityInCart >= product.stock) {
-            // Could show a toast message here
-            return;
-        }
-
+        if (!product.stock || product.stock === 0) return;
+        if (quantityInCart >= product.stock) return;
         addToCart(product);
         setShowAddedMessage(true);
         setTimeout(() => setShowAddedMessage(false), 2000);
+    };
+
+    const handleWishlist = async (e) => {
+        e.stopPropagation();
+        if (!user) {
+            setShowLoginTip(true);
+            setTimeout(() => setShowLoginTip(false), 2000);
+            return;
+        }
+        setHeartPop(true);
+        setTimeout(() => setHeartPop(false), 300);
+        await toggleWishlist(product.id);
     };
 
     const handleCardClick = () => {
@@ -43,18 +52,47 @@ const ProductCard = ({ product }) => {
             onClick={handleCardClick}
             className="card group cursor-pointer overflow-hidden transform hover:scale-105 transition-all duration-300 animate-fade-in relative"
         >
-            {/* Wishlist Button */}
-            <button
-                onClick={(e) => {
-                    e.stopPropagation();
-                    setIsLiked(!isLiked);
-                }}
-                className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/90 backdrop-blur-sm shadow-lg hover:scale-110 transition-transform duration-200"
-            >
-                <Heart
-                    className={`w-5 h-5 ${isLiked ? 'fill-red-500 text-red-500' : 'text-gray-600'} transition-colors duration-200`}
-                />
-            </button>
+            {/* Wishlist Button — always visible, solid bg so it shows on any image */}
+            <div className="absolute top-3 right-3 z-10">
+                <button
+                    onClick={handleWishlist}
+                    className={`relative w-10 h-10 flex items-center justify-center transition-all duration-200 ${heartPop ? 'scale-125' : 'scale-100'}`}
+                    style={{
+                        background: wishlisted
+                            ? 'linear-gradient(135deg, rgba(180,0,180,0.9), rgba(100,0,100,0.9))'
+                            : 'rgba(8,8,18,0.88)',
+                        border: wishlisted ? '2px solid #ff00ff' : '2px solid rgba(0,255,255,0.6)',
+                        clipPath: 'polygon(8px 0%, 100% 0%, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0% 100%, 0% 8px)',
+                        boxShadow: wishlisted
+                            ? '0 0 18px rgba(255,0,255,0.8), inset 0 0 10px rgba(255,0,255,0.2)'
+                            : '0 0 10px rgba(0,0,0,0.9), 0 0 6px rgba(0,255,255,0.2)',
+                        backdropFilter: 'blur(12px)',
+                    }}
+                    title={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+                >
+                    <Heart
+                        className="w-5 h-5 transition-all duration-200"
+                        style={{
+                            fill: wishlisted ? '#ff00ff' : 'transparent',
+                            color: wishlisted ? '#ff00ff' : '#00ffff',
+                            filter: wishlisted
+                                ? 'drop-shadow(0 0 6px rgba(255,0,255,1))'
+                                : 'drop-shadow(0 0 4px rgba(0,255,255,0.8))',
+                        }}
+                    />
+                </button>
+                {/* Login tooltip */}
+                {showLoginTip && (
+                    <div className="absolute right-0 top-12 w-36 bg-gray-950 border border-cyan-500/50 px-3 py-2 text-xs text-cyan-400 font-bold uppercase tracking-wide whitespace-nowrap animate-fade-in"
+                        style={{
+                            fontFamily: 'Rajdhani, sans-serif',
+                            boxShadow: '0 0 15px rgba(0,255,255,0.2)',
+                            clipPath: 'polygon(6px 0%, 100% 0%, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0% 100%, 0% 6px)',
+                        }}>
+                        Sign in to save ♥
+                    </div>
+                )}
+            </div>
 
             {/* Product Image */}
             <div className="relative h-64 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">

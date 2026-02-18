@@ -1,15 +1,17 @@
 import { Link } from 'react-router-dom';
-import { ShoppingCart, User, LogOut, Menu, X, Shield, Gamepad2 } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Menu, X, Shield, Gamepad2, Heart } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useAdmin } from '../context/AdminContext';
+import { useWishlist } from '../context/WishlistContext';
 
 const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const { user, signOut } = useAuth();
     const { getCartItemsCount } = useCart();
     const { isAdmin } = useAdmin();
+    const { wishlist } = useWishlist();
 
     const handleSignOut = async () => {
         try {
@@ -89,6 +91,24 @@ const Navbar = () => {
 
                     {/* Right: Action Icons */}
                     <div className="flex items-center space-x-3 flex-1 justify-end">
+                        {/* Wishlist */}
+                        {user && (
+                            <Link to="/wishlist" className="relative group">
+                                <div className="p-2.5 corner-clip-sm hover:bg-magenta-500/20 transition-all duration-200 border-2 border-transparent hover:border-magenta-500/50 relative"
+                                    style={{ boxShadow: '0 0 15px rgba(255,0,255,0.1)' }}>
+                                    <Heart className="w-6 h-6 text-magenta-400 group-hover:text-magenta-300 transition-colors duration-200 group-hover:scale-110 transform"
+                                        style={{ filter: 'drop-shadow(0 0 5px rgba(255,0,255,0.6))' }} />
+                                    <div className="absolute inset-0 bg-magenta-500/0 group-hover:bg-magenta-500/20 transition-all duration-200 corner-clip-sm -z-10 blur-sm"></div>
+                                    {wishlist.length > 0 && (
+                                        <span className="absolute -top-1 -right-1 bg-gradient-to-r from-magenta-500 to-purple-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
+                                            style={{ fontFamily: 'Orbitron, sans-serif', boxShadow: '0 0 15px rgba(255,0,255,0.8)' }}>
+                                            {wishlist.length}
+                                        </span>
+                                    )}
+                                </div>
+                            </Link>
+                        )}
+
                         {/* Cart */}
                         <Link to="/cart" className="relative group">
                             <div className="p-2.5 corner-clip-sm hover:bg-cyan-500/20 transition-all duration-200 border-2 border-transparent hover:border-cyan-500/50 relative" style={{ boxShadow: '0 0 15px rgba(0, 255, 255, 0.2)' }}>
@@ -177,6 +197,15 @@ const Navbar = () => {
                                         style={{ fontFamily: 'Rajdhani, sans-serif' }}
                                     >
                                         Orders
+                                    </Link>
+                                    <Link
+                                        to="/wishlist"
+                                        onClick={() => setIsMenuOpen(false)}
+                                        className="text-magenta-300 hover:text-magenta-400 font-bold uppercase tracking-wide transition-all duration-200 p-3 corner-clip-sm hover:bg-magenta-500/10 border-2 border-transparent hover:border-magenta-500/30 flex items-center gap-2"
+                                        style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                                    >
+                                        <Heart className="w-4 h-4" />
+                                        Wishlist {wishlist.length > 0 && `(${wishlist.length})`}
                                     </Link>
                                     <button
                                         onClick={() => {
