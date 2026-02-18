@@ -79,11 +79,11 @@ const Navbar = () => {
                         </div>
                         <div className="flex flex-col leading-none relative">
                             <span className="text-2xl font-black uppercase tracking-widest relative" style={{ fontFamily: 'Orbitron, sans-serif', color: '#00ffff', textShadow: '0 0 20px rgba(0, 255, 255, 1), 0 0 40px rgba(0, 255, 255, 0.6), 0 0 60px rgba(0, 255, 255, 0.3)' }}>
-                                GAME
+                                TECHNO
                                 <span className="absolute -inset-1 bg-cyan-500/20 blur-md -z-10"></span>
                             </span>
                             <span className="text-base font-bold uppercase tracking-widest relative" style={{ fontFamily: 'Orbitron, sans-serif', color: '#ff00ff', textShadow: '0 0 15px rgba(255, 0, 255, 1), 0 0 30px rgba(255, 0, 255, 0.6)' }}>
-                                ZONE
+                                WORLD
                                 <span className="absolute -inset-1 bg-magenta-500/20 blur-md -z-10"></span>
                             </span>
                         </div>
