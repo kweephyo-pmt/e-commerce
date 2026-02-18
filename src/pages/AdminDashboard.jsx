@@ -422,11 +422,18 @@ const AdminDashboard = () => {
                     <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 255, 0.1) 2px, rgba(0, 255, 255, 0.1) 4px)' }} />
 
                     {/* Logo / Toggle */}
-                    <div className={`flex items-center border-b-2 border-cyan-500/30 relative z-10 ${sidebarOpen ? 'md:p-6 p-4 justify-between' : 'p-4 justify-center'}`}>
-                        {/* Always show title on mobile drawer, respect sidebarOpen on desktop */}
-                        <div className={`${sidebarOpen ? 'block' : 'hidden md:hidden'} md:${sidebarOpen ? 'block' : 'hidden'}`}>
-                            <h1 className="text-xl md:text-2xl font-black text-cyan-400 uppercase tracking-wider" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(0, 255, 255, 1)' }}>Admin Zone</h1>
-                            <p className="text-cyan-300 text-xs md:text-sm font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Control Panel</p>
+                    <div className={`flex items-center border-b-2 border-cyan-500/30 relative z-10 p-4 ${sidebarOpen ? 'md:p-6 justify-between' : 'justify-center'}`}>
+                        {/* Title — hidden when collapsed on desktop */}
+                        {sidebarOpen && (
+                            <div className="hidden md:block">
+                                <h1 className="text-xl md:text-2xl font-black text-cyan-400 uppercase tracking-wider" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(0, 255, 255, 1)' }}>Admin Zone</h1>
+                                <p className="text-cyan-300 text-xs md:text-sm font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Control Panel</p>
+                            </div>
+                        )}
+                        {/* Always show title in mobile drawer */}
+                        <div className="md:hidden">
+                            <h1 className="text-xl font-black text-cyan-400 uppercase tracking-wider" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(0, 255, 255, 1)' }}>Admin Zone</h1>
+                            <p className="text-cyan-300 text-xs font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Control Panel</p>
                         </div>
                         {/* Desktop collapse toggle */}
                         <button
@@ -435,14 +442,7 @@ const AdminDashboard = () => {
                             style={{ boxShadow: '0 0 10px rgba(0, 255, 255, 0.2)' }}
                         >
                             {sidebarOpen ? <ChevronLeft className="w-5 h-5 text-cyan-400" /> : <Menu className="w-5 h-5 text-cyan-400" />}
-                        </button>
-                        {/* Mobile close button */}
-                        <button
-                            onClick={() => setMobileSidebarOpen(false)}
-                            className="md:hidden p-2 hover:bg-red-500/20 corner-clip-sm transition-all border-2 border-transparent hover:border-red-500/50"
-                        >
-                            <X className="w-5 h-5 text-red-400" />
-                        </button>
+                        </button>                        
                     </div>
 
                     {/* Navigation */}
@@ -458,7 +458,7 @@ const AdminDashboard = () => {
                                 title={!sidebarOpen ? item.label : undefined}
                                 className={`w-full flex items-center corner-clip-sm transition-all duration-200 border-2 relative overflow-hidden group
                                     space-x-3 px-4 py-3
-                                    md:${sidebarOpen ? 'space-x-3 px-4 py-3' : 'justify-center px-0 py-3'}
+                                    ${!sidebarOpen ? 'md:justify-center md:px-0 md:space-x-0' : ''}
                                     ${activeTab === item.id
                                         ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-400 border-cyan-500/50'
                                         : 'text-cyan-300 hover:bg-cyan-500/10 border-transparent hover:border-cyan-500/30'
@@ -470,9 +470,11 @@ const AdminDashboard = () => {
                                     className="w-5 h-5 flex-shrink-0 relative z-10"
                                     style={activeTab === item.id ? { filter: 'drop-shadow(0 0 5px rgba(0, 255, 255, 0.8))' } : {}}
                                 />
-                                {/* Always show label in mobile drawer; respect sidebarOpen on desktop */}
-                                <span className={`font-black uppercase tracking-wide relative z-10 ${sidebarOpen ? 'md:inline' : 'md:hidden'} inline`}
-                                    style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                {/* Label: always visible in mobile drawer, hidden when collapsed on desktop */}
+                                <span
+                                    className={`font-black uppercase tracking-wide relative z-10 inline ${!sidebarOpen ? 'md:hidden' : ''}`}
+                                    style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                                >
                                     {item.label}
                                 </span>
                             </button>
@@ -483,16 +485,17 @@ const AdminDashboard = () => {
                     <div className="p-4 border-t-2 border-cyan-500/20 relative z-10">
                         <div className="bg-gray-800/60 corner-clip-sm border border-cyan-500/20 overflow-hidden"
                             style={{ boxShadow: '0 0 20px rgba(0,255,255,0.08)' }}>
-                            <div className="flex items-center gap-3 px-4 py-3">
+                            <div className={`flex items-center gap-3 px-4 py-3 ${!sidebarOpen ? 'md:flex-col md:gap-2 md:px-2' : ''}`}>
                                 <div className="w-9 h-9 border border-cyan-500/50 corner-clip-sm flex items-center justify-center flex-shrink-0"
                                     style={{ boxShadow: '0 0 12px rgba(0,255,255,0.2)' }}>
                                     <span className="text-cyan-400 font-black text-sm" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                                        {user?.displayName?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase()}
+                                        {userProfile?.displayName?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase()}
                                     </span>
                                 </div>
-                                <div className={`flex-1 min-w-0 ${sidebarOpen ? 'md:block' : 'md:hidden'} block`}>
+                                {/* User info — hidden when collapsed on desktop */}
+                                <div className={`flex-1 min-w-0 ${!sidebarOpen ? 'md:hidden' : ''} block`}>
                                     <p className="text-white font-black text-sm truncate leading-tight" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                        {user?.displayName || user?.email?.split('@')[0]}
+                                        {userProfile?.displayName || user?.email?.split('@')[0]}
                                     </p>
                                     <p className="text-cyan-400 text-xs font-bold uppercase tracking-widest" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                         Administrator
