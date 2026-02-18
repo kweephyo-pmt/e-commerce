@@ -137,17 +137,47 @@ const Home = () => {
                             <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-cyan-400" style={{ boxShadow: '0 0 30px rgba(0, 255, 255, 0.5)' }}></div>
                         </div>
                     ) : featuredProducts.length > 0 ? (
-                        <div className="space-y-8">
-                            {/* Products Grid */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
+                        <div className="relative group">
+                            {/* Navigation Buttons for Desktop */}
+                            {featuredProducts.length >= 4 && (
+                                <>
+                                    <button
+                                        onClick={() => scroll('left')}
+                                        className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 z-20 p-3 bg-gray-900/80 border-2 border-cyan-500/50 text-cyan-400 corner-clip-sm hover:bg-cyan-500 hover:text-white transition-all duration-300 opacity-0 group-hover:opacity-100 hidden md:flex"
+                                        style={{ boxShadow: '0 0 20px rgba(0, 255, 255, 0.3)' }}
+                                    >
+                                        <ChevronLeft className="w-6 h-6" />
+                                    </button>
+                                    <button
+                                        onClick={() => scroll('right')}
+                                        className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 z-20 p-3 bg-gray-900/80 border-2 border-cyan-500/50 text-cyan-400 corner-clip-sm hover:bg-cyan-500 hover:text-white transition-all duration-300 opacity-0 group-hover:opacity-100 hidden md:flex"
+                                        style={{ boxShadow: '0 0 20px rgba(0, 255, 255, 0.3)' }}
+                                    >
+                                        <ChevronRight className="w-6 h-6" />
+                                    </button>
+                                </>
+                            )}
+
+                            {/* Slider Container */}
+                            <div
+                                ref={sliderRef}
+                                className="flex gap-4 sm:gap-6 md:gap-8 overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory"
+                                style={{
+                                    msOverflowStyle: 'none',
+                                    scrollbarWidth: 'none',
+                                    paddingLeft: '1rem',
+                                    paddingRight: '1rem',
+                                    margin: '0 -1rem'
+                                }}
+                            >
                                 {featuredProducts.map((product) => (
-                                    <div key={product.id} className="animate-scale-in">
+                                    <div key={product.id} className="min-w-[280px] sm:min-w-[320px] md:min-w-[300px] flex-shrink-0 snap-center">
                                         <ProductCard product={product} />
                                     </div>
                                 ))}
                             </div>
 
-                            <div className="text-center mt-8">
+                            <div className="text-center mt-4">
                                 <Link to="/products" className="btn-primary inline-flex items-center justify-center space-x-2">
                                     <span>View All Products</span>
                                     <ArrowRight className="w-5 h-5" />
