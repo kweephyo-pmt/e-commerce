@@ -62,18 +62,23 @@ export const AuthProvider = ({ children }) => {
     const [userProfile, setUserProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isAdmin, setIsAdmin] = useState(false);
+    const [adminChecking, setAdminChecking] = useState(true); // true until Firestore admin check completes
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
-                // Check if user is admin
+                // Set user immediately so the app unblocks
+                setUser(firebaseUser);
+                setLoading(false);
+                setAdminChecking(true); // background check starting
+
+                // Check admin status + fetch profile in background
                 try {
                     const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
                     const userData = userDoc.data();
                     const adminStatus = userData?.isAdmin === true;
 
                     setIsAdmin(adminStatus);
-                    setUser(firebaseUser);
                     setUserProfile({
                         uid: firebaseUser.uid,
                         email: firebaseUser.email,
@@ -84,25 +89,24 @@ export const AuthProvider = ({ children }) => {
 
                     // Redirect based on user type
                     const currentPath = window.location.pathname;
-
-                    // If admin tries to access customer pages (but not admin login page), redirect to admin dashboard
                     if (adminStatus && !currentPath.startsWith('/admin')) {
                         window.location.href = '/admin/dashboard';
-                    }
-                    // If regular user tries to access admin pages, redirect to home
-                    else if (!adminStatus && currentPath.startsWith('/admin/dashboard')) {
+                    } else if (!adminStatus && currentPath.startsWith('/admin/dashboard')) {
                         window.location.href = '/';
                     }
                 } catch (error) {
                     console.error('Error checking admin status:', error);
                     setIsAdmin(false);
+                } finally {
+                    setAdminChecking(false); // background check done
                 }
             } else {
                 setUser(null);
                 setUserProfile(null);
                 setIsAdmin(false);
+                setAdminChecking(false);
+                setLoading(false);
             }
-            setLoading(false);
         });
 
         return unsubscribe;
@@ -230,6 +234,7 @@ export const AuthProvider = ({ children }) => {
         user,
         userProfile,
         loading,
+        adminChecking,
         isAdmin,
         signUp,
         signIn,
@@ -240,7 +245,14 @@ export const AuthProvider = ({ children }) => {
 
     return (
         <AuthContext.Provider value={value}>
-            {!loading && children}
+            {loading ? (
+                <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0a0e27] via-[#0f172a] to-[#1a1f3a]">
+                    <div className="relative">
+                        <div className="animate-spin h-14 w-14 border-t-4 border-b-4 border-cyan-400 rounded-full" style={{ boxShadow: '0 0 30px rgba(0,255,255,0.6)' }} />
+                        <p className="mt-6 text-cyan-400 text-xs font-black uppercase tracking-widest text-center" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Loading...</p>
+                    </div>
+                </div>
+            ) : children}
         </AuthContext.Provider>
     );
 };
