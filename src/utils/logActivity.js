@@ -9,8 +9,9 @@ import { db } from '../config/firebase';
  * @param {string} opts.title  - Short action label e.g. "Product Added"
  * @param {string} opts.description - Detail e.g. "Nike Air Max added to inventory"
  * @param {'cyan'|'green'|'orange'|'magenta'|'purple'|'red'|'yellow'} opts.color
+ * @param {Object} [opts.admin] - { uid, name, email } of the admin who performed the action
  */
-export const logActivity = async ({ type, icon, title, description, color }) => {
+export const logActivity = async ({ type, icon, title, description, color, admin }) => {
     try {
         await addDoc(collection(db, 'activityLogs'), {
             type,
@@ -18,6 +19,9 @@ export const logActivity = async ({ type, icon, title, description, color }) => 
             title,
             description,
             color,
+            adminUid: admin?.uid || null,
+            adminName: admin?.name || admin?.email?.split('@')[0] || 'Admin',
+            adminEmail: admin?.email || null,
             createdAt: serverTimestamp()
         });
     } catch (err) {

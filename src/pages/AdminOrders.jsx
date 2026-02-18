@@ -2,9 +2,12 @@ import { useState, useEffect } from 'react';
 import { collection, onSnapshot, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { logActivity } from '../utils/logActivity';
+import { useAuth } from '../context/AuthContext';
 import { Package, Truck, CheckCircle, Clock, Calendar, User, MapPin, Mail, Phone, Search, ShoppingCart, ChevronDown, ChevronRight, Banknote, XCircle, Eye, X, AlertCircle, Filter, LayoutList } from 'lucide-react';
 
 const AdminOrders = () => {
+    const { user } = useAuth();
+    const adminInfo = { uid: user?.uid, name: user?.displayName, email: user?.email };
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
@@ -62,7 +65,8 @@ const AdminOrders = () => {
                 type: 'order', icon: 'ShoppingCart',
                 title: 'Order Status Updated',
                 description: `Order #${orderId.slice(0, 8).toUpperCase()} → ${newStatus}`,
-                color: 'green'
+                color: 'green',
+                admin: adminInfo
             });
             setTimeout(() => setUpdating(null), 1000);
         } catch (error) {
@@ -85,7 +89,8 @@ const AdminOrders = () => {
                 type: 'order', icon: 'ShoppingCart',
                 title: 'Payment Confirmed',
                 description: `Order #${orderId.slice(0, 8).toUpperCase()} · ฿${orderData.total?.toFixed(2)} — Payment verified`,
-                color: 'green'
+                color: 'green',
+                admin: adminInfo
             });
         } catch (e) {
             console.error('Error confirming payment:', e);
@@ -115,7 +120,8 @@ const AdminOrders = () => {
                         icon: 'ShoppingCart',
                         title: 'Payment Rejected',
                         description: `Order #${orderId.slice(0, 8).toUpperCase()} — Payment slip rejected`,
-                        color: 'red'
+                        color: 'red',
+                        admin: adminInfo
                     });
                 } catch (e) {
                     console.error('Error rejecting payment:', e);
@@ -170,12 +176,17 @@ const AdminOrders = () => {
         return matchesSearch && matchesStatus;
     });
 
+    const validOrders = orders.filter(o =>
+        o.paymentStatus !== 'rejected' && o.orderStatus !== 'cancelled'
+    );
+
     const statusCounts = {
-        all: orders.length,
+        all: validOrders.length,
         pending_verification: orders.filter(o => o.paymentStatus === 'pending_verification').length,
-        processing: orders.filter(o => o.orderStatus === 'processing').length,
-        shipped: orders.filter(o => o.orderStatus === 'shipped').length,
-        delivered: orders.filter(o => o.orderStatus === 'delivered').length,
+        processing: validOrders.filter(o => o.orderStatus === 'processing').length,
+        shipped: validOrders.filter(o => o.orderStatus === 'shipped').length,
+        delivered: validOrders.filter(o => o.orderStatus === 'delivered').length,
+        rejected: orders.filter(o => o.paymentStatus === 'rejected' || o.orderStatus === 'cancelled').length,
     };
 
     if (loading) {
@@ -235,6 +246,11 @@ const AdminOrders = () => {
                         <div className="sm:text-right">
                             <p className="text-gray-400 text-[10px] md:text-xs font-black uppercase tracking-wide mb-0.5 md:mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Total Orders</p>
                             <p className="text-2xl sm:text-3xl md:text-5xl font-black text-white" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(200,200,200,0.5)' }}>{statusCounts.all}</p>
+                            {statusCounts.rejected > 0 && (
+                                <p className="text-[10px] text-red-400 font-black uppercase tracking-wide mt-0.5" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                    +{statusCounts.rejected} rejected
+                                </p>
+                            )}
                         </div>
                     </div>
                     <div className="h-1 bg-gray-700 overflow-hidden relative z-10">

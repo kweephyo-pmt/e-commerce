@@ -203,7 +203,8 @@ const AdminDashboard = () => {
                 type: 'product', icon: 'Package',
                 title: 'Product Added',
                 description: `"${formData.name}" added to inventory`,
-                color: 'cyan'
+                color: 'cyan',
+                admin: { uid: user?.uid, name: user?.displayName, email: user?.email }
             });
             showToast('Product added successfully!', 'success');
             setShowAddForm(false);
@@ -233,7 +234,8 @@ const AdminDashboard = () => {
                 type: 'product', icon: 'Package',
                 title: 'Product Updated',
                 description: `"${formData.name}" details updated`,
-                color: 'cyan'
+                color: 'cyan',
+                admin: { uid: user?.uid, name: user?.displayName, email: user?.email }
             });
             showToast('Product updated successfully!', 'success');
             setEditingProduct(null);
@@ -258,7 +260,8 @@ const AdminDashboard = () => {
                 type: 'product', icon: 'Package',
                 title: 'Product Deleted',
                 description: `"${productName}" removed from inventory`,
-                color: 'orange'
+                color: 'orange',
+                admin: { uid: user?.uid, name: user?.displayName, email: user?.email }
             });
             showToast('Product deleted successfully!', 'success');
             fetchProducts();
@@ -713,6 +716,18 @@ const AdminDashboard = () => {
                                                         <div className="flex-1 min-w-0">
                                                             <p className="text-white font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{activity.title}</p>
                                                             <p className={`${colors.text} text-sm truncate`} style={{ fontFamily: 'Rajdhani, sans-serif' }}>{activity.description}</p>
+                                                            {activity.adminName && (
+                                                                <div className="flex items-center gap-1.5 mt-1">
+                                                                    <div className="w-4 h-4 rounded-full bg-purple-500/30 border border-purple-500/50 flex items-center justify-center flex-shrink-0">
+                                                                        <span className="text-purple-300 font-black" style={{ fontSize: '8px', fontFamily: 'Orbitron, sans-serif' }}>
+                                                                            {activity.adminName.charAt(0).toUpperCase()}
+                                                                        </span>
+                                                                    </div>
+                                                                    <span className="text-gray-500 text-xs font-bold truncate" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                                        {activity.adminName}
+                                                                    </span>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                         <div className="flex items-center gap-2 flex-shrink-0">
                                                             <span className="text-gray-500 text-xs font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>

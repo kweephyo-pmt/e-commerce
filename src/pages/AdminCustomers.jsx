@@ -24,6 +24,8 @@ const AdminCustomers = () => {
 
             ordersSnapshot.forEach((doc) => {
                 const order = doc.data();
+                // Skip rejected or cancelled orders — no money was collected
+                if (order.paymentStatus === 'rejected' || order.orderStatus === 'cancelled') return;
                 if (!ordersByUser[order.userId]) {
                     ordersByUser[order.userId] = { totalOrders: 0, totalSpent: 0 };
                 }

@@ -4,11 +4,14 @@ import {
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { logActivity } from '../utils/logActivity';
+import { useAuth } from '../context/AuthContext';
 import {
     Tag, Plus, Edit2, Trash2, Save, X, Search, Hash, Package, AlertTriangle
 } from 'lucide-react';
 
 const AdminCategories = () => {
+    const { user } = useAuth();
+    const adminInfo = { uid: user?.uid, name: user?.displayName, email: user?.email };
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
@@ -73,7 +76,8 @@ const AdminCategories = () => {
                     type: 'category', icon: 'Tag',
                     title: 'Category Updated',
                     description: `"${formData.name.trim()}" category updated`,
-                    color: 'orange'
+                    color: 'orange',
+                    admin: adminInfo
                 });
                 showToast('Category updated successfully!', 'success');
             } else {
@@ -87,7 +91,8 @@ const AdminCategories = () => {
                     type: 'category', icon: 'Tag',
                     title: 'Category Created',
                     description: `"${formData.name.trim()}" category added`,
-                    color: 'orange'
+                    color: 'orange',
+                    admin: adminInfo
                 });
                 showToast('Category created successfully!', 'success');
             }
@@ -118,7 +123,8 @@ const AdminCategories = () => {
                 type: 'category', icon: 'Tag',
                 title: 'Category Deleted',
                 description: `"${catName}" category removed`,
-                color: 'red'
+                color: 'red',
+                admin: adminInfo
             });
             showToast('Category deleted!', 'success');
             fetchCategories();
