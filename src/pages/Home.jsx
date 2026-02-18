@@ -161,7 +161,7 @@ const Home = () => {
                             {/* Slider Container */}
                             <div
                                 ref={sliderRef}
-                                className="flex gap-4 sm:gap-6 md:gap-8 overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory"
+                                className="flex items-start gap-4 sm:gap-6 md:gap-8 overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory"
                                 style={{
                                     msOverflowStyle: 'none',
                                     scrollbarWidth: 'none',
@@ -171,7 +171,7 @@ const Home = () => {
                                 }}
                             >
                                 {featuredProducts.map((product) => (
-                                    <div key={product.id} className="min-w-[280px] sm:min-w-[320px] md:min-w-[300px] flex-shrink-0 snap-center">
+                                    <div key={product.id} className="min-w-[260px] sm:min-w-[320px] md:min-w-[300px] flex-shrink-0 snap-center">
                                         <ProductCard product={product} />
                                     </div>
                                 ))}

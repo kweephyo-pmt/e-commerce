@@ -95,14 +95,14 @@ const ProductCard = ({ product }) => {
             </div>
 
             {/* Product Image */}
-            <div className="relative h-64 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+            <div className="relative h-48 sm:h-64 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
                 <img
                     src={product.image}
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
                 {product.discount && (
-                    <div className="absolute top-4 left-4 bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
+                    <div className="absolute top-4 left-4 bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1 rounded-full text-[10px] sm:text-sm font-bold shadow-lg">
                         -{product.discount}%
                     </div>
                 )}
