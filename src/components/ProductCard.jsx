@@ -109,29 +109,29 @@ const ProductCard = ({ product }) => {
             </div>
 
             {/* Product Info */}
-            <div className="p-6">
-                <div className="mb-2">
-                    <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 10px rgba(0, 255, 255, 0.5)' }}>
+            <div className="p-4 sm:p-6">
+                <div className="mb-1 sm:mb-2">
+                    <span className="text-[10px] sm:text-xs font-bold text-cyan-400 uppercase tracking-wider" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 10px rgba(0, 255, 255, 0.5)' }}>
                         {product.category}
                     </span>
                 </div>
 
-                <h3 className="text-lg font-bold text-white mb-2 line-clamp-2 group-hover:text-cyan-400 transition-colors duration-200" style={{ textShadow: '0 0 10px rgba(0, 255, 255, 0.3)' }}>
+                <h3 className="text-base sm:text-lg font-bold text-white mb-1 sm:mb-2 line-clamp-2 group-hover:text-cyan-400 transition-colors duration-200" style={{ textShadow: '0 0 10px rgba(0, 255, 255, 0.3)' }}>
                     {product.name}
                 </h3>
 
-                <p className="text-gray-300 text-sm mb-4 line-clamp-2">
+                <p className="text-gray-300 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2">
                     {product.description}
                 </p>
 
                 {/* Rating */}
                 {reviewCount > 0 ? (
-                    <div className="flex items-center mb-4">
+                    <div className="flex items-center mb-3 sm:mb-4">
                         <div className="flex items-center">
                             {[...Array(5)].map((_, i) => (
                                 <svg
                                     key={i}
-                                    className={`w-4 h-4 ${i < Math.floor(rating)
+                                    className={`w-3 h-3 sm:w-4 sm:h-4 ${i < Math.floor(rating)
                                         ? 'text-cyan-400 fill-current'
                                         : 'text-gray-600'
                                         }`}
@@ -159,15 +159,15 @@ const ProductCard = ({ product }) => {
                     <div>
                         {product.discount ? (
                             <div className="flex items-center space-x-2">
-                                <span className="text-2xl font-bold text-gradient">
+                                <span className="text-xl sm:text-2xl font-bold text-gradient">
                                     ฿{(product.price * (1 - product.discount / 100)).toFixed(2)}
                                 </span>
-                                <span className="text-sm text-gray-400 line-through">
+                                <span className="text-[10px] sm:text-sm text-gray-400 line-through">
                                     ฿{product.price.toFixed(2)}
                                 </span>
                             </div>
                         ) : (
-                            <span className="text-2xl font-bold text-gradient">
+                            <span className="text-xl sm:text-2xl font-bold text-gradient">
                                 ฿{product.price.toFixed(2)}
                             </span>
                         )}
@@ -188,13 +188,13 @@ const ProductCard = ({ product }) => {
                     <button
                         onClick={handleAddToCart}
                         disabled={!product.stock || product.stock === 0 || quantityInCart >= product.stock}
-                        className={`w-full relative corner-clip-sm py-3.5 px-4 transition-all duration-300 font-bold uppercase tracking-wider flex items-center justify-center gap-2 ${!product.stock || product.stock === 0 || quantityInCart >= product.stock
+                        className={`w-full relative corner-clip-sm py-2.5 sm:py-3.5 px-4 transition-all duration-300 font-bold uppercase tracking-wider flex items-center justify-center gap-2 ${!product.stock || product.stock === 0 || quantityInCart >= product.stock
                             ? 'opacity-50 cursor-not-allowed bg-gray-600 border-2 border-gray-500'
                             : 'bg-gradient-to-r from-cyan-600 to-magenta-600 hover:from-cyan-500 hover:to-magenta-500 border-2 border-cyan-500/50 hover:border-cyan-400 transform hover:scale-[1.02]'
                             }`}
-                        style={!product.stock || product.stock === 0 || quantityInCart >= product.stock ? {} : { boxShadow: '0 0 25px rgba(0, 255, 255, 0.5), 0 0 50px rgba(255, 0, 255, 0.25)', fontFamily: 'Rajdhani, sans-serif', fontSize: '0.95rem' }}
+                        style={!product.stock || product.stock === 0 || quantityInCart >= product.stock ? {} : { boxShadow: '0 0 25px rgba(0, 255, 255, 0.5), 0 0 50px rgba(255, 0, 255, 0.25)', fontFamily: 'Rajdhani, sans-serif', fontSize: '0.85rem sm:0.95rem' }}
                     >
-                        <ShoppingCart className="w-5 h-5" style={{ filter: 'drop-shadow(0 0 5px rgba(255, 255, 255, 1))' }} />
+                        <ShoppingCart className="w-4 h-4 sm:w-5 h-5" style={{ filter: 'drop-shadow(0 0 5px rgba(255, 255, 255, 1))' }} />
                         <span className="text-white" style={{ textShadow: '0 0 10px rgba(255, 255, 255, 0.5)' }}>Add to Cart</span>
                         {quantityInCart > 0 && (
                             <span className="absolute -top-2 -right-2 bg-gradient-to-r from-cyan-500 to-magenta-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center animate-pulse border-2 border-white" style={{ fontFamily: 'Orbitron, sans-serif', boxShadow: '0 0 20px rgba(0, 255, 255, 1)' }}>
