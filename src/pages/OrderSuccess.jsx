@@ -15,6 +15,7 @@ const OrderSuccess = () => {
     const [orderData, setOrderData] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    const orderTotal = orderData?.total ?? initialTotal;
     const isBankTransfer = (orderData?.paymentMethod || initialMethod) === 'bank_transfer';
     const orderStatus = orderData?.orderStatus || 'processing';
     const paymentStatus = orderData?.paymentStatus || 'pending';
@@ -308,7 +309,7 @@ const OrderSuccess = () => {
                                     style={{ fontFamily: 'Rajdhani, sans-serif' }}>Total Amount</p>
                                 <p className="font-black text-3xl text-gradient"
                                     style={{ textShadow: '0 0 20px rgba(0,255,255,0.5)' }}>
-                                    ฿{orderTotal?.toFixed(2)}
+                                    ฿{orderTotal?.toFixed(2) ?? '—'}
                                 </p>
                             </div>
                             <div className="w-12 h-12 corner-clip-sm bg-magenta-500/10 border-2 border-magenta-500/30 flex items-center justify-center">
