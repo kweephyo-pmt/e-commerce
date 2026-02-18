@@ -59,6 +59,7 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
+    const [userProfile, setUserProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isAdmin, setIsAdmin] = useState(false);
 
@@ -73,6 +74,13 @@ export const AuthProvider = ({ children }) => {
 
                     setIsAdmin(adminStatus);
                     setUser(firebaseUser);
+                    setUserProfile({
+                        uid: firebaseUser.uid,
+                        email: firebaseUser.email,
+                        displayName: userData?.displayName || firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Admin',
+                        photoURL: userData?.photoURL || firebaseUser.photoURL || null,
+                        phone: userData?.phone || null,
+                    });
 
                     // Redirect based on user type
                     const currentPath = window.location.pathname;
@@ -91,6 +99,7 @@ export const AuthProvider = ({ children }) => {
                 }
             } else {
                 setUser(null);
+                setUserProfile(null);
                 setIsAdmin(false);
             }
             setLoading(false);
@@ -219,6 +228,7 @@ export const AuthProvider = ({ children }) => {
 
     const value = {
         user,
+        userProfile,
         loading,
         isAdmin,
         signUp,

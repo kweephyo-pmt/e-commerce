@@ -6,8 +6,8 @@ import { useAuth } from '../context/AuthContext';
 import { Package, Truck, CheckCircle, Clock, Calendar, User, MapPin, Mail, Phone, Search, ShoppingCart, ChevronDown, ChevronRight, Banknote, XCircle, Eye, X, AlertCircle, Filter, LayoutList } from 'lucide-react';
 
 const AdminOrders = () => {
-    const { user } = useAuth();
-    const adminInfo = { uid: user?.uid, name: user?.displayName, email: user?.email };
+    const { userProfile } = useAuth();
+    const adminInfo = { uid: userProfile?.uid, name: userProfile?.displayName, email: userProfile?.email };
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');

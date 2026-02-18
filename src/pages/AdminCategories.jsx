@@ -10,8 +10,8 @@ import {
 } from 'lucide-react';
 
 const AdminCategories = () => {
-    const { user } = useAuth();
-    const adminInfo = { uid: user?.uid, name: user?.displayName, email: user?.email };
+    const { userProfile } = useAuth();
+    const adminInfo = { uid: userProfile?.uid, name: userProfile?.displayName, email: userProfile?.email };
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');

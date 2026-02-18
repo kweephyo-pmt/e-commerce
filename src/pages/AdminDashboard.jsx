@@ -64,7 +64,7 @@ const AdminDashboard = () => {
         stock: ''
     });
 
-    const { signOut, user } = useAuth();
+    const { signOut, user, userProfile } = useAuth();
     const navigate = useNavigate();
 
     // Save active tab to localStorage whenever it changes
@@ -204,7 +204,7 @@ const AdminDashboard = () => {
                 title: 'Product Added',
                 description: `"${formData.name}" added to inventory`,
                 color: 'cyan',
-                admin: { uid: user?.uid, name: user?.displayName, email: user?.email }
+                admin: { uid: userProfile?.uid, name: userProfile?.displayName, email: userProfile?.email }
             });
             showToast('Product added successfully!', 'success');
             setShowAddForm(false);
@@ -235,7 +235,7 @@ const AdminDashboard = () => {
                 title: 'Product Updated',
                 description: `"${formData.name}" details updated`,
                 color: 'cyan',
-                admin: { uid: user?.uid, name: user?.displayName, email: user?.email }
+                admin: { uid: userProfile?.uid, name: userProfile?.displayName, email: userProfile?.email }
             });
             showToast('Product updated successfully!', 'success');
             setEditingProduct(null);
@@ -261,7 +261,7 @@ const AdminDashboard = () => {
                 title: 'Product Deleted',
                 description: `"${productName}" removed from inventory`,
                 color: 'orange',
-                admin: { uid: user?.uid, name: user?.displayName, email: user?.email }
+                admin: { uid: userProfile?.uid, name: userProfile?.displayName, email: userProfile?.email }
             });
             showToast('Product deleted successfully!', 'success');
             fetchProducts();
