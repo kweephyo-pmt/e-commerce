@@ -46,10 +46,12 @@ const AdminDashboard = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-    const [toast, setToast] = useState({ show: false, message: '', type: '' });
+    const [toast, setToast] = useState({ show: false, message: '', type: '', action: null });
     const [recentActivity, setRecentActivity] = useState([]);
     const [showAllActivity, setShowAllActivity] = useState(false);
     const [categories, setCategories] = useState([]);
+    const [dashboardStartTime] = useState(Date.now()); // Track when dashboard was opened
+    const [notificationSound] = useState(new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3')); // Subtle futuristic beep
     const [formData, setFormData] = useState({
         name: '',
         description: '',
@@ -71,12 +73,51 @@ const AdminDashboard = () => {
     }, [activeTab]);
 
     // Toast notification helper
-    const showToast = (message, type = 'success') => {
-        setToast({ show: true, message, type });
+    const showToast = (message, type = 'success', action = null) => {
+        setToast({ show: true, message, type, action });
         setTimeout(() => {
-            setToast({ show: false, message: '', type: '' });
-        }, 3000);
+            setToast({ show: false, message: '', type: '', action: null });
+        }, 10000); // For order alerts, keep it longer (10s)
     };
+
+    // Real-time Order Listener for Notifications
+    useEffect(() => {
+        if (!user) return;
+
+        const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'), limit(1));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                if (change.type === 'added') {
+                    const order = change.doc.data();
+                    const orderTime = order.createdAt?.toDate()?.getTime() || Date.now();
+
+                    // Only notify if order is newer than dashboard load time
+                    if (orderTime > dashboardStartTime) {
+                        notificationSound.play().catch(e => console.log('Audio play blocked:', e));
+
+                        if (document.visibilityState === 'hidden' && Notification.permission === 'granted') {
+                            new Notification('New Order Received!', {
+                                body: `${order.userName} placed an order for ฿${order.total.toFixed(2)}`,
+                                icon: '/favicon.ico'
+                            });
+                        }
+
+                        showToast(
+                            `New Order! ${order.userName} — ฿${order.total.toFixed(2)}`,
+                            'success',
+                            { label: 'VIEW', onClick: () => setActiveTab('orders') }
+                        );
+                    }
+                }
+            });
+        });
+
+        if (Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+
+        return () => unsubscribe();
+    }, [user, dashboardStartTime, notificationSound]);
 
     // Fetch products from Firestore
     const fetchProducts = async () => {
@@ -312,12 +353,12 @@ const AdminDashboard = () => {
         <>
             {/* Toast Notification */}
             {toast.show && (
-                <div className="fixed top-4 right-4 z-50 animate-slide-in-right">
+                <div className="fixed top-4 right-4 z-[9999] animate-slide-in-right">
                     <div className={`flex items-center gap-3 px-6 py-4 corner-clip-sm shadow-2xl border-2 relative overflow-hidden ${toast.type === 'success'
                         ? 'bg-green-500/10 border-green-500/50 text-green-400'
                         : 'bg-red-500/10 border-red-500/50 text-red-400'
                         }`} style={{ boxShadow: toast.type === 'success' ? '0 0 30px rgba(0, 255, 0, 0.4)' : '0 0 30px rgba(255, 0, 0, 0.4)' }}>
-                        <div className="absolute inset-0 bg-gradient-to-r from-gray-900/90 to-gray-800/90"></div>
+                        <div className="absolute inset-0 bg-gray-900/90 to-gray-800/90"></div>
                         {toast.type === 'success' ? (
                             <div className="w-6 h-6 corner-clip-sm bg-green-500 flex items-center justify-center flex-shrink-0 relative z-10" style={{ boxShadow: '0 0 10px rgba(0, 255, 0, 0.8)' }}>
                                 <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -332,8 +373,22 @@ const AdminDashboard = () => {
                             </div>
                         )}
                         <p className="font-bold relative z-10" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{toast.message}</p>
+
+                        {toast.action && (
+                            <button
+                                onClick={() => {
+                                    toast.action.onClick();
+                                    setToast({ show: false, message: '', type: '', action: null });
+                                }}
+                                className="ml-4 px-3 py-1 bg-white/10 hover:bg-white/20 border border-white/30 corner-clip-sm text-xs font-black relative z-10 transition-all"
+                                style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                            >
+                                {toast.action.label}
+                            </button>
+                        )}
+
                         <button
-                            onClick={() => setToast({ show: false, message: '', type: '' })}
+                            onClick={() => setToast({ show: false, message: '', type: '', action: null })}
                             className="ml-2 hover:opacity-70 transition-opacity relative z-10"
                         >
                             <X className="w-4 h-4" />
