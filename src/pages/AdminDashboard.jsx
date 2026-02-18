@@ -40,7 +40,7 @@ const AdminDashboard = () => {
         return localStorage.getItem('adminActiveTab') || 'dashboard';
     });
     const [products, setProducts] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [productsLoading, setProductsLoading] = useState(true);
     const [editingProduct, setEditingProduct] = useState(null);
     const [showAddForm, setShowAddForm] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -121,7 +121,7 @@ const AdminDashboard = () => {
 
     // Real-time products listener — updates instantly when any product changes
     useEffect(() => {
-        setLoading(true);
+        setProductsLoading(true);
         const unsubscribe = onSnapshot(
             collection(db, 'products'),
             (snapshot) => {
@@ -130,12 +130,12 @@ const AdminDashboard = () => {
                     ...d.data()
                 }));
                 setProducts(productsData);
-                setLoading(false);
+                setProductsLoading(false);
             },
             (error) => {
                 console.error('Error listening to products:', error);
                 showToast('Failed to load products', 'error');
-                setLoading(false);
+                setProductsLoading(false);
             }
         );
         return () => unsubscribe();
@@ -337,17 +337,6 @@ const AdminDashboard = () => {
         { id: 'bank-accounts', icon: Banknote, label: 'Bank Accounts' },
         { id: 'settings', icon: Settings, label: 'Settings' },
     ];
-
-    if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0a0e27] via-[#0f172a] to-[#1a1f3a]">
-                <div className="relative">
-                    <div className="animate-spin corner-clip h-16 w-16 border-t-4 border-b-4 border-cyan-400" style={{ boxShadow: '0 0 30px rgba(0, 255, 255, 0.6)' }}></div>
-                    <div className="absolute inset-0 corner-clip border-2 border-magenta-400 animate-ping"></div>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <>
@@ -765,6 +754,11 @@ const AdminDashboard = () => {
                         {/* Products View */}
                         {activeTab === 'products' && (
                             <div className="space-y-4 md:space-y-6 animate-fade-in">
+                                {productsLoading && (
+                                    <div className="flex items-center justify-center py-12">
+                                        <div className="animate-spin corner-clip h-10 w-10 border-t-4 border-b-4 border-cyan-400" style={{ boxShadow: '0 0 20px rgba(0,255,255,0.5)' }} />
+                                    </div>
+                                )}
                                 {/* Header — hidden on mobile */}
                                 <div className="hidden md:block bg-gray-900 corner-clip p-6 md:p-8 border-2 border-magenta-500/50 relative overflow-hidden" style={{ boxShadow: '0 0 40px rgba(255, 0, 255, 0.4)' }}>
                                     <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 0, 255, 0.1) 2px, rgba(255, 0, 255, 0.1) 4px)' }} />
