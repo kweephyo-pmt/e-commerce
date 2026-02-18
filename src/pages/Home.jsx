@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { collection, getDocs, query, limit } from 'firebase/firestore';
+import { collection, onSnapshot, query, limit, where, orderBy } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { ArrowRight, ShoppingBag, Truck, Shield, Headphones } from 'lucide-react';
+import { ArrowRight, ShoppingBag, Truck, Shield, Headphones, ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 
 const features = [
@@ -32,28 +32,47 @@ const Home = () => {
     const [featuredProducts, setFeaturedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // Fetch featured products from Firestore
+    // Real-time listener for featured products
     useEffect(() => {
-        const fetchFeaturedProducts = async () => {
-            try {
-                setLoading(true);
-                // Fetch up to 4 products for the featured section
-                const q = query(collection(db, 'products'), limit(4));
-                const querySnapshot = await getDocs(q);
-                const productsData = querySnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-                setFeaturedProducts(productsData);
-            } catch (error) {
-                console.error('Error fetching featured products:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
+        setLoading(true);
+        // Query up to 12 products marked as featured
+        const q = query(
+            collection(db, 'products'),
+            where('isFeatured', '==', true),
+            limit(12)
+        );
 
-        fetchFeaturedProducts();
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const productsData = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            setFeaturedProducts(productsData);
+            setLoading(false);
+        }, (error) => {
+            console.error('Error fetching featured products:', error);
+            setLoading(false);
+        });
+
+        // Cleanup listener on unmount
+        return () => unsubscribe();
     }, []);
+
+    const sliderRef = useRef(null);
+
+    const scroll = (direction) => {
+        if (sliderRef.current) {
+            const { scrollLeft, clientWidth } = sliderRef.current;
+            const scrollTo = direction === 'left'
+                ? scrollLeft - clientWidth / 2
+                : scrollLeft + clientWidth / 2;
+
+            sliderRef.current.scrollTo({
+                left: scrollTo,
+                behavior: 'smooth'
+            });
+        }
+    };
 
     return (
         <div className="min-h-screen">
@@ -118,20 +137,53 @@ const Home = () => {
                             <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-cyan-400" style={{ boxShadow: '0 0 30px rgba(0, 255, 255, 0.5)' }}></div>
                         </div>
                     ) : featuredProducts.length > 0 ? (
-                        <>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8 mb-8 md:mb-12">
+                        <div className="relative group">
+                            {/* Navigation Buttons */}
+                            {featuredProducts.length >= 4 && (
+                                <>
+                                    <button
+                                        onClick={() => scroll('left')}
+                                        className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 z-20 p-3 bg-gray-900/80 border-2 border-cyan-500/50 text-cyan-400 corner-clip-sm hover:bg-cyan-500 hover:text-white transition-all duration-300 opacity-0 group-hover:opacity-100 hidden md:flex"
+                                        style={{ boxShadow: '0 0 20px rgba(0, 255, 255, 0.3)' }}
+                                    >
+                                        <ChevronLeft className="w-6 h-6" />
+                                    </button>
+                                    <button
+                                        onClick={() => scroll('right')}
+                                        className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 z-20 p-3 bg-gray-900/80 border-2 border-cyan-500/50 text-cyan-400 corner-clip-sm hover:bg-cyan-500 hover:text-white transition-all duration-300 opacity-0 group-hover:opacity-100 hidden md:flex"
+                                        style={{ boxShadow: '0 0 20px rgba(0, 255, 255, 0.3)' }}
+                                    >
+                                        <ChevronRight className="w-6 h-6" />
+                                    </button>
+                                </>
+                            )}
+
+                            {/* Slider Container */}
+                            <div
+                                ref={sliderRef}
+                                className="flex gap-4 sm:gap-6 md:gap-8 overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory"
+                                style={{
+                                    msOverflowStyle: 'none',
+                                    scrollbarWidth: 'none',
+                                    paddingLeft: '1rem',
+                                    paddingRight: '1rem',
+                                    margin: '0 -1rem'
+                                }}
+                            >
                                 {featuredProducts.map((product) => (
-                                    <ProductCard key={product.id} product={product} />
+                                    <div key={product.id} className="min-w-[280px] sm:min-w-[320px] md:min-w-[300px] flex-shrink-0 snap-center">
+                                        <ProductCard product={product} />
+                                    </div>
                                 ))}
                             </div>
 
-                            <div className="text-center">
+                            <div className="text-center mt-8">
                                 <Link to="/products" className="btn-primary inline-flex items-center justify-center space-x-2">
                                     <span>View All Products</span>
                                     <ArrowRight className="w-5 h-5" />
                                 </Link>
                             </div>
-                        </>
+                        </div>
                     ) : (
                         <div className="text-center py-12 md:py-20 bg-gray-900/50 corner-clip border-2 border-cyan-500/30" style={{ boxShadow: '0 0 30px rgba(0, 255, 255, 0.2)' }}>
                             <ShoppingBag className="w-16 h-16 md:w-24 md:h-24 mx-auto text-cyan-400 mb-4" style={{ filter: 'drop-shadow(0 0 15px rgba(0, 255, 255, 0.6))' }} />

@@ -30,7 +30,8 @@ import {
     ChevronLeft,
     Image as ImageIcon,
     Tag,
-    Banknote
+    Banknote,
+    Star
 } from 'lucide-react';
 
 
@@ -61,7 +62,8 @@ const AdminDashboard = () => {
         category: '',
         rating: '',
         reviews: '',
-        stock: ''
+        stock: '',
+        isFeatured: false
     });
 
     const { signOut, user, userProfile } = useAuth();
@@ -178,10 +180,10 @@ const AdminDashboard = () => {
 
     // Handle form input changes
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
+        const { name, value, type, checked } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: value
+            [name]: type === 'checkbox' ? checked : value
         }));
     };
 
@@ -268,6 +270,27 @@ const AdminDashboard = () => {
         }
     };
 
+    // Toggle featured status
+    const handleToggleFeatured = async (product) => {
+        try {
+            const newStatus = !product.isFeatured;
+            await updateDoc(doc(db, 'products', product.id), {
+                isFeatured: newStatus
+            });
+            await logActivity({
+                type: 'product', icon: 'Star',
+                title: newStatus ? 'Product Featured' : 'Product Unfeatured',
+                description: `"${product.name}" ${newStatus ? 'marked as' : 'removed from'} featured`,
+                color: 'yellow',
+                admin: { uid: userProfile?.uid, name: userProfile?.displayName, email: userProfile?.email }
+            });
+            showToast(newStatus ? 'Product featured!' : 'Product unfeatured', 'success');
+        } catch (error) {
+            console.error('Error toggling featured:', error);
+            showToast('Failed to toggle featured', 'error');
+        }
+    };
+
     // Start editing a product
     const startEdit = (product) => {
         setEditingProduct(product);
@@ -280,7 +303,8 @@ const AdminDashboard = () => {
             category: product.category,
             rating: product.rating?.toString() || '',
             reviews: product.reviews?.toString() || '',
-            stock: product.stock?.toString() || ''
+            stock: product.stock?.toString() || '',
+            isFeatured: product.isFeatured || false
         });
         setShowAddForm(false);
     };
@@ -296,7 +320,8 @@ const AdminDashboard = () => {
             category: '',
             rating: '',
             reviews: '',
-            stock: ''
+            stock: '',
+            isFeatured: false
         });
     };
 
@@ -1139,6 +1164,14 @@ const AdminDashboard = () => {
                                                                 </td>
                                                                 <td className="px-6 py-4">
                                                                     <div className="flex space-x-2">
+                                                                        <button
+                                                                            onClick={() => handleToggleFeatured(product)}
+                                                                            className={`p-2 corner-clip-sm border-2 transition-all ${product.isFeatured ? 'text-yellow-400 border-yellow-500/50 bg-yellow-500/10' : 'text-gray-500 border-gray-700 hover:border-yellow-500/30 hover:text-yellow-400/70'}`}
+                                                                            title={product.isFeatured ? "Unfeature" : "Feature on Home"}
+                                                                            style={product.isFeatured ? { boxShadow: '0 0 10px rgba(234, 179, 8, 0.3)' } : {}}
+                                                                        >
+                                                                            <Star className={`w-4 h-4 ${product.isFeatured ? 'fill-yellow-400' : ''}`} />
+                                                                        </button>
                                                                         <button onClick={() => startEdit(product)} className="p-2 text-cyan-400 hover:bg-cyan-500/20 corner-clip-sm border-2 border-cyan-500/50 hover:border-cyan-400 transition-all" title="Edit" style={{ boxShadow: '0 0 10px rgba(0, 255, 255, 0.2)' }}>
                                                                             <Edit2 className="w-4 h-4" style={{ filter: 'drop-shadow(0 0 5px rgba(0, 255, 255, 0.6))' }} />
                                                                         </button>
@@ -1168,6 +1201,12 @@ const AdminDashboard = () => {
                                                             <p className={`text-xs font-bold mt-1 ${product.stock > 10 ? 'text-green-400' : 'text-orange-400'}`} style={{ fontFamily: 'Rajdhani, sans-serif' }}>Stock: {product.stock || 0}</p>
                                                         </div>
                                                         <div className="flex flex-col gap-2 flex-shrink-0">
+                                                            <button
+                                                                onClick={() => handleToggleFeatured(product)}
+                                                                className={`p-2 corner-clip-sm border-2 transition-all ${product.isFeatured ? 'text-yellow-400 border-yellow-500/50 bg-yellow-500/10' : 'text-gray-500 border-gray-700'}`}
+                                                            >
+                                                                <Star className={`w-4 h-4 ${product.isFeatured ? 'fill-yellow-400' : ''}`} />
+                                                            </button>
                                                             <button onClick={() => startEdit(product)} className="p-2 text-cyan-400 hover:bg-cyan-500/20 corner-clip-sm border-2 border-cyan-500/50 transition-all">
                                                                 <Edit2 className="w-4 h-4" />
                                                             </button>

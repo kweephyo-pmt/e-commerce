@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext';
 import { AdminProvider } from './context/AdminContext';
 import { CartProvider } from './context/CartContext';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import { WishlistProvider } from './context/WishlistContext';
 import Home from './pages/Home';
@@ -47,6 +48,7 @@ function AppContent() {
           }
         />
       </Routes>
+      {!isAdminRoute && <Footer />}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { collection, getDocs, doc, updateDoc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { Settings as SettingsIcon, Users, Mail, Crown, UserX, RefreshCw, Shield, Lock, Truck, Save } from 'lucide-react';
+import { Settings as SettingsIcon, Users, Mail, Crown, UserX, RefreshCw, Shield, Lock, Truck, Save, Gamepad2 } from 'lucide-react';
 import Toast from '../components/Toast';
 import { useAuth } from '../context/AuthContext';
 import { logActivity } from '../utils/logActivity';
@@ -19,9 +19,22 @@ const AdminSettings = () => {
     const [shippingLoading, setShippingLoading] = useState(false);
     const [shippingSaving, setShippingSaving] = useState(false);
 
+    // Footer settings
+    const [footerForm, setFooterForm] = useState({
+        description: 'Your ultimate portal to the future of gaming gear. We provide high-performance tech with a cyberpunk edge for elite players and digital enthusiasts.',
+        address: 'Level 99, Cyber District, BKK',
+        phone: '+66 81 234 5678',
+        email: 'support@techno-world.io',
+        facebook: '',
+        instagram: ''
+    });
+    const [footerLoading, setFooterLoading] = useState(false);
+    const [footerSaving, setFooterSaving] = useState(false);
+
     useEffect(() => {
         fetchUsers();
         fetchShippingSettings();
+        fetchFooterSettings();
     }, []);
 
     const fetchUsers = async () => {
@@ -38,6 +51,40 @@ const AdminSettings = () => {
             setToast({ message: 'Failed to load users', type: 'error' });
         } finally {
             setLoadingUsers(false);
+        }
+    };
+
+    const fetchFooterSettings = async () => {
+        setFooterLoading(true);
+        try {
+            const snap = await getDoc(doc(db, 'settings', 'footer'));
+            if (snap.exists()) {
+                setFooterForm(prev => ({ ...prev, ...snap.data() }));
+            }
+        } catch (e) {
+            console.error('Failed to load footer settings:', e);
+        } finally {
+            setFooterLoading(false);
+        }
+    };
+
+    const saveFooterSettings = async () => {
+        setFooterSaving(true);
+        try {
+            await setDoc(doc(db, 'settings', 'footer'), footerForm, { merge: true });
+            await logActivity({
+                type: 'settings', icon: 'Settings',
+                title: 'Footer Settings Updated',
+                description: 'Footer brand info and contact details modified',
+                color: 'magenta',
+                admin: adminInfo
+            });
+            setToast({ message: 'Footer settings saved!', type: 'success' });
+        } catch (e) {
+            console.error('Failed to save footer settings:', e);
+            setToast({ message: 'Failed to save footer settings', type: 'error' });
+        } finally {
+            setFooterSaving(false);
         }
     };
 
@@ -507,6 +554,119 @@ const AdminSettings = () => {
                                     style={{ fontFamily: 'Rajdhani, sans-serif', boxShadow: '0 0 15px rgba(0,255,255,0.2)' }}>
                                     <Save className="w-4 h-4" />
                                     {shippingSaving ? 'Saving...' : 'Save Shipping Settings'}
+                                </button>
+                            </>
+                        )}
+                    </div>
+                </div>
+
+                {/* ── Footer Settings ─────────────────────────────────────── */}
+                <div className="bg-gray-900 corner-clip border-2 border-magenta-500/30 relative overflow-hidden"
+                    style={{ boxShadow: '0 0 30px rgba(255,0,255,0.1)' }}>
+                    <div className="absolute inset-0 opacity-5"
+                        style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,0,255,0.1) 2px, rgba(255,0,255,0.1) 4px)' }}></div>
+
+                    <div className="flex items-center justify-between px-6 md:px-8 py-5 border-b-2 border-magenta-500/20 relative z-10 bg-gray-800/40">
+                        <div className="flex items-center space-x-3">
+                            <Gamepad2 className="w-5 h-5 text-magenta-400" style={{ filter: 'drop-shadow(0 0 6px rgba(255,0,255,0.8))' }} />
+                            <h2 className="text-xl font-black text-magenta-400 uppercase tracking-wide"
+                                style={{ fontFamily: 'Rajdhani, sans-serif', textShadow: '0 0 10px rgba(255,0,255,0.6)' }}>
+                                Footer Management
+                            </h2>
+                        </div>
+                    </div>
+
+                    <div className="px-6 md:px-8 py-6 relative z-10 space-y-6 text-left">
+                        {footerLoading ? (
+                            <div className="text-center py-8">
+                                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-magenta-500 mx-auto"></div>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="space-y-4">
+                                    {/* Brand Description */}
+                                    <div>
+                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Brand Description</label>
+                                        <textarea
+                                            value={footerForm.description}
+                                            onChange={e => setFooterForm(prev => ({ ...prev, description: e.target.value }))}
+                                            className="w-full bg-gray-800 border-2 border-magenta-500/30 corner-clip-sm text-white px-4 py-3 focus:outline-none focus:border-magenta-400 transition-all font-bold text-sm resize-none"
+                                            rows={3}
+                                            style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                                        />
+                                    </div>
+
+                                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {/* Address */}
+                                        <div>
+                                            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Address</label>
+                                            <input
+                                                type="text"
+                                                value={footerForm.address}
+                                                onChange={e => setFooterForm(prev => ({ ...prev, address: e.target.value }))}
+                                                className="w-full bg-gray-800 border-2 border-magenta-500/30 corner-clip-sm text-white px-4 py-3 focus:outline-none focus:border-magenta-400 transition-all font-bold text-sm"
+                                                style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                                            />
+                                        </div>
+                                        {/* Phone */}
+                                        <div>
+                                            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Phone</label>
+                                            <input
+                                                type="text"
+                                                value={footerForm.phone}
+                                                onChange={e => setFooterForm(prev => ({ ...prev, phone: e.target.value }))}
+                                                className="w-full bg-gray-800 border-2 border-magenta-500/30 corner-clip-sm text-white px-4 py-3 focus:outline-none focus:border-magenta-400 transition-all font-bold text-sm"
+                                                style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                                            />
+                                        </div>
+                                        {/* Email */}
+                                        <div>
+                                            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Email</label>
+                                            <input
+                                                type="email"
+                                                value={footerForm.email}
+                                                onChange={e => setFooterForm(prev => ({ ...prev, email: e.target.value }))}
+                                                className="w-full bg-gray-800 border-2 border-magenta-500/30 corner-clip-sm text-white px-4 py-3 focus:outline-none focus:border-magenta-400 transition-all font-bold text-sm"
+                                                style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid sm:grid-cols-2 gap-6">
+                                        {/* Facebook */}
+                                        <div>
+                                            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Facebook URL</label>
+                                            <input
+                                                type="text"
+                                                value={footerForm.facebook}
+                                                onChange={e => setFooterForm(prev => ({ ...prev, facebook: e.target.value }))}
+                                                placeholder="https://facebook.com/..."
+                                                className="w-full bg-gray-800 border-2 border-magenta-500/30 corner-clip-sm text-white px-4 py-3 focus:outline-none focus:border-magenta-400 transition-all font-bold text-sm"
+                                                style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                                            />
+                                        </div>
+                                        {/* Instagram */}
+                                        <div>
+                                            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Instagram URL</label>
+                                            <input
+                                                type="text"
+                                                value={footerForm.instagram}
+                                                onChange={e => setFooterForm(prev => ({ ...prev, instagram: e.target.value }))}
+                                                placeholder="https://instagram.com/..."
+                                                className="w-full bg-gray-800 border-2 border-magenta-500/30 corner-clip-sm text-white px-4 py-3 focus:outline-none focus:border-magenta-400 transition-all font-bold text-sm"
+                                                style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button
+                                    onClick={saveFooterSettings}
+                                    disabled={footerSaving}
+                                    className="flex items-center gap-2 px-6 py-3 bg-magenta-500/20 text-magenta-400 font-black uppercase tracking-widest corner-clip-sm border-2 border-magenta-500/60 hover:bg-magenta-500/30 transition-all disabled:opacity-50"
+                                    style={{ fontFamily: 'Rajdhani, sans-serif', boxShadow: '0 0 15px rgba(255,0,255,0.2)' }}>
+                                    <Save className="w-4 h-4" />
+                                    {footerSaving ? 'Saving...' : 'Save Footer Settings'}
                                 </button>
                             </>
                         )}
