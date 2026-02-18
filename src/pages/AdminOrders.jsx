@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { collection, onSnapshot, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { Package, Truck, CheckCircle, Clock, Calendar, User, MapPin, Search, ShoppingCart, ChevronDown, ChevronRight } from 'lucide-react';
+import { logActivity } from '../utils/logActivity';
+import { Package, Truck, CheckCircle, Clock, Calendar, User, MapPin, Mail, Phone, Search, ShoppingCart, ChevronDown, ChevronRight } from 'lucide-react';
 
 const AdminOrders = () => {
     const [orders, setOrders] = useState([]);
@@ -11,10 +12,8 @@ const AdminOrders = () => {
     const [updating, setUpdating] = useState(null);
     const [expandedOrders, setExpandedOrders] = useState(new Set());
 
-    // Real-time orders subscription
     useEffect(() => {
         const ordersRef = collection(db, 'orders');
-
         const unsubscribe = onSnapshot(ordersRef,
             (querySnapshot) => {
                 const ordersData = querySnapshot.docs.map(doc => ({
@@ -23,14 +22,11 @@ const AdminOrders = () => {
                     createdAt: doc.data().createdAt?.toDate(),
                     updatedAt: doc.data().updatedAt?.toDate()
                 }));
-
-                // Sort by date (newest first)
                 ordersData.sort((a, b) => {
                     if (!a.createdAt) return 1;
                     if (!b.createdAt) return -1;
                     return b.createdAt - a.createdAt;
                 });
-
                 setOrders(ordersData);
                 setLoading(false);
             },
@@ -39,7 +35,6 @@ const AdminOrders = () => {
                 setLoading(false);
             }
         );
-
         return () => unsubscribe();
     }, []);
 
@@ -63,7 +58,12 @@ const AdminOrders = () => {
                 orderStatus: newStatus,
                 updatedAt: serverTimestamp()
             });
-            // Success feedback
+            await logActivity({
+                type: 'order', icon: 'ShoppingCart',
+                title: 'Order Status Updated',
+                description: `Order #${orderId.slice(0, 8).toUpperCase()} → ${newStatus}`,
+                color: 'green'
+            });
             setTimeout(() => setUpdating(null), 1000);
         } catch (error) {
             console.error('Error updating order:', error);
@@ -72,16 +72,28 @@ const AdminOrders = () => {
         }
     };
 
-    const getStatusColor = (status) => {
+    const getStatusStyle = (status) => {
         switch (status) {
             case 'processing':
-                return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+                return {
+                    className: 'border-yellow-500/60 text-yellow-400 bg-yellow-500/10',
+                    glow: '0 0 10px rgba(234, 179, 8, 0.4)'
+                };
             case 'shipped':
-                return 'bg-blue-100 text-blue-800 border-blue-300';
+                return {
+                    className: 'border-cyan-500/60 text-cyan-400 bg-cyan-500/10',
+                    glow: '0 0 10px rgba(0, 255, 255, 0.4)'
+                };
             case 'delivered':
-                return 'bg-green-100 text-green-800 border-green-300';
+                return {
+                    className: 'border-green-500/60 text-green-400 bg-green-500/10',
+                    glow: '0 0 10px rgba(0, 255, 0, 0.4)'
+                };
             default:
-                return 'bg-gray-100 text-gray-800 border-gray-300';
+                return {
+                    className: 'border-gray-500/60 text-gray-400 bg-gray-500/10',
+                    glow: 'none'
+                };
         }
     };
 
@@ -96,15 +108,12 @@ const AdminOrders = () => {
         }).format(date);
     };
 
-    // Filter orders
     const filteredOrders = orders.filter(order => {
         const matchesSearch =
             order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
             order.userName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             order.userEmail?.toLowerCase().includes(searchQuery.toLowerCase());
-
         const matchesStatus = filterStatus === 'all' || order.orderStatus === filterStatus;
-
         return matchesSearch && matchesStatus;
     });
 
@@ -119,312 +128,381 @@ const AdminOrders = () => {
         return (
             <div className="flex items-center justify-center py-20">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Loading orders...</p>
+                    <div className="relative w-20 h-20 mx-auto mb-4">
+                        <div className="absolute inset-0 border-4 border-cyan-500/30 corner-clip animate-spin"
+                            style={{ borderTopColor: 'rgba(0,255,255,0.9)', boxShadow: '0 0 20px rgba(0,255,255,0.5)' }}></div>
+                        <div className="absolute inset-3 border-2 border-magenta-500/50 corner-clip animate-ping"
+                            style={{ borderColor: 'rgba(255,0,255,0.6)' }}></div>
+                    </div>
+                    <p className="text-cyan-400 uppercase tracking-widest font-black" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                        Loading Orders...
+                    </p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="space-y-6 bg-gradient-to-br from-blue-50 via-white to-indigo-50 min-h-screen p-6">
+        <div className="space-y-6 min-h-screen p-6" style={{ background: 'linear-gradient(135deg, #0a0e27 0%, #0f172a 50%, #1a1f3a 100%)' }}>
+
             {/* Header */}
-            <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-                <div className="flex items-center space-x-4">
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-                        <ShoppingCart className="w-8 h-8 text-white" />
+            <div className="bg-gray-900 corner-clip p-8 border-2 border-cyan-500/30 relative overflow-hidden"
+                style={{ boxShadow: '0 0 40px rgba(0, 255, 255, 0.2)' }}>
+                <div className="absolute inset-0 opacity-5"
+                    style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,255,0.1) 2px, rgba(0,255,255,0.1) 4px)' }}></div>
+                <div className="flex items-center space-x-4 relative z-10">
+                    <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 corner-clip flex items-center justify-center"
+                        style={{ boxShadow: '0 0 25px rgba(0, 255, 255, 0.6)' }}>
+                        <ShoppingCart className="w-8 h-8 text-white" style={{ filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.8))' }} />
                     </div>
                     <div>
-                        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-1">
+                        <h1 className="text-4xl font-black text-white uppercase tracking-wider mb-1"
+                            style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(0, 255, 255, 0.8)' }}>
                             Order Management
                         </h1>
-                        <p className="text-gray-600 text-lg">Manage and track all customer orders • Real-time updates</p>
+                        <p className="text-cyan-300/70 text-lg font-bold uppercase tracking-wide"
+                            style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                            Track & Manage All Customer Orders • Real-Time Updates
+                        </p>
                     </div>
                 </div>
             </div>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="bg-gradient-to-br from-gray-500 to-gray-600 rounded-2xl shadow-xl p-6 text-white transform hover:scale-105 transition-all duration-300">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                            <Package className="w-7 h-7 text-white" />
+                {/* Total Orders */}
+                <div className="bg-gray-900 corner-clip p-6 border-2 border-gray-500/40 relative overflow-hidden group hover:border-gray-400/60 transition-all"
+                    style={{ boxShadow: '0 0 20px rgba(150,150,150,0.15)' }}>
+                    <div className="absolute inset-0 bg-gradient-to-br from-gray-500/5 to-transparent"></div>
+                    <div className="flex items-center justify-between mb-4 relative z-10">
+                        <div className="w-14 h-14 bg-gray-500/20 corner-clip-sm flex items-center justify-center border border-gray-500/40">
+                            <Package className="w-7 h-7 text-gray-300" style={{ filter: 'drop-shadow(0 0 5px rgba(200,200,200,0.6))' }} />
                         </div>
                         <div className="text-right">
-                            <p className="text-gray-100 text-sm font-medium mb-1">Total Orders</p>
-                            <p className="text-4xl font-bold">{statusCounts.all}</p>
+                            <p className="text-gray-400 text-xs font-black uppercase tracking-wide mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Total Orders</p>
+                            <p className="text-5xl font-black text-white" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(200,200,200,0.5)' }}>{statusCounts.all}</p>
                         </div>
                     </div>
-                    <div className="h-1 bg-white/30 rounded-full overflow-hidden">
-                        <div className="h-full bg-white rounded-full" style={{ width: '100%' }}></div>
+                    <div className="h-1 bg-gray-700 overflow-hidden relative z-10">
+                        <div className="h-full bg-gradient-to-r from-gray-400 to-gray-300" style={{ width: '100%', boxShadow: '0 0 8px rgba(200,200,200,0.6)' }}></div>
                     </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-yellow-500 to-orange-600 rounded-2xl shadow-xl p-6 text-white transform hover:scale-105 transition-all duration-300">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                            <Clock className="w-7 h-7 text-white" />
+                {/* Processing */}
+                <div className="bg-gray-900 corner-clip p-6 border-2 border-yellow-500/40 relative overflow-hidden group hover:border-yellow-400/60 transition-all"
+                    style={{ boxShadow: '0 0 20px rgba(234,179,8,0.15)' }}>
+                    <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent"></div>
+                    <div className="flex items-center justify-between mb-4 relative z-10">
+                        <div className="w-14 h-14 bg-yellow-500/20 corner-clip-sm flex items-center justify-center border border-yellow-500/40">
+                            <Clock className="w-7 h-7 text-yellow-400" style={{ filter: 'drop-shadow(0 0 5px rgba(234,179,8,0.8))' }} />
                         </div>
                         <div className="text-right">
-                            <p className="text-yellow-100 text-sm font-medium mb-1">Processing</p>
-                            <p className="text-4xl font-bold">{statusCounts.processing}</p>
+                            <p className="text-yellow-400/70 text-xs font-black uppercase tracking-wide mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Processing</p>
+                            <p className="text-5xl font-black text-yellow-400" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(234,179,8,0.8)' }}>{statusCounts.processing}</p>
                         </div>
                     </div>
-                    <div className="h-1 bg-white/30 rounded-full overflow-hidden">
-                        <div className="h-full bg-white rounded-full" style={{ width: `${(statusCounts.processing / statusCounts.all * 100) || 0}%` }}></div>
+                    <div className="h-1 bg-gray-700 overflow-hidden relative z-10">
+                        <div className="h-full bg-gradient-to-r from-yellow-500 to-orange-400"
+                            style={{ width: `${(statusCounts.processing / (statusCounts.all || 1) * 100)}%`, boxShadow: '0 0 8px rgba(234,179,8,0.6)' }}></div>
                     </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-xl p-6 text-white transform hover:scale-105 transition-all duration-300">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                            <Truck className="w-7 h-7 text-white" />
+                {/* Shipped */}
+                <div className="bg-gray-900 corner-clip p-6 border-2 border-cyan-500/40 relative overflow-hidden group hover:border-cyan-400/60 transition-all"
+                    style={{ boxShadow: '0 0 20px rgba(0,255,255,0.15)' }}>
+                    <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent"></div>
+                    <div className="flex items-center justify-between mb-4 relative z-10">
+                        <div className="w-14 h-14 bg-cyan-500/20 corner-clip-sm flex items-center justify-center border border-cyan-500/40">
+                            <Truck className="w-7 h-7 text-cyan-400" style={{ filter: 'drop-shadow(0 0 5px rgba(0,255,255,0.8))' }} />
                         </div>
                         <div className="text-right">
-                            <p className="text-blue-100 text-sm font-medium mb-1">Shipped</p>
-                            <p className="text-4xl font-bold">{statusCounts.shipped}</p>
+                            <p className="text-cyan-400/70 text-xs font-black uppercase tracking-wide mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Shipped</p>
+                            <p className="text-5xl font-black text-cyan-400" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(0,255,255,0.8)' }}>{statusCounts.shipped}</p>
                         </div>
                     </div>
-                    <div className="h-1 bg-white/30 rounded-full overflow-hidden">
-                        <div className="h-full bg-white rounded-full" style={{ width: `${(statusCounts.shipped / statusCounts.all * 100) || 0}%` }}></div>
+                    <div className="h-1 bg-gray-700 overflow-hidden relative z-10">
+                        <div className="h-full bg-gradient-to-r from-cyan-500 to-blue-400"
+                            style={{ width: `${(statusCounts.shipped / (statusCounts.all || 1) * 100)}%`, boxShadow: '0 0 8px rgba(0,255,255,0.6)' }}></div>
                     </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl shadow-xl p-6 text-white transform hover:scale-105 transition-all duration-300">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                            <CheckCircle className="w-7 h-7 text-white" />
+                {/* Delivered */}
+                <div className="bg-gray-900 corner-clip p-6 border-2 border-green-500/40 relative overflow-hidden group hover:border-green-400/60 transition-all"
+                    style={{ boxShadow: '0 0 20px rgba(0,255,0,0.15)' }}>
+                    <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent"></div>
+                    <div className="flex items-center justify-between mb-4 relative z-10">
+                        <div className="w-14 h-14 bg-green-500/20 corner-clip-sm flex items-center justify-center border border-green-500/40">
+                            <CheckCircle className="w-7 h-7 text-green-400" style={{ filter: 'drop-shadow(0 0 5px rgba(0,255,0,0.8))' }} />
                         </div>
                         <div className="text-right">
-                            <p className="text-green-100 text-sm font-medium mb-1">Delivered</p>
-                            <p className="text-4xl font-bold">{statusCounts.delivered}</p>
+                            <p className="text-green-400/70 text-xs font-black uppercase tracking-wide mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Delivered</p>
+                            <p className="text-5xl font-black text-green-400" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(0,255,0,0.8)' }}>{statusCounts.delivered}</p>
                         </div>
                     </div>
-                    <div className="h-1 bg-white/30 rounded-full overflow-hidden">
-                        <div className="h-full bg-white rounded-full" style={{ width: `${(statusCounts.delivered / statusCounts.all * 100) || 0}%` }}></div>
+                    <div className="h-1 bg-gray-700 overflow-hidden relative z-10">
+                        <div className="h-full bg-gradient-to-r from-green-500 to-emerald-400"
+                            style={{ width: `${(statusCounts.delivered / (statusCounts.all || 1) * 100)}%`, boxShadow: '0 0 8px rgba(0,255,0,0.6)' }}></div>
                     </div>
                 </div>
             </div>
 
             {/* Filters */}
-            <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
-                <div className="flex flex-col md:flex-row gap-4">
+            <div className="bg-gray-900 corner-clip p-6 border-2 border-cyan-500/30 relative overflow-hidden"
+                style={{ boxShadow: '0 0 20px rgba(0,255,255,0.1)' }}>
+                <div className="absolute inset-0 opacity-5"
+                    style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,255,0.1) 2px, rgba(0,255,255,0.1) 4px)' }}></div>
+                <div className="flex flex-col md:flex-row gap-4 relative z-10">
                     {/* Search */}
                     <div className="flex-1 relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-cyan-400 w-5 h-5"
+                            style={{ filter: 'drop-shadow(0 0 5px rgba(0,255,255,0.6))' }} />
                         <input
                             type="text"
-                            placeholder="Search by order ID, customer name, or email..."
+                            placeholder="SEARCH BY ORDER ID, CUSTOMER NAME OR EMAIL..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors"
+                            className="w-full pl-10 pr-4 py-3 bg-gray-800 border-2 border-cyan-500/50 corner-clip-sm text-white placeholder-cyan-300/40 focus:outline-none focus:border-cyan-400 transition-all"
+                            style={{ fontFamily: 'Rajdhani, sans-serif', boxShadow: '0 0 15px rgba(0,255,255,0.15)' }}
                         />
                     </div>
 
-                    {/* Status Filter */}
+                    {/* Status Filter Buttons */}
                     <div className="flex gap-2 flex-wrap">
-                        {['all', 'processing', 'shipped', 'delivered'].map((status) => (
-                            <button
-                                key={status}
-                                onClick={() => setFilterStatus(status)}
-                                className={`px-5 py-3 rounded-xl font-semibold text-sm transition-all transform hover:scale-105 ${filterStatus === status
-                                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                    }`}
-                            >
-                                {status.charAt(0).toUpperCase() + status.slice(1)}
-                                <span className={`ml-1 text-xs ${filterStatus === status ? 'text-blue-100' : 'text-gray-500'}`}>
-                                    ({statusCounts[status]})
-                                </span>
-                            </button>
-                        ))}
+                        {[
+                            { key: 'all', label: 'All', color: 'gray' },
+                            { key: 'processing', label: 'Processing', color: 'yellow' },
+                            { key: 'shipped', label: 'Shipped', color: 'cyan' },
+                            { key: 'delivered', label: 'Delivered', color: 'green' }
+                        ].map(({ key, label, color }) => {
+                            const colorMap = {
+                                gray: { active: 'border-gray-400 bg-gray-500/20 text-gray-200', inactive: 'border-gray-600/40 text-gray-500 hover:border-gray-500', glow: 'rgba(150,150,150,0.4)' },
+                                yellow: { active: 'border-yellow-400 bg-yellow-500/20 text-yellow-300', inactive: 'border-yellow-600/30 text-yellow-600 hover:border-yellow-500', glow: 'rgba(234,179,8,0.4)' },
+                                cyan: { active: 'border-cyan-400 bg-cyan-500/20 text-cyan-300', inactive: 'border-cyan-600/30 text-cyan-600 hover:border-cyan-500', glow: 'rgba(0,255,255,0.4)' },
+                                green: { active: 'border-green-400 bg-green-500/20 text-green-300', inactive: 'border-green-600/30 text-green-600 hover:border-green-500', glow: 'rgba(0,255,0,0.4)' },
+                            };
+                            const c = colorMap[color];
+                            const isActive = filterStatus === key;
+                            return (
+                                <button
+                                    key={key}
+                                    onClick={() => setFilterStatus(key)}
+                                    className={`px-5 py-3 corner-clip-sm font-black text-sm uppercase tracking-wide border-2 transition-all ${isActive ? c.active : c.inactive}`}
+                                    style={{
+                                        fontFamily: 'Rajdhani, sans-serif',
+                                        boxShadow: isActive ? `0 0 15px ${c.glow}` : 'none'
+                                    }}
+                                >
+                                    {label}
+                                    <span className="ml-1 text-xs opacity-70">({statusCounts[key]})</span>
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
             </div>
 
             {/* Orders Table */}
-            <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
-                <div className="overflow-x-auto">
+            <div className="bg-gray-900 corner-clip overflow-hidden border-2 border-cyan-500/30 relative"
+                style={{ boxShadow: '0 0 30px rgba(0,255,255,0.2)' }}>
+                <div className="absolute inset-0 opacity-5"
+                    style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,255,0.1) 2px, rgba(0,255,255,0.1) 4px)' }}></div>
+                <div className="overflow-x-auto relative z-10">
                     <table className="w-full">
-                        <thead className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white">
+                        <thead className="bg-gray-800/80 border-b-2 border-cyan-500/50">
                             <tr>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    Order
-                                </th>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    Customer
-                                </th>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    Date
-                                </th>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    Total
-                                </th>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    Status
-                                </th>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    Actions
-                                </th>
+                                {['Order', 'Customer', 'Date', 'Total', 'Status', 'Actions'].map(h => (
+                                    <th key={h} className="px-6 py-4 text-left text-xs font-black text-cyan-400 uppercase tracking-widest"
+                                        style={{ fontFamily: 'Rajdhani, sans-serif', textShadow: '0 0 8px rgba(0,255,255,0.6)' }}>
+                                        {h}
+                                    </th>
+                                ))}
                             </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
+                        <tbody className="divide-y divide-cyan-500/10">
                             {filteredOrders.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
+                                    <td colSpan="6" className="px-6 py-12 text-center text-gray-400"
+                                        style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                         No orders found
                                     </td>
                                 </tr>
                             ) : (
-                                filteredOrders.map((order) => (
-                                    <>
-                                        <tr
-                                            key={order.id}
-                                            className="hover:bg-gray-50 transition-colors cursor-pointer"
-                                            onClick={() => toggleOrderExpansion(order.id)}
-                                        >
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center space-x-2">
-                                                    <Package className="w-4 h-4 text-blue-600" />
-                                                    <span className="font-mono text-sm font-semibold">
-                                                        #{order.id.slice(0, 8).toUpperCase()}
-                                                    </span>
-                                                </div>
-                                                <div className="text-xs text-gray-500 mt-1 flex items-center">
-                                                    {order.items?.length} item(s)
-                                                    {expandedOrders.has(order.id) ? (
-                                                        <ChevronDown className="w-4 h-4 ml-2 text-blue-600" />
-                                                    ) : (
-                                                        <ChevronRight className="w-4 h-4 ml-2 text-blue-600" />
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-start space-x-2">
-                                                    <User className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                                                    <div className="min-w-0">
-                                                        <div className="font-semibold text-sm">{order.userName}</div>
-                                                        <div className="text-xs text-gray-500">{order.userEmail}</div>
-                                                        {order.shippingAddress && (
-                                                            <div className="mt-2 text-xs text-gray-600 space-y-0.5">
-                                                                <div className="flex items-start">
-                                                                    <MapPin className="w-3 h-3 mr-1 mt-0.5 flex-shrink-0" />
-                                                                    <div className="break-words">
-                                                                        <div>{order.shippingAddress.address}</div>
-                                                                        <div>
-                                                                            {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zipCode}
-                                                                        </div>
-                                                                        <div>{order.shippingAddress.country}</div>
-                                                                        {order.shippingAddress.phone && (
-                                                                            <div className="mt-1">📞 {order.shippingAddress.phone}</div>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-                                                            </div>
+                                filteredOrders.map((order) => {
+                                    const statusStyle = getStatusStyle(order.orderStatus);
+                                    return (
+                                        <>
+                                            <tr
+                                                key={order.id}
+                                                className="hover:bg-cyan-500/5 transition-colors cursor-pointer border-b border-cyan-500/10"
+                                                onClick={() => toggleOrderExpansion(order.id)}
+                                            >
+                                                {/* Order ID */}
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center space-x-2">
+                                                        <Package className="w-4 h-4 text-cyan-400" style={{ filter: 'drop-shadow(0 0 4px rgba(0,255,255,0.6))' }} />
+                                                        <span className="font-black text-white text-sm" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                                                            #{order.id.slice(0, 8).toUpperCase()}
+                                                        </span>
+                                                    </div>
+                                                    <div className="text-xs text-gray-500 mt-1 flex items-center" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                        {order.items?.length} item(s)
+                                                        {expandedOrders.has(order.id) ? (
+                                                            <ChevronDown className="w-4 h-4 ml-2 text-cyan-400" />
+                                                        ) : (
+                                                            <ChevronRight className="w-4 h-4 ml-2 text-cyan-400" />
                                                         )}
                                                     </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center text-sm text-gray-600">
-                                                    <Calendar className="w-4 h-4 mr-1" />
-                                                    {formatDate(order.createdAt)}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="font-bold text-blue-600">
-                                                    ฿{order.total?.toFixed(2)}
-                                                </div>
-                                                <div className="text-xs text-gray-500">
-                                                    {order.paymentStatus === 'paid' && '✓ Paid'}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(order.orderStatus)}`}>
-                                                    {order.orderStatus}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
-                                                <select
-                                                    value={order.orderStatus}
-                                                    onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                                                    disabled={updating === order.id}
-                                                    className={`text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${updating === order.id ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-                                                        }`}
-                                                >
-                                                    <option value="processing">Processing</option>
-                                                    <option value="shipped">Shipped</option>
-                                                    <option value="delivered">Delivered</option>
-                                                </select>
-                                                {updating === order.id && (
-                                                    <div className="text-xs text-green-600 mt-1">✓ Updated</div>
-                                                )}
-                                            </td>
-                                        </tr>
+                                                </td>
 
-                                        {/* Expanded Order Items */}
-                                        {expandedOrders.has(order.id) && (
-                                            <tr key={`${order.id}-items`} className="bg-blue-50">
-                                                <td colSpan="6" className="px-6 py-4">
-                                                    <div className="bg-white rounded-lg p-4 shadow-inner">
-                                                        <h4 className="font-bold text-gray-800 mb-3 flex items-center">
-                                                            <ShoppingCart className="w-4 h-4 mr-2 text-blue-600" />
-                                                            Order Items
-                                                        </h4>
-                                                        <div className="space-y-3">
-                                                            {order.items?.map((item, index) => (
-                                                                <div key={index} className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
-                                                                    <img
-                                                                        src={item.image}
-                                                                        alt={item.name}
-                                                                        className="w-16 h-16 object-cover rounded-lg shadow-sm"
-                                                                    />
-                                                                    <div className="flex-1">
-                                                                        <div className="font-semibold text-gray-800">{item.name}</div>
-                                                                        <div className="text-sm text-gray-600">
-                                                                            <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-medium">
-                                                                                {item.category}
-                                                                            </span>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="text-right">
-                                                                        <div className="text-sm text-gray-600">Qty: {item.quantity}</div>
-                                                                        <div className="font-bold text-blue-600">
-                                                                            ฿{(item.price * item.quantity).toFixed(2)}
-                                                                        </div>
-                                                                        {item.discount > 0 && (
-                                                                            <div className="text-xs text-red-600">
-                                                                                -{item.discount}% off
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-                                                            ))}
+                                                {/* Customer */}
+                                                <td className="px-6 py-5">
+                                                    <div className="flex items-start space-x-3">
+                                                        <div className="w-8 h-8 bg-cyan-500/20 corner-clip-sm flex items-center justify-center flex-shrink-0 border border-cyan-500/40 mt-0.5">
+                                                            <User className="w-4 h-4 text-cyan-400" />
                                                         </div>
-
-                                                        {/* Order Summary */}
-                                                        <div className="mt-4 pt-4 border-t border-gray-200">
-                                                            <div className="flex justify-end space-x-8 text-sm">
-                                                                <div className="space-y-1">
-                                                                    <div className="text-gray-600">Subtotal:</div>
-                                                                    <div className="text-gray-600">Shipping:</div>
-                                                                    <div className="text-gray-600">Tax:</div>
-                                                                    <div className="font-bold text-gray-800">Total:</div>
-                                                                </div>
-                                                                <div className="space-y-1 text-right">
-                                                                    <div className="text-gray-800">฿{order.subtotal?.toFixed(2)}</div>
-                                                                    <div className="text-gray-800">฿{order.shipping?.toFixed(2)}</div>
-                                                                    <div className="text-gray-800">฿{order.tax?.toFixed(2)}</div>
-                                                                    <div className="font-bold text-blue-600">฿{order.total?.toFixed(2)}</div>
-                                                                </div>
+                                                        <div className="min-w-0 space-y-1">
+                                                            <div className="font-black text-white text-base leading-tight" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{order.userName}</div>
+                                                            <div className="text-sm text-gray-300 flex items-center gap-1">
+                                                                <Mail className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
+                                                                {order.userEmail}
                                                             </div>
+                                                            {order.shippingAddress && (
+                                                                <div className="mt-2 pt-2 border-t border-cyan-500/10 text-sm text-gray-300 space-y-1">
+                                                                    <div className="flex items-start gap-1.5">
+                                                                        <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0 text-cyan-400" />
+                                                                        <div className="leading-snug">
+                                                                            <div className="text-white font-bold">{order.shippingAddress.address}</div>
+                                                                            <div>{order.shippingAddress.city}{order.shippingAddress.state ? `, ${order.shippingAddress.state}` : ''} {order.shippingAddress.zipCode}</div>
+                                                                            <div>{order.shippingAddress.country}</div>
+                                                                        </div>
+                                                                    </div>
+                                                                    {order.shippingAddress.phone && (
+                                                                        <div className="flex items-center gap-1.5 text-gray-300">
+                                                                            <Phone className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
+                                                                            {order.shippingAddress.phone}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </td>
+
+                                                {/* Date */}
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center text-sm text-gray-200" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                        <Calendar className="w-4 h-4 mr-1 text-cyan-400" />
+                                                        {formatDate(order.createdAt)}
+                                                    </div>
+                                                </td>
+
+                                                {/* Total */}
+                                                <td className="px-6 py-4">
+                                                    <div className="font-black text-cyan-400" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 8px rgba(0,255,255,0.5)' }}>
+                                                        ฿{order.total?.toFixed(2)}
+                                                    </div>
+                                                    {order.paymentStatus === 'paid' && (
+                                                        <div className="text-xs text-green-400 font-black mt-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>✓ PAID</div>
+                                                    )}
+                                                </td>
+
+                                                {/* Status Badge */}
+                                                <td className="px-6 py-4">
+                                                    <span
+                                                        className={`px-3 py-1 corner-clip-sm text-xs font-black uppercase tracking-wide border ${statusStyle.className}`}
+                                                        style={{ fontFamily: 'Rajdhani, sans-serif', boxShadow: statusStyle.glow }}
+                                                    >
+                                                        {order.orderStatus}
+                                                    </span>
+                                                </td>
+
+                                                {/* Actions */}
+                                                <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                                                    <select
+                                                        value={order.orderStatus}
+                                                        onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                                                        disabled={updating === order.id}
+                                                        className={`text-sm bg-gray-800 border-2 border-cyan-500/40 corner-clip-sm text-white px-3 py-1.5 focus:outline-none focus:border-cyan-400 transition-all ${updating === order.id ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                                                        style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                                                    >
+                                                        <option value="processing" className="bg-gray-900">Processing</option>
+                                                        <option value="shipped" className="bg-gray-900">Shipped</option>
+                                                        <option value="delivered" className="bg-gray-900">Delivered</option>
+                                                    </select>
+                                                    {updating === order.id && (
+                                                        <div className="text-xs text-green-400 font-black mt-1 uppercase" style={{ fontFamily: 'Rajdhani, sans-serif' }}>✓ Updated</div>
+                                                    )}
+                                                </td>
                                             </tr>
-                                        )}
-                                    </>
-                                ))
+
+                                            {/* Expanded Order Items */}
+                                            {expandedOrders.has(order.id) && (
+                                                <tr key={`${order.id}-items`} className="bg-cyan-500/5">
+                                                    <td colSpan="6" className="px-6 py-4">
+                                                        <div className="bg-gray-800/80 corner-clip-sm p-4 border-2 border-cyan-500/20"
+                                                            style={{ boxShadow: '0 0 15px rgba(0,255,255,0.1)' }}>
+                                                            <h4 className="font-black text-cyan-400 mb-4 flex items-center uppercase tracking-wide"
+                                                                style={{ fontFamily: 'Rajdhani, sans-serif', textShadow: '0 0 8px rgba(0,255,255,0.5)' }}>
+                                                                <ShoppingCart className="w-4 h-4 mr-2" style={{ filter: 'drop-shadow(0 0 4px rgba(0,255,255,0.6))' }} />
+                                                                Order Items
+                                                            </h4>
+                                                            <div className="space-y-3">
+                                                                {order.items?.map((item, index) => (
+                                                                    <div key={index} className="flex items-center space-x-4 p-3 bg-gray-900/80 corner-clip-sm border border-cyan-500/20">
+                                                                        <img
+                                                                            src={item.image}
+                                                                            alt={item.name}
+                                                                            className="w-16 h-16 object-cover corner-clip border-2 border-cyan-500/30"
+                                                                            style={{ boxShadow: '0 0 10px rgba(0,255,255,0.2)' }}
+                                                                        />
+                                                                        <div className="flex-1">
+                                                                            <div className="font-black text-white" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{item.name}</div>
+                                                                            <div className="mt-1">
+                                                                                <span className="bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 px-2 py-0.5 corner-clip-sm text-xs font-black"
+                                                                                    style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                                                    {item.category}
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="text-right">
+                                                                            <div className="text-sm text-gray-200 font-black" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Qty: {item.quantity}</div>
+                                                                            <div className="font-black text-cyan-400" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 8px rgba(0,255,255,0.5)' }}>
+                                                                                ฿{(item.price * item.quantity).toFixed(2)}
+                                                                            </div>
+                                                                            {item.discount > 0 && (
+                                                                                <div className="text-xs text-red-400 font-black" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                                                    -{item.discount}% off
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+
+                                                            {/* Order Summary */}
+                                                            <div className="mt-4 pt-4 border-t-2 border-cyan-500/20">
+                                                                <div className="flex justify-end space-x-8 text-sm">
+                                                                    <div className="space-y-1 text-gray-300 font-black uppercase" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                                        <div>Subtotal:</div>
+                                                                        <div>Shipping:</div>
+                                                                        <div>Tax:</div>
+                                                                        <div className="text-white">Total:</div>
+                                                                    </div>
+                                                                    <div className="space-y-1 text-right font-black" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                                                                        <div className="text-gray-300">฿{order.subtotal?.toFixed(2)}</div>
+                                                                        <div className="text-gray-300">฿{order.shipping?.toFixed(2)}</div>
+                                                                        <div className="text-gray-300">฿{order.tax?.toFixed(2)}</div>
+                                                                        <div className="text-cyan-400" style={{ textShadow: '0 0 10px rgba(0,255,255,0.7)' }}>฿{order.total?.toFixed(2)}</div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </>
+                                    );
+                                })
                             )}
                         </tbody>
                     </table>

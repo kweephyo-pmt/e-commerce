@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '../config/firebase';
 import { X, SlidersHorizontal, Star, DollarSign, Tag, TrendingUp } from 'lucide-react';
 
 const FilterSidebar = ({
@@ -10,7 +12,7 @@ const FilterSidebar = ({
     onCategoryChange,
     mobileOnly = false
 }) => {
-    const categories = ['All', 'Electronics', 'Fashion', 'Sports', 'Home', 'Books'];
+    const [categories, setCategories] = useState(['All']);
 
     // Calculate price range from products
     const [priceRange, setPriceRange] = useState({ min: 0, max: 10000 });
@@ -19,6 +21,19 @@ const FilterSidebar = ({
     const [selectedBrands, setSelectedBrands] = useState([]);
     const [inStockOnly, setInStockOnly] = useState(false);
     const [onSaleOnly, setOnSaleOnly] = useState(false);
+
+    // Real-time categories from Firestore
+    useEffect(() => {
+        const unsubscribe = onSnapshot(
+            collection(db, 'categories'),
+            (snapshot) => {
+                const fetched = snapshot.docs.map(d => d.data().name).filter(Boolean);
+                setCategories(['All', ...fetched]);
+            },
+            (error) => console.error('Error loading categories:', error)
+        );
+        return () => unsubscribe();
+    }, []);
 
     // Calculate actual price range and brands from products
     useEffect(() => {

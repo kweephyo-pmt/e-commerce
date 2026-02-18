@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { collection, addDoc, serverTimestamp, doc, getDoc, updateDoc, runTransaction } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import StripePaymentForm from '../components/StripePaymentForm';
+import { logActivity } from '../utils/logActivity';
 
 const Checkout = () => {
     const { cartItems, getCartTotal, clearCart } = useCart();
@@ -172,10 +173,10 @@ const Checkout = () => {
                                     <div key={step.id} className="flex flex-col items-center flex-1">
                                         <div
                                             className={`w-12 h-12 corner-clip-sm flex items-center justify-center mb-2 transition-all duration-300 border-2 ${isCompleted
-                                                    ? 'bg-gradient-to-br from-magenta-500 to-magenta-600 text-white border-magenta-500/50 scale-110'
-                                                    : isActive
-                                                        ? 'bg-gradient-to-br from-cyan-500 to-cyan-600 text-white border-cyan-500/50 scale-110'
-                                                        : 'bg-gray-800 text-gray-500 border-gray-700'
+                                                ? 'bg-gradient-to-br from-magenta-500 to-magenta-600 text-white border-magenta-500/50 scale-110'
+                                                : isActive
+                                                    ? 'bg-gradient-to-br from-cyan-500 to-cyan-600 text-white border-cyan-500/50 scale-110'
+                                                    : 'bg-gray-800 text-gray-500 border-gray-700'
                                                 }`}
                                             style={{
                                                 boxShadow: isActive || isCompleted ? '0 0 20px rgba(0, 255, 255, 0.5)' : 'none'
@@ -524,6 +525,15 @@ const Checkout = () => {
                                                 };
 
                                                 const orderRef = await addDoc(collection(db, 'orders'), orderData);
+
+                                                // Log new order to activity feed
+                                                await logActivity({
+                                                    type: 'order',
+                                                    icon: 'ShoppingCart',
+                                                    title: 'New Order Placed',
+                                                    description: `${formData.fullName} placed order #${orderRef.id.slice(0, 8).toUpperCase()} · ฿${total.toFixed(2)}`,
+                                                    color: 'cyan'
+                                                });
 
                                                 // Clear cart and redirect
                                                 clearCart();

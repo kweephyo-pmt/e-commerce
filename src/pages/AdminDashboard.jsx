@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot, orderBy, query, limit } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAuth } from '../context/AuthContext';
+import { logActivity } from '../utils/logActivity';
 import CloudinaryUpload from '../components/CloudinaryUpload';
 import AdminOrders from './AdminOrders';
 import AdminCustomers from './AdminCustomers';
 import AdminSettings from './AdminSettings';
+import AdminCategories from './AdminCategories';
 import {
     LayoutDashboard,
     Package,
@@ -25,7 +27,8 @@ import {
     ShoppingBag,
     Menu,
     ChevronLeft,
-    Image as ImageIcon
+    Image as ImageIcon,
+    Tag
 } from 'lucide-react';
 
 
@@ -41,6 +44,9 @@ const AdminDashboard = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [toast, setToast] = useState({ show: false, message: '', type: '' });
+    const [recentActivity, setRecentActivity] = useState([]);
+    const [showAllActivity, setShowAllActivity] = useState(false);
+    const [categories, setCategories] = useState([]);
     const [formData, setFormData] = useState({
         name: '',
         description: '',
@@ -91,6 +97,41 @@ const AdminDashboard = () => {
         fetchProducts();
     }, []);
 
+    // Real-time activity log listener — only runs once user is authenticated
+    useEffect(() => {
+        if (!user) return; // wait for auth before subscribing
+        const q = query(
+            collection(db, 'activityLogs'),
+            orderBy('createdAt', 'desc'),
+            limit(100)
+        );
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const logs = snapshot.docs.map(d => ({
+                id: d.id,
+                ...d.data(),
+                timestamp: d.data().createdAt?.toDate?.()?.getTime() || Date.now()
+            }));
+            setRecentActivity(logs);
+        }, (err) => console.error('Activity log error:', err));
+        return () => unsubscribe();
+    }, [user]); // re-run when user changes (login/logout)
+
+    // Real-time categories listener — updates instantly when categories are added/edited/deleted
+    useEffect(() => {
+        const unsubscribe = onSnapshot(
+            collection(db, 'categories'),
+            (snapshot) => {
+                const data = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                setCategories(data);
+            },
+            (error) => {
+                console.error('Error listening to categories:', error);
+            }
+        );
+        return () => unsubscribe(); // cleanup on unmount
+    }, []);
+
+
     // Handle form input changes
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -114,6 +155,12 @@ const AdminDashboard = () => {
             };
 
             await addDoc(collection(db, 'products'), productData);
+            await logActivity({
+                type: 'product', icon: 'Package',
+                title: 'Product Added',
+                description: `"${formData.name}" added to inventory`,
+                color: 'cyan'
+            });
             showToast('Product added successfully!', 'success');
             setShowAddForm(false);
             resetForm();
@@ -138,6 +185,12 @@ const AdminDashboard = () => {
             };
 
             await updateDoc(doc(db, 'products', editingProduct.id), productData);
+            await logActivity({
+                type: 'product', icon: 'Package',
+                title: 'Product Updated',
+                description: `"${formData.name}" details updated`,
+                color: 'cyan'
+            });
             showToast('Product updated successfully!', 'success');
             setEditingProduct(null);
             resetForm();
@@ -155,7 +208,14 @@ const AdminDashboard = () => {
         }
 
         try {
+            const productName = products.find(p => p.id === productId)?.name || 'Product';
             await deleteDoc(doc(db, 'products', productId));
+            await logActivity({
+                type: 'product', icon: 'Package',
+                title: 'Product Deleted',
+                description: `"${productName}" removed from inventory`,
+                color: 'orange'
+            });
             showToast('Product deleted successfully!', 'success');
             fetchProducts();
         } catch (error) {
@@ -227,6 +287,7 @@ const AdminDashboard = () => {
     const menuItems = [
         { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
         { id: 'products', icon: Package, label: 'Products' },
+        { id: 'categories', icon: Tag, label: 'Categories' },
         { id: 'orders', icon: ShoppingCart, label: 'Orders' },
         { id: 'customers', icon: Users, label: 'Customers' },
         { id: 'settings', icon: Settings, label: 'Settings' },
@@ -234,8 +295,11 @@ const AdminDashboard = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0a0e27] via-[#0f172a] to-[#1a1f3a]">
+                <div className="relative">
+                    <div className="animate-spin corner-clip h-16 w-16 border-t-4 border-b-4 border-cyan-400" style={{ boxShadow: '0 0 30px rgba(0, 255, 255, 0.6)' }}></div>
+                    <div className="absolute inset-0 corner-clip border-2 border-magenta-400 animate-ping"></div>
+                </div>
             </div>
         );
     }
@@ -245,27 +309,28 @@ const AdminDashboard = () => {
             {/* Toast Notification */}
             {toast.show && (
                 <div className="fixed top-4 right-4 z-50 animate-slide-in-right">
-                    <div className={`flex items-center gap-3 px-6 py-4 rounded-lg shadow-2xl border-2 ${toast.type === 'success'
-                        ? 'bg-green-50 border-green-500 text-green-800'
-                        : 'bg-red-50 border-red-500 text-red-800'
-                        }`}>
+                    <div className={`flex items-center gap-3 px-6 py-4 corner-clip-sm shadow-2xl border-2 relative overflow-hidden ${toast.type === 'success'
+                        ? 'bg-green-500/10 border-green-500/50 text-green-400'
+                        : 'bg-red-500/10 border-red-500/50 text-red-400'
+                        }`} style={{ boxShadow: toast.type === 'success' ? '0 0 30px rgba(0, 255, 0, 0.4)' : '0 0 30px rgba(255, 0, 0, 0.4)' }}>
+                        <div className="absolute inset-0 bg-gradient-to-r from-gray-900/90 to-gray-800/90"></div>
                         {toast.type === 'success' ? (
-                            <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                            <div className="w-6 h-6 corner-clip-sm bg-green-500 flex items-center justify-center flex-shrink-0 relative z-10" style={{ boxShadow: '0 0 10px rgba(0, 255, 0, 0.8)' }}>
                                 <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
                         ) : (
-                            <div className="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
+                            <div className="w-6 h-6 corner-clip-sm bg-red-500 flex items-center justify-center flex-shrink-0 relative z-10" style={{ boxShadow: '0 0 10px rgba(255, 0, 0, 0.8)' }}>
                                 <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                             </div>
                         )}
-                        <p className="font-semibold">{toast.message}</p>
+                        <p className="font-bold relative z-10" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{toast.message}</p>
                         <button
                             onClick={() => setToast({ show: false, message: '', type: '' })}
-                            className="ml-2 hover:opacity-70 transition-opacity"
+                            className="ml-2 hover:opacity-70 transition-opacity relative z-10"
                         >
                             <X className="w-4 h-4" />
                         </button>
@@ -273,81 +338,100 @@ const AdminDashboard = () => {
                 </div>
             )}
 
-            <div className="flex h-screen bg-gray-50 overflow-hidden">
+            <div className="flex h-screen bg-gradient-to-br from-[#0a0e27] via-[#0f172a] to-[#1a1f3a] overflow-hidden">
                 {/* Sidebar */}
-                <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-gradient-to-b from-blue-600 to-indigo-700 text-white transition-all duration-300 flex flex-col`}>
+                <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-gradient-to-b from-gray-900/95 to-gray-800/95 backdrop-blur-xl text-white transition-all duration-300 flex flex-col border-r-2 border-cyan-500/30 relative overflow-hidden`} style={{ boxShadow: '0 0 40px rgba(0, 255, 255, 0.2)' }}>
+                    {/* Scan lines background */}
+                    <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 255, 0.1) 2px, rgba(0, 255, 255, 0.1) 4px)' }}></div>
                     {/* Logo */}
-                    <div className="p-6 flex items-center justify-between border-b border-blue-500">
+                    <div className="p-6 flex items-center justify-between border-b-2 border-cyan-500/30 relative z-10">
                         {sidebarOpen && (
                             <div>
-                                <h1 className="text-2xl font-bold">ShopAdmin</h1>
-                                <p className="text-blue-200 text-sm">Dashboard</p>
+                                <h1 className="text-2xl font-black text-cyan-400 uppercase tracking-wider" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(0, 255, 255, 1)' }}>Admin Zone</h1>
+                                <p className="text-cyan-300 text-sm font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif', textShadow: '0 0 10px rgba(0, 255, 255, 0.5)' }}>Control Panel</p>
                             </div>
                         )}
                         <button
                             onClick={() => setSidebarOpen(!sidebarOpen)}
-                            className="p-2 hover:bg-blue-500 rounded-lg transition-colors"
+                            className="p-2 hover:bg-cyan-500/20 corner-clip-sm transition-all duration-200 border-2 border-transparent hover:border-cyan-500/50"
+                            style={{ boxShadow: '0 0 10px rgba(0, 255, 255, 0.2)' }}
                         >
-                            {sidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                            {sidebarOpen ? <ChevronLeft className="w-5 h-5 text-cyan-400" /> : <Menu className="w-5 h-5 text-cyan-400" />}
                         </button>
                     </div>
 
                     {/* Navigation */}
-                    <nav className="flex-1 p-4 space-y-2">
+                    <nav className="flex-1 p-4 space-y-2 relative z-10">
                         {menuItems.map((item) => (
                             <button
                                 key={item.id}
                                 onClick={() => setActiveTab(item.id)}
-                                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeTab === item.id
-                                    ? 'bg-white text-blue-600 shadow-lg'
-                                    : 'text-blue-100 hover:bg-blue-500'
+                                className={`w-full flex items-center space-x-3 px-4 py-3 corner-clip-sm transition-all duration-200 border-2 relative overflow-hidden group ${activeTab === item.id
+                                    ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-400 border-cyan-500/50'
+                                    : 'text-cyan-300 hover:bg-cyan-500/10 border-transparent hover:border-cyan-500/30'
                                     }`}
+                                style={activeTab === item.id ? { boxShadow: '0 0 20px rgba(0, 255, 255, 0.3)' } : {}}
                             >
-                                <item.icon className="w-5 h-5 flex-shrink-0" />
-                                {sidebarOpen && <span className="font-medium">{item.label}</span>}
+                                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                <item.icon className="w-5 h-5 flex-shrink-0 relative z-10" style={activeTab === item.id ? { filter: 'drop-shadow(0 0 5px rgba(0, 255, 255, 0.8))' } : {}} />
+                                {sidebarOpen && <span className="font-black uppercase tracking-wide relative z-10" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{item.label}</span>}
                             </button>
                         ))}
                     </nav>
 
                     {/* User Profile & Logout */}
-                    <div className="p-4 border-t border-blue-500 space-y-3">
-                        {/* Profile Card */}
-                        <div className={`${sidebarOpen ? 'bg-white bg-opacity-10 backdrop-blur-sm' : ''} rounded-xl overflow-hidden transition-all duration-300`}>
-                            {sidebarOpen ? (
-                                <div className="p-4">
-                                    <div className="flex items-center space-x-3 mb-3">
-                                        <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
-                                            <span className="text-blue-600 font-bold text-lg">
-                                                {user?.email?.charAt(0).toUpperCase()}
-                                            </span>
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-xs text-blue-200 font-medium mb-0.5">Admin</p>
-                                            <p className="font-bold text-white text-sm truncate">
-                                                {user?.displayName || user?.email?.split('@')[0] || 'Leo'}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="flex justify-center py-2">
-                                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg">
-                                        <span className="text-blue-600 font-bold text-sm">
-                                            {user?.email?.charAt(0).toUpperCase()}
+                    <div className="p-4 border-t-2 border-cyan-500/20 relative z-10">
+                        {sidebarOpen ? (
+                            /* Expanded: unified card */
+                            <div className="bg-gray-800/60 corner-clip-sm border border-cyan-500/20 overflow-hidden"
+                                style={{ boxShadow: '0 0 20px rgba(0,255,255,0.08)' }}>
+                                {/* Top: avatar + info + logout icon */}
+                                <div className="flex items-center gap-3 px-4 py-3">
+                                    {/* Avatar */}
+                                    <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-600 corner-clip-sm flex items-center justify-center flex-shrink-0"
+                                        style={{ boxShadow: '0 0 12px rgba(0,255,255,0.5)' }}>
+                                        <span className="text-white font-black text-sm" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                                            {user?.displayName?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase()}
                                         </span>
                                     </div>
+                                    {/* Name + role */}
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-white font-black text-sm truncate leading-tight" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                            {user?.displayName || user?.email?.split('@')[0]}
+                                        </p>
+                                        <p className="text-cyan-400 text-xs font-bold uppercase tracking-widest" style={{ fontFamily: 'Rajdhani, sans-serif', textShadow: '0 0 8px rgba(0,255,255,0.6)' }}>
+                                            Administrator
+                                        </p>
+                                    </div>
+                                    {/* Logout icon button */}
+                                    <button
+                                        onClick={handleLogout}
+                                        title="Logout"
+                                        className="w-8 h-8 flex items-center justify-center corner-clip-sm border border-red-500/40 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white hover:border-red-400 transition-all duration-200 flex-shrink-0 group"
+                                        style={{ boxShadow: '0 0 8px rgba(255,0,0,0.15)' }}
+                                    >
+                                        <LogOut className="w-4 h-4 group-hover:rotate-12 transition-transform duration-200" />
+                                    </button>
                                 </div>
-                            )}
-                        </div>
-
-                        {/* Logout Button */}
-                        <button
-                            onClick={handleLogout}
-                            className={`w-full flex items-center ${sidebarOpen ? 'justify-start space-x-3 px-4' : 'justify-center'} py-3 text-white bg-white bg-opacity-10 hover:bg-red-500 rounded-xl transition-all duration-200 group`}
-                        >
-                            <LogOut className="w-5 h-5 flex-shrink-0 group-hover:rotate-12 transition-transform duration-200" />
-                            {sidebarOpen && <span className="font-semibold">Logout</span>}
-                        </button>
+                            </div>
+                        ) : (
+                            /* Collapsed: stacked avatar + logout */
+                            <div className="flex flex-col items-center gap-2">
+                                <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-600 corner-clip-sm flex items-center justify-center"
+                                    style={{ boxShadow: '0 0 12px rgba(0,255,255,0.5)' }}>
+                                    <span className="text-white font-black text-sm" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                                        {user?.displayName?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase()}
+                                    </span>
+                                </div>
+                                <button
+                                    onClick={handleLogout}
+                                    title="Logout"
+                                    className="w-10 h-10 flex items-center justify-center corner-clip-sm border border-red-500/40 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all duration-200 group"
+                                >
+                                    <LogOut className="w-4 h-4 group-hover:rotate-12 transition-transform duration-200" />
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </aside>
 
@@ -359,87 +443,196 @@ const AdminDashboard = () => {
                         {activeTab === 'dashboard' && (
                             <div className="space-y-6 animate-fade-in">
                                 {/* Header */}
-                                <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-                                    <div className="flex items-center space-x-4">
-                                        <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-                                            <LayoutDashboard className="w-8 h-8 text-white" />
+                                <div className="bg-gray-900 corner-clip p-8 border-2 border-cyan-500/50 relative overflow-hidden" style={{ boxShadow: '0 0 40px rgba(0, 255, 255, 0.4)' }}>
+                                    <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 255, 0.1) 2px, rgba(0, 255, 255, 0.1) 4px)' }}></div>
+                                    <div className="flex items-center space-x-4 relative z-10">
+                                        <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 corner-clip flex items-center justify-center" style={{ boxShadow: '0 0 30px rgba(0, 255, 255, 0.6)' }}>
+                                            <LayoutDashboard className="w-8 h-8 text-white" style={{ filter: 'drop-shadow(0 0 10px rgba(255, 255, 255, 1))' }} />
                                         </div>
                                         <div>
-                                            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-1">
+                                            <h1 className="text-4xl font-black text-cyan-400 mb-1 uppercase tracking-wider" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(0, 255, 255, 1)' }}>
                                                 Dashboard
                                             </h1>
-                                            <p className="text-gray-600 text-lg">Overview of your store performance</p>
+                                            <p className="text-cyan-200 text-lg font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Command Center Overview</p>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Stats Cards */}
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    <div className="card p-6 bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-                                        <div className="flex items-center justify-between">
+                                    <div className="bg-gray-900 backdrop-blur-sm p-6 corner-clip border-2 border-cyan-500/50 relative overflow-hidden" style={{ boxShadow: '0 0 30px rgba(0, 255, 255, 0.5)' }}>
+                                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-transparent"></div>
+                                        <div className="flex items-center justify-between relative z-10">
                                             <div>
-                                                <p className="text-blue-100 text-sm font-medium">Total Products</p>
-                                                <h3 className="text-4xl font-bold mt-2">{totalProducts}</h3>
+                                                <p className="text-cyan-200 text-sm font-black uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Total Products</p>
+                                                <h3 className="text-5xl font-black mt-2 text-white" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(0, 255, 255, 1)' }}>{totalProducts}</h3>
                                             </div>
-                                            <div className="p-4 bg-white bg-opacity-20 rounded-xl">
-                                                <Package className="w-8 h-8" />
+                                            <div className="p-4 bg-cyan-500/20 corner-clip border-2 border-cyan-500/50" style={{ boxShadow: '0 0 20px rgba(0, 255, 255, 0.6)' }}>
+                                                <Package className="w-8 h-8 text-cyan-400" style={{ filter: 'drop-shadow(0 0 10px rgba(0, 255, 255, 1))' }} />
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="card p-6 bg-gradient-to-br from-green-500 to-green-600 text-white">
-                                        <div className="flex items-center justify-between">
+                                    <div className="bg-gray-900 backdrop-blur-sm p-6 corner-clip border-2 border-green-500/50 relative overflow-hidden" style={{ boxShadow: '0 0 30px rgba(0, 255, 0, 0.5)' }}>
+                                        <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-transparent"></div>
+                                        <div className="flex items-center justify-between relative z-10">
                                             <div>
-                                                <p className="text-green-100 text-sm font-medium">Inventory Value</p>
-                                                <h3 className="text-4xl font-bold mt-2">฿{totalValue.toFixed(0)}</h3>
+                                                <p className="text-green-200 text-sm font-black uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Inventory Value</p>
+                                                <h3 className="text-5xl font-black mt-2 text-white" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(0, 255, 0, 1)' }}>฿{totalValue.toFixed(0)}</h3>
                                             </div>
-                                            <div className="p-4 bg-white bg-opacity-20 rounded-xl">
-                                                <DollarSign className="w-8 h-8" />
+                                            <div className="p-4 bg-green-500/20 corner-clip border-2 border-green-500/50" style={{ boxShadow: '0 0 20px rgba(0, 255, 0, 0.6)' }}>
+                                                <DollarSign className="w-8 h-8 text-green-400" style={{ filter: 'drop-shadow(0 0 10px rgba(0, 255, 0, 1))' }} />
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="card p-6 bg-gradient-to-br from-orange-500 to-orange-600 text-white">
-                                        <div className="flex items-center justify-between">
+                                    <div className="bg-gray-900 backdrop-blur-sm p-6 corner-clip border-2 border-orange-500/50 relative overflow-hidden" style={{ boxShadow: '0 0 30px rgba(255, 165, 0, 0.5)' }}>
+                                        <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-transparent"></div>
+                                        <div className="flex items-center justify-between relative z-10">
                                             <div>
-                                                <p className="text-orange-100 text-sm font-medium">Low Stock Items</p>
-                                                <h3 className="text-4xl font-bold mt-2">{lowStockProducts}</h3>
+                                                <p className="text-orange-200 text-sm font-black uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Low Stock Items</p>
+                                                <h3 className="text-5xl font-black mt-2 text-white" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(255, 165, 0, 1)' }}>{lowStockProducts}</h3>
                                             </div>
-                                            <div className="p-4 bg-white bg-opacity-20 rounded-xl">
-                                                <TrendingUp className="w-8 h-8" />
+                                            <div className="p-4 bg-orange-500/20 corner-clip border-2 border-orange-500/50" style={{ boxShadow: '0 0 20px rgba(255, 165, 0, 0.6)' }}>
+                                                <TrendingUp className="w-8 h-8 text-orange-400" style={{ filter: 'drop-shadow(0 0 10px rgba(255, 165, 0, 1))' }} />
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Quick Actions */}
-                                <div className="card p-6">
-                                    <h3 className="text-xl font-bold mb-4">Quick Actions</h3>
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div className="bg-gray-900 corner-clip p-6 border-2 border-cyan-500/30 relative overflow-hidden" style={{ boxShadow: '0 0 30px rgba(0, 255, 255, 0.2)' }}>
+                                    <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 255, 0.1) 2px, rgba(0, 255, 255, 0.1) 4px)' }}></div>
+                                    <h3 className="text-2xl font-black mb-6 text-cyan-400 uppercase tracking-wider relative z-10" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(0, 255, 255, 0.8)' }}>Quick Actions</h3>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 relative z-10">
                                         <button
                                             onClick={() => {
                                                 setActiveTab('products');
                                                 setShowAddForm(true);
                                                 resetForm();
                                             }}
-                                            className="p-4 border-2 border-blue-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all text-center group"
+                                            className="p-6 border-2 border-cyan-500/50 corner-clip-sm hover:border-cyan-400 hover:bg-cyan-500/10 transition-all text-center group relative overflow-hidden"
+                                            style={{ boxShadow: '0 0 15px rgba(0, 255, 255, 0.2)' }}
                                         >
-                                            <Plus className="w-8 h-8 mx-auto mb-2 text-blue-600" />
-                                            <p className="font-semibold text-gray-700 group-hover:text-blue-600">Add Product</p>
+                                            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                            <Plus className="w-10 h-10 mx-auto mb-3 text-cyan-400 relative z-10" style={{ filter: 'drop-shadow(0 0 8px rgba(0, 255, 255, 0.8))' }} />
+                                            <p className="font-black text-white uppercase tracking-wide text-sm relative z-10" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Add Product</p>
                                         </button>
-                                        <button className="p-4 border-2 border-gray-200 rounded-xl hover:border-gray-400 hover:bg-gray-50 transition-all text-center group">
-                                            <ShoppingCart className="w-8 h-8 mx-auto mb-2 text-gray-600" />
-                                            <p className="font-semibold text-gray-700 group-hover:text-gray-900">View Orders</p>
+                                        <button
+                                            onClick={() => setActiveTab('orders')}
+                                            className="p-6 border-2 border-magenta-500/50 corner-clip-sm hover:border-magenta-400 hover:bg-magenta-500/10 transition-all text-center group relative overflow-hidden"
+                                            style={{ boxShadow: '0 0 15px rgba(255, 0, 255, 0.2)' }}
+                                        >
+                                            <div className="absolute inset-0 bg-gradient-to-r from-magenta-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                            <ShoppingCart className="w-10 h-10 mx-auto mb-3 text-magenta-400 relative z-10" style={{ filter: 'drop-shadow(0 0 8px rgba(255, 0, 255, 0.8))' }} />
+                                            <p className="font-black text-white uppercase tracking-wide text-sm relative z-10" style={{ fontFamily: 'Rajdhani, sans-serif' }}>View Orders</p>
                                         </button>
-                                        <button className="p-4 border-2 border-gray-200 rounded-xl hover:border-gray-400 hover:bg-gray-50 transition-all text-center group">
-                                            <Users className="w-8 h-8 mx-auto mb-2 text-gray-600" />
-                                            <p className="font-semibold text-gray-700 group-hover:text-gray-900">Customers</p>
+                                        <button
+                                            onClick={() => setActiveTab('customers')}
+                                            className="p-6 border-2 border-purple-500/50 corner-clip-sm hover:border-purple-400 hover:bg-purple-500/10 transition-all text-center group relative overflow-hidden"
+                                            style={{ boxShadow: '0 0 15px rgba(147, 51, 234, 0.2)' }}
+                                        >
+                                            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                            <Users className="w-10 h-10 mx-auto mb-3 text-purple-400 relative z-10" style={{ filter: 'drop-shadow(0 0 8px rgba(147, 51, 234, 0.8))' }} />
+                                            <p className="font-black text-white uppercase tracking-wide text-sm relative z-10" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Customers</p>
                                         </button>
-                                        <button className="p-4 border-2 border-gray-200 rounded-xl hover:border-gray-400 hover:bg-gray-50 transition-all text-center group">
-                                            <Settings className="w-8 h-8 mx-auto mb-2 text-gray-600" />
-                                            <p className="font-semibold text-gray-700 group-hover:text-gray-900">Settings</p>
+                                        <button
+                                            onClick={() => setActiveTab('settings')}
+                                            className="p-6 border-2 border-blue-500/50 corner-clip-sm hover:border-blue-400 hover:bg-blue-500/10 transition-all text-center group relative overflow-hidden"
+                                            style={{ boxShadow: '0 0 15px rgba(59, 130, 246, 0.2)' }}
+                                        >
+                                            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                            <Settings className="w-10 h-10 mx-auto mb-3 text-blue-400 relative z-10" style={{ filter: 'drop-shadow(0 0 8px rgba(59, 130, 246, 0.8))' }} />
+                                            <p className="font-black text-white uppercase tracking-wide text-sm relative z-10" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Settings</p>
                                         </button>
                                     </div>
+                                </div>
+
+                                {/* Recent Activity */}
+                                <div className="bg-gray-900 corner-clip p-6 border-2 border-purple-500/30 relative overflow-hidden" style={{ boxShadow: '0 0 30px rgba(147, 51, 234, 0.2)' }}>
+                                    <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(147, 51, 234, 0.1) 2px, rgba(147, 51, 234, 0.1) 4px)' }}></div>
+                                    {/* Header row */}
+                                    <div className="flex items-center justify-between mb-6 relative z-10">
+                                        <div className="flex items-center space-x-3">
+                                            <h3 className="text-2xl font-black text-purple-400 uppercase tracking-wider" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(147, 51, 234, 0.8)' }}>Recent Activity</h3>
+                                            {recentActivity.length > 0 && (
+                                                <span className="px-2 py-0.5 bg-purple-500/20 border border-purple-500/50 corner-clip-sm text-purple-300 text-xs font-black"
+                                                    style={{ fontFamily: 'Orbitron, sans-serif', boxShadow: '0 0 8px rgba(147,51,234,0.4)' }}>
+                                                    {recentActivity.length}
+                                                </span>
+                                            )}
+                                        </div>
+                                        {recentActivity.length > 4 && (
+                                            <button
+                                                onClick={() => setShowAllActivity(prev => !prev)}
+                                                className="inline-flex items-center space-x-1 px-4 py-2 corner-clip-sm border-2 border-purple-500/40 bg-purple-500/10 hover:bg-purple-500/20 hover:border-purple-400 text-purple-300 text-xs font-black uppercase tracking-wide transition-all"
+                                                style={{ fontFamily: 'Rajdhani, sans-serif', boxShadow: '0 0 10px rgba(147,51,234,0.2)' }}
+                                            >
+                                                {showAllActivity ? (
+                                                    <><span>Show Less</span><span className="ml-1">↑</span></>
+                                                ) : (
+                                                    <><span>View All</span><span className="ml-1 text-purple-400">+{recentActivity.length - 4}</span></>
+                                                )}
+                                            </button>
+                                        )}
+                                    </div>
+                                    <div className="space-y-3 relative z-10">
+                                        {recentActivity.length > 0 ? (
+                                            (showAllActivity ? recentActivity : recentActivity.slice(0, 4)).map((activity, index) => {
+                                                const IconComponent = activity.icon === 'Package' ? Package :
+                                                    activity.icon === 'ShoppingCart' ? ShoppingCart :
+                                                        activity.icon === 'Users' ? Users : TrendingUp;
+
+                                                const colorMap = {
+                                                    cyan: { border: 'border-cyan-500/20 hover:border-cyan-500/40', bg: 'from-cyan-500 to-blue-500', shadow: '0 0 15px rgba(0, 255, 255, 0.4)', text: 'text-cyan-300' },
+                                                    green: { border: 'border-green-500/20 hover:border-green-500/40', bg: 'from-green-500 to-emerald-500', shadow: '0 0 15px rgba(0, 255, 0, 0.4)', text: 'text-green-300' },
+                                                    magenta: { border: 'border-magenta-500/20 hover:border-magenta-500/40', bg: 'from-magenta-500 to-purple-500', shadow: '0 0 15px rgba(255, 0, 255, 0.4)', text: 'text-magenta-300' },
+                                                    orange: { border: 'border-orange-500/20 hover:border-orange-500/40', bg: 'from-orange-500 to-red-500', shadow: '0 0 15px rgba(255, 165, 0, 0.4)', text: 'text-orange-300' }
+                                                };
+
+                                                const colors = colorMap[activity.color] || colorMap.cyan;
+
+                                                const getTimeAgo = (timestamp) => {
+                                                    const seconds = Math.floor((new Date().getTime() - timestamp) / 1000);
+                                                    if (seconds < 60) return 'Just now';
+                                                    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+                                                    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+                                                    return `${Math.floor(seconds / 86400)}d ago`;
+                                                };
+
+                                                return (
+                                                    <div key={index} className={`flex items-start space-x-4 p-4 bg-gray-800/50 corner-clip-sm border ${colors.border} transition-all`}>
+                                                        <div className={`w-10 h-10 bg-gradient-to-br ${colors.bg} corner-clip-sm flex items-center justify-center flex-shrink-0`} style={{ boxShadow: colors.shadow }}>
+                                                            <IconComponent className="w-5 h-5 text-white" />
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-white font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{activity.title}</p>
+                                                            <p className={`${colors.text} text-sm truncate`} style={{ fontFamily: 'Rajdhani, sans-serif' }}>{activity.description}</p>
+                                                        </div>
+                                                        <span className="text-gray-500 text-xs font-bold flex-shrink-0 mt-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                            {getTimeAgo(activity.timestamp)}
+                                                        </span>
+                                                    </div>
+                                                );
+                                            })
+                                        ) : (
+                                            <div className="text-center py-8">
+                                                <p className="text-gray-400" style={{ fontFamily: 'Rajdhani, sans-serif' }}>No recent activity</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                    {/* Bottom View All button (when expanded) */}
+                                    {showAllActivity && recentActivity.length > 4 && (
+                                        <div className="mt-4 pt-4 border-t border-purple-500/20 relative z-10">
+                                            <button
+                                                onClick={() => setShowAllActivity(false)}
+                                                className="w-full py-2 corner-clip-sm border border-purple-500/30 text-purple-400 text-xs font-black uppercase tracking-wide hover:bg-purple-500/10 transition-all"
+                                                style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                                            >
+                                                ↑ Show Less
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -448,16 +641,17 @@ const AdminDashboard = () => {
                         {activeTab === 'products' && (
                             <div className="space-y-6 animate-fade-in">
                                 {/* Header */}
-                                <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 mb-8">
-                                    <div className="flex items-center space-x-4">
-                                        <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-                                            <Package className="w-8 h-8 text-white" />
+                                <div className="bg-gray-900 corner-clip p-8 border-2 border-magenta-500/50 mb-8 relative overflow-hidden" style={{ boxShadow: '0 0 40px rgba(255, 0, 255, 0.4)' }}>
+                                    <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 0, 255, 0.1) 2px, rgba(255, 0, 255, 0.1) 4px)' }}></div>
+                                    <div className="flex items-center space-x-4 relative z-10">
+                                        <div className="w-16 h-16 bg-gradient-to-br from-magenta-500 to-purple-600 corner-clip flex items-center justify-center" style={{ boxShadow: '0 0 30px rgba(255, 0, 255, 0.6)' }}>
+                                            <Package className="w-8 h-8 text-white" style={{ filter: 'drop-shadow(0 0 10px rgba(255, 255, 255, 1))' }} />
                                         </div>
                                         <div>
-                                            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-1">
+                                            <h1 className="text-4xl font-black text-magenta-400 mb-1 uppercase tracking-wider" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(255, 0, 255, 1)' }}>
                                                 Product Management
                                             </h1>
-                                            <p className="text-gray-600 text-lg">Manage your inventory and catalog</p>
+                                            <p className="text-magenta-200 text-lg font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Inventory Control System</p>
                                         </div>
                                     </div>
                                 </div>
@@ -465,13 +659,14 @@ const AdminDashboard = () => {
                                 {/* Toolbar */}
                                 <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
                                     <div className="relative flex-1 max-w-md">
-                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-cyan-400 w-5 h-5" style={{ filter: 'drop-shadow(0 0 5px rgba(0, 255, 255, 0.6))' }} />
                                         <input
                                             type="text"
-                                            placeholder="Search products..."
+                                            placeholder="SEARCH PRODUCTS..."
                                             value={searchQuery}
                                             onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="input-field pl-10 w-full"
+                                            className="w-full pl-10 pr-4 py-3 bg-gray-900 border-2 border-cyan-500/50 corner-clip-sm text-white placeholder-cyan-300/50 focus:outline-none focus:border-cyan-400 transition-all"
+                                            style={{ fontFamily: 'Rajdhani, sans-serif', boxShadow: '0 0 20px rgba(0, 255, 255, 0.2)' }}
                                         />
                                     </div>
                                     <button
@@ -480,35 +675,38 @@ const AdminDashboard = () => {
                                             setEditingProduct(null);
                                             resetForm();
                                         }}
-                                        className="btn-primary inline-flex items-center space-x-2"
+                                        className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-black uppercase tracking-wide corner-clip-sm border-2 border-cyan-400 transition-all"
+                                        style={{ fontFamily: 'Rajdhani, sans-serif', boxShadow: '0 0 20px rgba(0, 255, 255, 0.5)' }}
                                     >
-                                        <Plus className="w-5 h-5" />
+                                        <Plus className="w-5 h-5" style={{ filter: 'drop-shadow(0 0 5px rgba(255, 255, 255, 0.8))' }} />
                                         <span>Add Product</span>
                                     </button>
                                 </div>
 
                                 {/* Add/Edit Form */}
                                 {(showAddForm || editingProduct) && (
-                                    <div className="card p-6 animate-fade-in">
-                                        <div className="flex justify-between items-center mb-6">
-                                            <h3 className="text-2xl font-bold">
+                                    <div className="bg-gray-900 corner-clip p-6 border-2 border-magenta-500/50 animate-fade-in relative overflow-hidden" style={{ boxShadow: '0 0 30px rgba(255, 0, 255, 0.3)' }}>
+                                        <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 0, 255, 0.1) 2px, rgba(255, 0, 255, 0.1) 4px)' }}></div>
+                                        <div className="flex justify-between items-center mb-6 relative z-10">
+                                            <h3 className="text-2xl font-black text-magenta-400 uppercase tracking-wider" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(255, 0, 255, 0.8)' }}>
                                                 {editingProduct ? 'Edit Product' : 'Add New Product'}
                                             </h3>
-                                            <button onClick={cancelEdit} className="p-2 hover:bg-gray-100 rounded-lg">
-                                                <X className="w-6 h-6" />
+                                            <button onClick={cancelEdit} className="p-2 hover:bg-red-500/20 corner-clip-sm border-2 border-red-500/50 hover:border-red-500 transition-all" style={{ boxShadow: '0 0 10px rgba(255, 0, 0, 0.3)' }}>
+                                                <X className="w-6 h-6 text-red-400" style={{ filter: 'drop-shadow(0 0 5px rgba(255, 0, 0, 0.8))' }} />
                                             </button>
                                         </div>
 
-                                        <form onSubmit={editingProduct ? handleUpdateProduct : handleAddProduct} className="space-y-6">
+                                        <form onSubmit={editingProduct ? handleUpdateProduct : handleAddProduct} className="space-y-6 relative z-10">
                                             {/* Basic Information Section */}
-                                            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-100">
-                                                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                                                    <Package className="w-5 h-5 mr-2 text-blue-600" />
+                                            <div className="bg-gray-800/50 p-6 corner-clip-sm border-2 border-cyan-500/30 relative overflow-hidden">
+                                                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-transparent"></div>
+                                                <h3 className="text-lg font-black text-cyan-400 mb-4 flex items-center uppercase tracking-wide relative z-10" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                    <Package className="w-5 h-5 mr-2" style={{ filter: 'drop-shadow(0 0 5px rgba(0, 255, 255, 0.8))' }} />
                                                     Basic Information
                                                 </h3>
-                                                <div className="grid md:grid-cols-2 gap-6">
+                                                <div className="grid md:grid-cols-2 gap-6 relative z-10">
                                                     <div>
-                                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                                        <label className="block text-sm font-black text-cyan-300 mb-2 uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                                             Product Name *
                                                         </label>
                                                         <input
@@ -516,49 +714,60 @@ const AdminDashboard = () => {
                                                             name="name"
                                                             value={formData.name}
                                                             onChange={handleInputChange}
-                                                            className="input-field"
+                                                            className="w-full px-4 py-3 bg-gray-900 border-2 border-cyan-500/50 corner-clip-sm text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400 transition-all"
+                                                            style={{ fontFamily: 'Rajdhani, sans-serif' }}
                                                             placeholder="e.g., Premium Wireless Headphones"
                                                             required
                                                         />
                                                     </div>
 
                                                     <div>
-                                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                                        <label className="block text-sm font-black text-cyan-300 mb-2 uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                                             Category *
                                                         </label>
                                                         <select
                                                             name="category"
                                                             value={formData.category}
                                                             onChange={handleInputChange}
-                                                            className="input-field"
+                                                            className="w-full px-4 py-3 bg-gray-900 border-2 border-cyan-500/50 corner-clip-sm text-white focus:outline-none focus:border-cyan-400 transition-all"
+                                                            style={{ fontFamily: 'Rajdhani, sans-serif' }}
                                                             required
                                                         >
-                                                            <option value="">Select Category</option>
-                                                            <option value="Electronics">Electronics</option>
-                                                            <option value="Fashion">Fashion</option>
-                                                            <option value="Sports">Sports</option>
-                                                            <option value="Home">Home</option>
-                                                            <option value="Books">Books</option>
-                                                            <option value="Beauty">Beauty</option>
-                                                            <option value="Toys">Toys</option>
-                                                            <option value="Food">Food & Beverages</option>
+                                                            <option value="" className="bg-gray-900">Select Category</option>
+                                                            {categories.length > 0 ? (
+                                                                categories.map(cat => (
+                                                                    <option key={cat.id} value={cat.name} className="bg-gray-900">
+                                                                        {cat.name}
+                                                                    </option>
+                                                                ))
+                                                            ) : (
+                                                                <option value="" disabled className="bg-gray-900 text-gray-500">
+                                                                    No categories — add them in Categories page
+                                                                </option>
+                                                            )}
                                                         </select>
+                                                        {categories.length === 0 && (
+                                                            <p className="text-xs text-orange-400/70 mt-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                                ⚡ Go to Categories page to create categories first
+                                                            </p>
+                                                        )}
                                                     </div>
 
                                                     <div className="md:col-span-2">
-                                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                                        <label className="block text-sm font-black text-cyan-300 mb-2 uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                                             Description *
                                                         </label>
                                                         <textarea
                                                             name="description"
                                                             value={formData.description}
                                                             onChange={handleInputChange}
-                                                            className="input-field"
+                                                            className="w-full px-4 py-3 bg-gray-900 border-2 border-cyan-500/50 corner-clip-sm text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400 transition-all resize-none"
+                                                            style={{ fontFamily: 'Rajdhani, sans-serif' }}
                                                             rows="4"
                                                             placeholder="Describe your product features, benefits, and specifications..."
                                                             required
                                                         />
-                                                        <p className="text-xs text-gray-500 mt-1">
+                                                        <p className="text-xs text-cyan-500/70 mt-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                                             {formData.description.length} characters
                                                         </p>
                                                     </div>
@@ -566,18 +775,19 @@ const AdminDashboard = () => {
                                             </div>
 
                                             {/* Pricing Section */}
-                                            <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-xl border border-green-100">
-                                                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                                                    <DollarSign className="w-5 h-5 mr-2 text-green-600" />
+                                            <div className="bg-gray-800/50 p-6 corner-clip-sm border-2 border-green-500/30 relative overflow-hidden">
+                                                <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-transparent"></div>
+                                                <h3 className="text-lg font-black text-green-400 mb-4 flex items-center uppercase tracking-wide relative z-10" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                    <DollarSign className="w-5 h-5 mr-2" style={{ filter: 'drop-shadow(0 0 5px rgba(0, 255, 0, 0.8))' }} />
                                                     Pricing & Discount
                                                 </h3>
-                                                <div className="grid md:grid-cols-2 gap-6">
+                                                <div className="grid md:grid-cols-2 gap-6 relative z-10">
                                                     <div>
-                                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                                        <label className="block text-sm font-black text-green-300 mb-2 uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                                             Price (฿) *
                                                         </label>
                                                         <div className="relative">
-                                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">
+                                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-green-400 font-black" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                                                                 ฿
                                                             </span>
                                                             <input
@@ -586,7 +796,8 @@ const AdminDashboard = () => {
                                                                 name="price"
                                                                 value={formData.price}
                                                                 onChange={handleInputChange}
-                                                                className="input-field pl-8"
+                                                                className="w-full pl-8 pr-4 py-3 bg-gray-900 border-2 border-green-500/50 corner-clip-sm text-white placeholder-gray-500 focus:outline-none focus:border-green-400 transition-all"
+                                                                style={{ fontFamily: 'Orbitron, sans-serif' }}
                                                                 placeholder="0.00"
                                                                 min="0"
                                                                 required
@@ -595,7 +806,7 @@ const AdminDashboard = () => {
                                                     </div>
 
                                                     <div>
-                                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                                        <label className="block text-sm font-black text-green-300 mb-2 uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                                             Discount (%)
                                                         </label>
                                                         <div className="relative">
@@ -604,12 +815,13 @@ const AdminDashboard = () => {
                                                                 name="discount"
                                                                 value={formData.discount}
                                                                 onChange={handleInputChange}
-                                                                className="input-field pr-8"
+                                                                className="w-full px-4 py-3 bg-gray-900 border-2 border-green-500/50 corner-clip-sm text-white placeholder-gray-500 focus:outline-none focus:border-green-400 transition-all pr-10"
+                                                                style={{ fontFamily: 'Orbitron, sans-serif' }}
                                                                 placeholder="0"
                                                                 min="0"
                                                                 max="100"
                                                             />
-                                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">
+                                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-400 font-black" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                                                                 %
                                                             </span>
                                                         </div>
@@ -617,23 +829,23 @@ const AdminDashboard = () => {
 
                                                     {/* Price Preview */}
                                                     {formData.price && (
-                                                        <div className="md:col-span-2 bg-white p-4 rounded-lg border-2 border-green-200">
-                                                            <p className="text-sm text-gray-600 mb-2">Price Preview:</p>
+                                                        <div className="md:col-span-2 bg-gray-900/80 p-4 corner-clip-sm border-2 border-green-500/40" style={{ boxShadow: '0 0 15px rgba(0, 255, 0, 0.15)' }}>
+                                                            <p className="text-sm text-green-400 mb-2 uppercase font-black" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Price Preview:</p>
                                                             <div className="flex items-center space-x-3">
                                                                 {formData.discount > 0 ? (
                                                                     <>
-                                                                        <span className="text-3xl font-bold text-green-600">
+                                                                        <span className="text-3xl font-black text-green-400" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(0, 255, 0, 0.8)' }}>
                                                                             ฿{(formData.price * (1 - formData.discount / 100)).toFixed(2)}
                                                                         </span>
-                                                                        <span className="text-xl text-gray-400 line-through">
+                                                                        <span className="text-xl text-gray-500 line-through" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                                                                             ฿{parseFloat(formData.price).toFixed(2)}
                                                                         </span>
-                                                                        <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                                                                        <span className="bg-red-500/20 text-red-400 border border-red-500/50 px-3 py-1 corner-clip-sm text-sm font-black" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                                                             -{formData.discount}%
                                                                         </span>
                                                                     </>
                                                                 ) : (
-                                                                    <span className="text-3xl font-bold text-gray-800">
+                                                                    <span className="text-3xl font-black text-green-400" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(0, 255, 0, 0.8)' }}>
                                                                         ฿{parseFloat(formData.price).toFixed(2)}
                                                                     </span>
                                                                 )}
@@ -644,34 +856,38 @@ const AdminDashboard = () => {
                                             </div>
 
                                             {/* Product Image Section */}
-                                            <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-xl border border-purple-100">
-                                                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                                                    <ImageIcon className="w-5 h-5 mr-2 text-purple-600" />
+                                            <div className="bg-gray-800/50 p-6 corner-clip-sm border-2 border-purple-500/30 relative overflow-hidden">
+                                                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-transparent"></div>
+                                                <h3 className="text-lg font-black text-purple-400 mb-4 flex items-center uppercase tracking-wide relative z-10" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                    <ImageIcon className="w-5 h-5 mr-2" style={{ filter: 'drop-shadow(0 0 5px rgba(147, 51, 234, 0.8))' }} />
                                                     Product Image
                                                 </h3>
-                                                <CloudinaryUpload
-                                                    currentImage={formData.image}
-                                                    onUploadSuccess={(url) => {
-                                                        setFormData(prev => ({ ...prev, image: url }));
-                                                    }}
-                                                />
-                                                <input
-                                                    type="hidden"
-                                                    name="image"
-                                                    value={formData.image}
-                                                    required
-                                                />
+                                                <div className="relative z-10">
+                                                    <CloudinaryUpload
+                                                        currentImage={formData.image}
+                                                        onUploadSuccess={(url) => {
+                                                            setFormData(prev => ({ ...prev, image: url }));
+                                                        }}
+                                                    />
+                                                    <input
+                                                        type="hidden"
+                                                        name="image"
+                                                        value={formData.image}
+                                                        required
+                                                    />
+                                                </div>
                                             </div>
 
                                             {/* Inventory Section */}
-                                            <div className="bg-gradient-to-r from-orange-50 to-amber-50 p-6 rounded-xl border border-orange-100">
-                                                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                                                    <ShoppingBag className="w-5 h-5 mr-2 text-orange-600" />
+                                            <div className="bg-gray-800/50 p-6 corner-clip-sm border-2 border-orange-500/30 relative overflow-hidden">
+                                                <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-transparent"></div>
+                                                <h3 className="text-lg font-black text-orange-400 mb-4 flex items-center uppercase tracking-wide relative z-10" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                    <ShoppingBag className="w-5 h-5 mr-2" style={{ filter: 'drop-shadow(0 0 5px rgba(255, 165, 0, 0.8))' }} />
                                                     Inventory Management
                                                 </h3>
-                                                <div className="max-w-md">
+                                                <div className="max-w-md relative z-10">
                                                     <div>
-                                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                                        <label className="block text-sm font-black text-orange-300 mb-2 uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                                             Stock Quantity *
                                                         </label>
                                                         <input
@@ -679,25 +895,26 @@ const AdminDashboard = () => {
                                                             name="stock"
                                                             value={formData.stock}
                                                             onChange={handleInputChange}
-                                                            className="input-field"
+                                                            className="w-full px-4 py-3 bg-gray-900 border-2 border-orange-500/50 corner-clip-sm text-white placeholder-gray-500 focus:outline-none focus:border-orange-400 transition-all"
+                                                            style={{ fontFamily: 'Orbitron, sans-serif' }}
                                                             placeholder="0"
                                                             min="0"
                                                             required
                                                         />
                                                         {formData.stock > 0 && (
-                                                            <div className="mt-2 p-3 rounded-lg bg-white border-2 border-orange-200">
-                                                                <p className={`text-sm font-semibold ${formData.stock > 10 ? 'text-green-600' : 'text-orange-600'}`}>
+                                                            <div className="mt-3 p-3 corner-clip-sm bg-gray-900/80 border-2 border-orange-500/30">
+                                                                <p className={`text-sm font-black uppercase ${formData.stock > 10 ? 'text-green-400' : 'text-orange-400'}`} style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                                                     {formData.stock > 10 ? (
-                                                                        <span>In Stock - {formData.stock} units available</span>
+                                                                        <span>✓ In Stock — {formData.stock} units available</span>
                                                                     ) : (
-                                                                        <span>Low Stock - Only {formData.stock} units left</span>
+                                                                        <span>⚠ Low Stock — Only {formData.stock} units left</span>
                                                                     )}
                                                                 </p>
                                                             </div>
                                                         )}
                                                         {formData.stock == 0 && (
-                                                            <p className="text-xs mt-2 text-red-600 font-semibold">
-                                                                Product will be marked as "Out of Stock"
+                                                            <p className="text-xs mt-2 text-red-400 font-black uppercase" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                                ✗ Product will be marked as "Out of Stock"
                                                             </p>
                                                         )}
                                                     </div>
@@ -705,12 +922,21 @@ const AdminDashboard = () => {
                                             </div>
 
                                             {/* Action Buttons */}
-                                            <div className="flex gap-4 pt-4 border-t">
-                                                <button type="submit" className="btn-primary inline-flex items-center space-x-2 flex-1">
-                                                    <Save className="w-5 h-5" />
+                                            <div className="flex gap-4 pt-6 border-t-2 border-gray-700">
+                                                <button
+                                                    type="submit"
+                                                    className="inline-flex items-center justify-center space-x-2 flex-1 px-6 py-4 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-black uppercase tracking-wider corner-clip-sm border-2 border-cyan-400 transition-all"
+                                                    style={{ fontFamily: 'Rajdhani, sans-serif', boxShadow: '0 0 25px rgba(0, 255, 255, 0.5)' }}
+                                                >
+                                                    <Save className="w-5 h-5" style={{ filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.8))' }} />
                                                     <span>{editingProduct ? 'Update Product' : 'Add Product'}</span>
                                                 </button>
-                                                <button type="button" onClick={cancelEdit} className="btn-secondary">
+                                                <button
+                                                    type="button"
+                                                    onClick={cancelEdit}
+                                                    className="px-6 py-4 bg-gray-800 hover:bg-gray-700 text-gray-300 font-black uppercase tracking-wider corner-clip-sm border-2 border-gray-600 hover:border-gray-500 transition-all"
+                                                    style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                                                >
                                                     Cancel
                                                 </button>
                                             </div>
@@ -719,47 +945,49 @@ const AdminDashboard = () => {
                                 )}
 
                                 {/* Products Table */}
-                                <div className="card overflow-hidden">
-                                    <div className="overflow-x-auto">
+                                <div className="bg-gray-900 corner-clip overflow-hidden border-2 border-cyan-500/30 relative" style={{ boxShadow: '0 0 30px rgba(0, 255, 255, 0.2)' }}>
+                                    <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 255, 0.1) 2px, rgba(0, 255, 255, 0.1) 4px)' }}></div>
+                                    <div className="overflow-x-auto relative z-10">
                                         <table className="w-full">
-                                            <thead className="bg-gray-50 border-b-2 border-gray-200">
+                                            <thead className="bg-gray-800/80 border-b-2 border-cyan-500/50">
                                                 <tr>
-                                                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-700">Image</th>
-                                                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-700">Name</th>
-                                                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-700">Category</th>
-                                                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-700">Price</th>
-                                                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-700">Stock</th>
-                                                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-700">Actions</th>
+                                                    <th className="px-6 py-4 text-left text-sm font-black text-cyan-400 uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Image</th>
+                                                    <th className="px-6 py-4 text-left text-sm font-black text-cyan-400 uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Name</th>
+                                                    <th className="px-6 py-4 text-left text-sm font-black text-cyan-400 uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Category</th>
+                                                    <th className="px-6 py-4 text-left text-sm font-black text-cyan-400 uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Price</th>
+                                                    <th className="px-6 py-4 text-left text-sm font-black text-cyan-400 uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Stock</th>
+                                                    <th className="px-6 py-4 text-left text-sm font-black text-cyan-400 uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Actions</th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-gray-200">
+                                            <tbody className="divide-y divide-cyan-500/10">
                                                 {filteredProducts.length === 0 ? (
                                                     <tr>
-                                                        <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
+                                                        <td colSpan="6" className="px-6 py-12 text-center text-gray-400" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                                             {searchQuery ? 'No products found matching your search.' : 'No products found. Add your first product!'}
                                                         </td>
                                                     </tr>
                                                 ) : (
                                                     filteredProducts.map((product) => (
-                                                        <tr key={product.id} className="hover:bg-gray-50 transition-colors">
+                                                        <tr key={product.id} className="hover:bg-cyan-500/5 transition-colors border-b border-cyan-500/10">
                                                             <td className="px-6 py-4">
                                                                 <img
                                                                     src={product.image}
                                                                     alt={product.name}
-                                                                    className="w-16 h-16 object-cover rounded-lg"
+                                                                    className="w-16 h-16 object-cover corner-clip border-2 border-cyan-500/30"
+                                                                    style={{ boxShadow: '0 0 10px rgba(0, 255, 255, 0.3)' }}
                                                                 />
                                                             </td>
                                                             <td className="px-6 py-4">
-                                                                <div className="font-semibold text-gray-900">{product.name}</div>
-                                                                <div className="text-sm text-gray-600 line-clamp-1">{product.description}</div>
+                                                                <div className="font-bold text-white" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{product.name}</div>
+                                                                <div className="text-sm text-gray-400 line-clamp-1">{product.description}</div>
                                                             </td>
                                                             <td className="px-6 py-4">
-                                                                <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
+                                                                <span className="px-3 py-1 bg-magenta-500/20 text-magenta-300 corner-clip-sm text-sm font-black border border-magenta-500/50" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                                                     {product.category}
                                                                 </span>
                                                             </td>
                                                             <td className="px-6 py-4">
-                                                                <div className="font-bold text-gray-900">฿{product.price.toFixed(2)}</div>
+                                                                <div className="font-black text-white" style={{ fontFamily: 'Orbitron, sans-serif' }}>฿{product.price.toFixed(2)}</div>
                                                                 {product.discount > 0 && (
                                                                     <div className="text-sm text-red-600">-{product.discount}%</div>
                                                                 )}
@@ -773,17 +1001,19 @@ const AdminDashboard = () => {
                                                                 <div className="flex space-x-2">
                                                                     <button
                                                                         onClick={() => startEdit(product)}
-                                                                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                                        className="p-2 text-cyan-400 hover:bg-cyan-500/20 corner-clip-sm border-2 border-cyan-500/50 hover:border-cyan-400 transition-all"
                                                                         title="Edit"
+                                                                        style={{ boxShadow: '0 0 10px rgba(0, 255, 255, 0.2)' }}
                                                                     >
-                                                                        <Edit2 className="w-5 h-5" />
+                                                                        <Edit2 className="w-5 h-5" style={{ filter: 'drop-shadow(0 0 5px rgba(0, 255, 255, 0.6))' }} />
                                                                     </button>
                                                                     <button
                                                                         onClick={() => handleDeleteProduct(product.id)}
-                                                                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                                        className="p-2 text-red-400 hover:bg-red-500/20 corner-clip-sm border-2 border-red-500/50 hover:border-red-400 transition-all"
                                                                         title="Delete"
+                                                                        style={{ boxShadow: '0 0 10px rgba(255, 0, 0, 0.2)' }}
                                                                     >
-                                                                        <Trash2 className="w-5 h-5" />
+                                                                        <Trash2 className="w-5 h-5" style={{ filter: 'drop-shadow(0 0 5px rgba(255, 0, 0, 0.6))' }} />
                                                                     </button>
                                                                 </div>
                                                             </td>
@@ -797,6 +1027,13 @@ const AdminDashboard = () => {
                             </div>
                         )
                         }
+
+                        {/* Categories View */}
+                        {activeTab === 'categories' && (
+                            <div className="animate-fade-in">
+                                <AdminCategories />
+                            </div>
+                        )}
 
                         {/* Orders View */}
                         {activeTab === 'orders' && (
