@@ -4,7 +4,6 @@ import { AdminProvider } from './context/AdminContext';
 import { CartProvider } from './context/CartContext';
 import Navbar from './components/Navbar';
 import ScrollToTop from './components/ScrollToTop';
-import ProtectedAdminRoute from './components/ProtectedAdminRoute';
 import { WishlistProvider } from './context/WishlistContext';
 import Home from './pages/Home';
 import Products from './pages/Products';
@@ -44,9 +43,7 @@ function AppContent() {
         <Route
           path="/admin/dashboard"
           element={
-            <ProtectedAdminRoute>
-              <AdminDashboard />
-            </ProtectedAdminRoute>
+            <AdminDashboard />
           }
         />
       </Routes>
