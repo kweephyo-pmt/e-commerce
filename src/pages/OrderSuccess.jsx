@@ -19,6 +19,7 @@ const OrderSuccess = () => {
     const isBankTransfer = (orderData?.paymentMethod || initialMethod) === 'bank_transfer';
     const orderStatus = orderData?.orderStatus || 'processing';
     const paymentStatus = orderData?.paymentStatus || 'pending';
+    const paymentConfirmed = paymentStatus === 'paid';
 
     useEffect(() => {
         if (!orderId) {
@@ -134,7 +135,11 @@ const OrderSuccess = () => {
         if (orderStatus === 'cancelled' || paymentStatus === 'rejected') return -1;
         if (orderStatus === 'delivered') return isBankTransfer ? 3 : 2;
         if (orderStatus === 'shipped') return isBankTransfer ? 2 : 1;
-        if (orderStatus === 'processing') return isBankTransfer && paymentStatus === 'pending_verification' ? 0 : (isBankTransfer ? 1 : 0);
+        if (orderStatus === 'processing') {
+            // For bank transfer: if payment confirmed, move to step 1 (Order Processing)
+            if (isBankTransfer) return paymentConfirmed ? 1 : 0;
+            return 0;
+        }
         return 0;
     };
 
@@ -197,9 +202,11 @@ const OrderSuccess = () => {
                             }}>
                             {paymentStatus === 'rejected'
                                 ? <XCircle className="w-14 h-14 text-red-500" style={{ filter: 'drop-shadow(0 0 12px rgba(239,68,68,1))' }} />
-                                : isBankTransfer
-                                    ? <Clock className="w-14 h-14 text-yellow-400" style={{ filter: 'drop-shadow(0 0 12px rgba(234,179,8,1))' }} />
-                                    : <CheckCircle className="w-14 h-14 text-cyan-400" style={{ filter: 'drop-shadow(0 0 12px rgba(0,255,255,1))' }} />
+                                : paymentConfirmed
+                                    ? <CheckCircle className="w-14 h-14 text-green-400" style={{ filter: 'drop-shadow(0 0 12px rgba(34,197,94,1))' }} />
+                                    : isBankTransfer
+                                        ? <Clock className="w-14 h-14 text-yellow-400" style={{ filter: 'drop-shadow(0 0 12px rgba(234,179,8,1))' }} />
+                                        : <CheckCircle className="w-14 h-14 text-cyan-400" style={{ filter: 'drop-shadow(0 0 12px rgba(0,255,255,1))' }} />
                             }
                         </div>
                     </div>
@@ -216,6 +223,17 @@ const OrderSuccess = () => {
                                 <span className="text-red-400"
                                     style={{ textShadow: '0 0 30px rgba(239,68,68,0.8)' }}>
                                     Rejected
+                                </span>
+                            </>
+                        ) : paymentConfirmed ? (
+                            <>
+                                <span className="text-green-400"
+                                    style={{ textShadow: '0 0 30px rgba(34,197,94,0.9), 0 0 60px rgba(34,197,94,0.4)' }}>
+                                    Payment{' '}
+                                </span>
+                                <span className="text-emerald-300"
+                                    style={{ textShadow: '0 0 30px rgba(52,211,153,0.8)' }}>
+                                    Confirmed
                                 </span>
                             </>
                         ) : isBankTransfer ? (
@@ -252,17 +270,26 @@ const OrderSuccess = () => {
                         }}>
                         {paymentStatus === 'rejected'
                             ? <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
-                            : isBankTransfer
-                                ? <Clock className="w-4 h-4 text-yellow-400 flex-shrink-0" />
-                                : <Zap className="w-4 h-4 text-cyan-400 flex-shrink-0" />
+                            : paymentConfirmed
+                                ? <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
+                                : isBankTransfer
+                                    ? <Clock className="w-4 h-4 text-yellow-400 flex-shrink-0" />
+                                    : <Zap className="w-4 h-4 text-cyan-400 flex-shrink-0" />
                         }
                         <span className="font-black uppercase tracking-widest text-sm"
                             style={{
                                 fontFamily: 'Rajdhani, sans-serif',
-                                color: paymentStatus === 'rejected' ? '#ef4444' : isBankTransfer ? '#fbbf24' : '#67e8f9',
-                                textShadow: paymentStatus === 'rejected' ? '0 0 8px rgba(239,68,68,0.5)' : isBankTransfer ? '0 0 8px rgba(234,179,8,0.5)' : '0 0 8px rgba(0,255,255,0.5)',
+                                color: paymentStatus === 'rejected' ? '#ef4444' : paymentConfirmed ? '#4ade80' : isBankTransfer ? '#fbbf24' : '#67e8f9',
+                                textShadow: paymentStatus === 'rejected' ? '0 0 8px rgba(239,68,68,0.5)' : paymentConfirmed ? '0 0 8px rgba(74,222,128,0.5)' : isBankTransfer ? '0 0 8px rgba(234,179,8,0.5)' : '0 0 8px rgba(0,255,255,0.5)',
                             }}>
-                            {paymentStatus === 'rejected' ? 'Action Required: Verification Failed' : isBankTransfer ? 'Awaiting Payment Verification' : 'Your order is locked in'}
+                            {paymentStatus === 'rejected'
+                                ? 'Action Required: Verification Failed'
+                                : paymentConfirmed
+                                    ? 'Payment Verified — Order is Being Prepared'
+                                    : isBankTransfer
+                                        ? 'Awaiting Payment Verification'
+                                        : 'Your order is locked in'
+                            }
                         </span>
                     </div>
                 </div>

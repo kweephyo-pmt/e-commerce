@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot, orderBy, query, limit } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, orderBy, query, limit } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAuth } from '../context/AuthContext';
 import { logActivity } from '../utils/logActivity';
@@ -119,26 +119,26 @@ const AdminDashboard = () => {
         return () => unsubscribe();
     }, [user, dashboardStartTime, notificationSound]);
 
-    // Fetch products from Firestore
-    const fetchProducts = async () => {
-        try {
-            setLoading(true);
-            const querySnapshot = await getDocs(collection(db, 'products'));
-            const productsData = querySnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-            setProducts(productsData);
-        } catch (error) {
-            console.error('Error fetching products:', error);
-            showToast('Failed to fetch products', 'error');
-        } finally {
-            setLoading(false);
-        }
-    };
-
+    // Real-time products listener — updates instantly when any product changes
     useEffect(() => {
-        fetchProducts();
+        setLoading(true);
+        const unsubscribe = onSnapshot(
+            collection(db, 'products'),
+            (snapshot) => {
+                const productsData = snapshot.docs.map(d => ({
+                    id: d.id,
+                    ...d.data()
+                }));
+                setProducts(productsData);
+                setLoading(false);
+            },
+            (error) => {
+                console.error('Error listening to products:', error);
+                showToast('Failed to load products', 'error');
+                setLoading(false);
+            }
+        );
+        return () => unsubscribe();
     }, []);
 
     // Real-time activity log listener — only runs once user is authenticated
@@ -209,7 +209,6 @@ const AdminDashboard = () => {
             showToast('Product added successfully!', 'success');
             setShowAddForm(false);
             resetForm();
-            fetchProducts();
         } catch (error) {
             console.error('Error adding product:', error);
             showToast('Failed to add product', 'error');
@@ -240,7 +239,6 @@ const AdminDashboard = () => {
             showToast('Product updated successfully!', 'success');
             setEditingProduct(null);
             resetForm();
-            fetchProducts();
         } catch (error) {
             console.error('Error updating product:', error);
             showToast('Failed to update product', 'error');
@@ -264,7 +262,6 @@ const AdminDashboard = () => {
                 admin: { uid: userProfile?.uid, name: userProfile?.displayName, email: userProfile?.email }
             });
             showToast('Product deleted successfully!', 'success');
-            fetchProducts();
         } catch (error) {
             console.error('Error deleting product:', error);
             showToast('Failed to delete product', 'error');
@@ -442,7 +439,7 @@ const AdminDashboard = () => {
                             style={{ boxShadow: '0 0 10px rgba(0, 255, 255, 0.2)' }}
                         >
                             {sidebarOpen ? <ChevronLeft className="w-5 h-5 text-cyan-400" /> : <Menu className="w-5 h-5 text-cyan-400" />}
-                        </button>                        
+                        </button>
                     </div>
 
                     {/* Navigation */}
