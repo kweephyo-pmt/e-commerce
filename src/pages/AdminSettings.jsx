@@ -293,7 +293,7 @@ const AdminSettings = () => {
                                             </td>
                                             <td className="px-6 py-4">
                                                 {(() => {
-                                                    const isSelf = user.id === currentUser?.uid;
+                                                    const isSelf = user.id === userProfile?.uid;
                                                     return (
                                                         <div className="relative group/btn inline-block">
                                                             <button
