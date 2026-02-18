@@ -10,7 +10,7 @@ import { db } from '../config/firebase';
 const Footer = () => {
     const [settings, setSettings] = useState({
         description: 'Your ultimate portal to the future of gaming gear. We provide high-performance tech with a cyberpunk edge for elite players and digital enthusiasts.',
-        address: 'Level 99, Cyber District, BKK',
+        address: 'Level 99, Cyber District',
         phone: '+66 81 234 5678',
         email: 'support@techno-world.io',
         facebook: '',
