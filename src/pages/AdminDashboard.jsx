@@ -534,7 +534,7 @@ const AdminDashboard = () => {
                     </div>
 
                     {/* Content Area */}
-                    <div className="p-4 md:p-8 pb-24 md:pb-8">
+                    <div className="p-4 md:p-8 pb-8">
                         {/* Dashboard View */}
                         {activeTab === 'dashboard' && (
                             <div className="space-y-4 md:space-y-6 animate-fade-in">
@@ -1194,26 +1194,7 @@ const AdminDashboard = () => {
                         )}
                     </div>
 
-                    {/* Mobile bottom nav bar */}
-                    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-gray-900/98 backdrop-blur-xl border-t-2 border-cyan-500/30"
-                        style={{ boxShadow: '0 -4px 30px rgba(0,255,255,0.15)' }}>
-                        <div className="flex items-center justify-around px-2 py-2">
-                            {menuItems.slice(0, 5).map((item) => (
-                                <button
-                                    key={item.id}
-                                    onClick={() => { setActiveTab(item.id); localStorage.setItem('adminActiveTab', item.id); }}
-                                    className={`flex flex-col items-center gap-1 px-3 py-2 corner-clip-sm transition-all ${activeTab === item.id
-                                        ? 'text-cyan-400 bg-cyan-500/15 border-2 border-cyan-500/40'
-                                        : 'text-gray-500 border-2 border-transparent'
-                                        }`}
-                                    style={activeTab === item.id ? { boxShadow: '0 0 12px rgba(0,255,255,0.3)' } : {}}
-                                >
-                                    <item.icon className="w-5 h-5" style={activeTab === item.id ? { filter: 'drop-shadow(0 0 4px rgba(0,255,255,0.8))' } : {}} />
-                                    <span className="text-[10px] font-black uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{item.label}</span>
-                                </button>
-                            ))}
-                        </div>
-                    </nav>
+
                 </main>
             </div>
         </>
