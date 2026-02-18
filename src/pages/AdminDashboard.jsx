@@ -682,26 +682,38 @@ const AdminDashboard = () => {
                                             (showAllActivity ? recentActivity : recentActivity.slice(0, 4)).map((activity, index) => {
                                                 const IconComponent = activity.icon === 'Package' ? Package :
                                                     activity.icon === 'ShoppingCart' ? ShoppingCart :
-                                                        activity.icon === 'Users' ? Users : TrendingUp;
+                                                        activity.icon === 'Banknote' ? Banknote :
+                                                            activity.icon === 'Users' ? Users : TrendingUp;
 
                                                 const colorMap = {
                                                     cyan: { border: 'border-cyan-500/20 hover:border-cyan-500/40 hover:bg-cyan-500/5', bg: 'from-cyan-500 to-blue-500', shadow: '0 0 15px rgba(0, 255, 255, 0.4)', text: 'text-cyan-300', arrow: 'text-cyan-500' },
                                                     green: { border: 'border-green-500/20 hover:border-green-500/40 hover:bg-green-500/5', bg: 'from-green-500 to-emerald-500', shadow: '0 0 15px rgba(0, 255, 0, 0.4)', text: 'text-green-300', arrow: 'text-green-500' },
                                                     magenta: { border: 'border-magenta-500/20 hover:border-magenta-500/40 hover:bg-magenta-500/5', bg: 'from-magenta-500 to-purple-500', shadow: '0 0 15px rgba(255, 0, 255, 0.4)', text: 'text-magenta-300', arrow: 'text-magenta-500' },
-                                                    orange: { border: 'border-orange-500/20 hover:border-orange-500/40 hover:bg-orange-500/5', bg: 'from-orange-500 to-red-500', shadow: '0 0 15px rgba(255, 165, 0, 0.4)', text: 'text-orange-300', arrow: 'text-orange-500' }
+                                                    orange: { border: 'border-orange-500/20 hover:border-orange-500/40 hover:bg-orange-500/5', bg: 'from-orange-500 to-red-500', shadow: '0 0 15px rgba(255, 165, 0, 0.4)', text: 'text-orange-300', arrow: 'text-orange-500' },
+                                                    yellow: { border: 'border-yellow-500/20 hover:border-yellow-500/40 hover:bg-yellow-500/5', bg: 'from-yellow-500 to-orange-500', shadow: '0 0 15px rgba(255, 255, 0, 0.4)', text: 'text-yellow-300', arrow: 'text-yellow-500' },
+                                                    red: { border: 'border-red-500/20 hover:border-red-500/40 hover:bg-red-500/5', bg: 'from-red-500 to-rose-500', shadow: '0 0 15px rgba(239, 68, 68, 0.4)', text: 'text-red-300', arrow: 'text-red-500' }
                                                 };
 
                                                 const colors = colorMap[activity.color] || colorMap.cyan;
 
                                                 // Map activity type → admin tab name
-                                                const tabMap = {
-                                                    product: 'products',
-                                                    order: 'orders',
-                                                    user: 'customers',
-                                                    category: 'categories',
-                                                    settings: 'settings',
+                                                const getTargetTab = (log) => {
+                                                    // Direct match
+                                                    if (log.type === 'bank') return 'bank-accounts';
+                                                    if (log.type === 'product') return 'products';
+                                                    if (log.type === 'order') return 'orders';
+                                                    if (log.type === 'user') return 'customers';
+                                                    if (log.type === 'category') return 'categories';
+
+                                                    // Legacy or fallback check for settings/bank
+                                                    if (log.type === 'settings') {
+                                                        const desc = (log.title + log.description).toLowerCase();
+                                                        if (desc.includes('bank') || desc.includes('account')) return 'bank-accounts';
+                                                        return 'settings';
+                                                    }
+                                                    return null;
                                                 };
-                                                const targetTab = tabMap[activity.type] || null;
+                                                const targetTab = getTargetTab(activity);
 
                                                 const getTimeAgo = (timestamp) => {
                                                     const seconds = Math.floor((new Date().getTime() - timestamp) / 1000);

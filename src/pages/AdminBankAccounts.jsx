@@ -54,6 +54,9 @@ const AdminBankAccounts = () => {
     const [form, setForm] = useState(EMPTY_FORM);
     const [formErrors, setFormErrors] = useState({});
 
+    // Delete Confirmation modal
+    const [confirmDelete, setConfirmDelete] = useState({ show: false, id: null, bankName: '' });
+
     // Copy-to-clipboard
     const [copied, setCopied] = useState('');
 
@@ -151,7 +154,7 @@ const AdminBankAccounts = () => {
         await persist(newAccounts, newActiveId);
         if (editingId) {
             await logActivity({
-                type: 'settings', icon: 'Settings',
+                type: 'bank', icon: 'Banknote',
                 title: 'Bank Account Updated',
                 description: `"${form.bankName}" account details updated`,
                 color: 'cyan',
@@ -159,7 +162,7 @@ const AdminBankAccounts = () => {
             });
         } else {
             await logActivity({
-                type: 'settings', icon: 'Settings',
+                type: 'bank', icon: 'Banknote',
                 title: 'Bank Account Added',
                 description: `"${form.bankName}" — ${form.accountName} added`,
                 color: 'cyan',
@@ -170,8 +173,14 @@ const AdminBankAccounts = () => {
         closeForm();
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm('Delete this bank account?')) return;
+    const handleDelete = (id) => {
+        const acc = accounts.find(a => a.id === id);
+        setConfirmDelete({ show: true, id, bankName: acc?.bankName || 'Account' });
+    };
+
+    const confirmDeleteAccount = async () => {
+        const { id } = confirmDelete;
+        if (!id) return;
         const newAccounts = accounts.filter(a => a.id !== id);
         const deletedAcc = accounts.find(a => a.id === id);
         const newActiveId = activeId === id
@@ -181,13 +190,14 @@ const AdminBankAccounts = () => {
         setActiveId(newActiveId);
         await persist(newAccounts, newActiveId);
         await logActivity({
-            type: 'settings', icon: 'Settings',
+            type: 'bank', icon: 'Banknote',
             title: 'Bank Account Deleted',
             description: `"${deletedAcc?.bankName || 'Account'}" removed`,
             color: 'red',
             admin: adminInfo
         });
         showToast('Account deleted');
+        setConfirmDelete({ show: false, id: null, bankName: '' });
     };
 
     const handleSetActive = async (id) => {
@@ -195,7 +205,7 @@ const AdminBankAccounts = () => {
         await persist(accounts, id);
         const acc = accounts.find(a => a.id === id);
         await logActivity({
-            type: 'settings', icon: 'Settings',
+            type: 'bank', icon: 'Banknote',
             title: 'Active Bank Account Changed',
             description: `"${acc?.bankName || 'Account'}" set as active checkout account`,
             color: 'yellow',
@@ -543,6 +553,46 @@ const AdminBankAccounts = () => {
                                     <Save className="w-4 h-4" />
                                     {saving ? 'Saving...' : editingId ? 'Update Account' : 'Add Account'}
                                 </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* ── Delete Confirmation Modal ────────────────────────────── */}
+                {confirmDelete.show && (
+                    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in"
+                        onClick={() => setConfirmDelete({ show: false, id: null, bankName: '' })}>
+                        <div className="w-full max-w-md bg-gray-900 corner-clip border-2 border-red-500/50 relative overflow-hidden"
+                            style={{ boxShadow: '0 0 50px rgba(239,68,68,0.3)' }}
+                            onClick={e => e.stopPropagation()}>
+
+                            {/* Danger Glow */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-transparent pointer-events-none" />
+
+                            <div className="px-6 py-8 text-center relative z-10">
+                                <div className="w-16 h-16 bg-red-500/10 border-2 border-red-500/40 corner-clip mx-auto mb-6 flex items-center justify-center"
+                                    style={{ boxShadow: '0 0 20px rgba(239,68,68,0.2)' }}>
+                                    <AlertCircle className="w-8 h-8 text-red-500" />
+                                </div>
+                                <h2 className="text-2xl font-black text-white uppercase tracking-wider mb-2"
+                                    style={{ fontFamily: 'Orbitron, sans-serif' }}>Delete Account?</h2>
+                                <p className="text-gray-400 font-bold mb-8" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                    Are you sure you want to remove <span className="text-red-400 font-black">"{confirmDelete.bankName}"</span>?
+                                    This action cannot be undone.
+                                </p>
+
+                                <div className="flex gap-4">
+                                    <button onClick={() => setConfirmDelete({ show: false, id: null, bankName: '' })}
+                                        className="flex-1 px-4 py-3 bg-gray-800 border-2 border-gray-700 text-gray-300 hover:bg-gray-700 corner-clip-sm font-black text-sm uppercase tracking-wide transition-all"
+                                        style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                        Cancel
+                                    </button>
+                                    <button onClick={confirmDeleteAccount}
+                                        className="flex-1 px-4 py-3 bg-red-500/10 border-2 border-red-500/60 text-red-400 hover:bg-red-500/20 corner-clip-sm font-black text-sm uppercase tracking-wide transition-all"
+                                        style={{ fontFamily: 'Rajdhani, sans-serif', boxShadow: '0 0 15px rgba(239,68,68,0.2)' }}>
+                                        Confirm Delete
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
