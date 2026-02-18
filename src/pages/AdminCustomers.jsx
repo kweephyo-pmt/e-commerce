@@ -98,9 +98,9 @@ const AdminCustomers = () => {
                     style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(147,51,234,0.15) 2px, rgba(147,51,234,0.15) 4px)' }} />
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-transparent" />
                 <div className="flex items-center space-x-4 relative z-10">
-                    <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 corner-clip flex items-center justify-center"
-                        style={{ boxShadow: '0 0 25px rgba(147, 51, 234, 0.7)' }}>
-                        <Users className="w-8 h-8 text-white" style={{ filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.8))' }} />
+                    <div className="w-16 h-16 border-2 border-purple-500/50 corner-clip flex items-center justify-center"
+                        style={{ boxShadow: '0 0 25px rgba(147, 51, 234, 0.3)' }}>
+                        <Users className="w-8 h-8 text-purple-400" style={{ filter: 'drop-shadow(0 0 5px rgba(147, 51, 234, 0.5))' }} />
                     </div>
                     <div>
                         <h1 className="text-4xl font-black text-white uppercase tracking-wider mb-1"
@@ -229,8 +229,8 @@ const AdminCustomers = () => {
                                     key={key}
                                     onClick={() => setFilterStatus(key)}
                                     className={`inline-flex items-center gap-2 px-3 py-2 md:px-5 md:py-3 corner-clip-sm font-black text-xs md:text-sm uppercase tracking-wide border-2 transition-all whitespace-nowrap flex-shrink-0 ${isActive
-                                            ? 'border-purple-400 bg-purple-500/20 text-purple-300'
-                                            : 'border-purple-600/30 text-purple-600 hover:border-purple-500'
+                                        ? 'border-purple-400 bg-purple-500/20 text-purple-300'
+                                        : 'border-purple-600/30 text-purple-600 hover:border-purple-500'
                                         }`}
                                     style={{
                                         fontFamily: 'Rajdhani, sans-serif',
@@ -278,9 +278,9 @@ const AdminCustomers = () => {
                                         <tr key={customer.id} className="hover:bg-purple-500/5 transition-colors border-b border-purple-500/10">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center space-x-3">
-                                                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 corner-clip-sm flex items-center justify-center flex-shrink-0"
-                                                        style={{ boxShadow: '0 0 12px rgba(147,51,234,0.5)' }}>
-                                                        <span className="text-white font-black text-sm" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                                                    <div className="w-10 h-10 border border-purple-500/50 corner-clip-sm flex items-center justify-center flex-shrink-0"
+                                                        style={{ boxShadow: '0 0 12px rgba(147,51,234,0.2)' }}>
+                                                        <span className="text-purple-400 font-black text-sm" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                                                             {customer.displayName?.charAt(0)?.toUpperCase() || customer.email?.charAt(0)?.toUpperCase() || 'U'}
                                                         </span>
                                                     </div>
@@ -350,9 +350,9 @@ const AdminCustomers = () => {
                         <div className="md:hidden divide-y divide-purple-500/10 relative z-10">
                             {filteredCustomers.map((customer) => (
                                 <div key={customer.id} className="flex items-center gap-3 p-4 hover:bg-purple-500/5 transition-colors">
-                                    <div className="w-11 h-11 bg-gradient-to-br from-purple-500 to-pink-600 corner-clip-sm flex items-center justify-center flex-shrink-0"
-                                        style={{ boxShadow: '0 0 10px rgba(147,51,234,0.5)' }}>
-                                        <span className="text-white font-black text-sm" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                                    <div className="w-11 h-11 border border-purple-500/50 corner-clip-sm flex items-center justify-center flex-shrink-0"
+                                        style={{ boxShadow: '0 0 10px rgba(147,51,234,0.2)' }}>
+                                        <span className="text-purple-400 font-black text-sm" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                                             {customer.displayName?.charAt(0)?.toUpperCase() || customer.email?.charAt(0)?.toUpperCase() || 'U'}
                                         </span>
                                     </div>

@@ -84,10 +84,10 @@ const AdminLogin = () => {
 
                     {/* Header */}
                     <div className="text-center mb-8 relative z-10">
-                        <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-magenta-500 to-purple-600 corner-clip mb-6 relative" style={{ boxShadow: '0 0 40px rgba(255, 0, 255, 0.6)' }}>
-                            <Shield className="w-12 h-12 text-white" style={{ filter: 'drop-shadow(0 0 10px rgba(255, 255, 255, 1))' }} />
+                        <div className="inline-flex items-center justify-center w-24 h-24 border-2 border-magenta-500/50 corner-clip mb-6 relative" style={{ boxShadow: '0 0 40px rgba(255, 0, 255, 0.2)' }}>
+                            <Shield className="w-12 h-12 text-magenta-400" style={{ filter: 'drop-shadow(0 0 10px rgba(255, 0, 255, 0.5))' }} />
                             {/* Pulsing ring */}
-                            <div className="absolute inset-0 corner-clip border-4 border-magenta-400 animate-ping"></div>
+                            <div className="absolute inset-0 corner-clip border-2 border-magenta-400/50 animate-ping"></div>
                         </div>
                         <h2 className="text-3xl sm:text-4xl font-black text-magenta-400 mb-2 uppercase tracking-wider" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(255, 0, 255, 1), 0 0 40px rgba(255, 0, 255, 0.6)' }}>
                             Admin Access

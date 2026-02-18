@@ -190,9 +190,9 @@ const AdminBankAccounts = () => {
                     <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-transparent" />
                     <div className="flex items-center justify-between relative z-10">
                         <div className="flex items-center space-x-4">
-                            <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 corner-clip flex items-center justify-center"
-                                style={{ boxShadow: '0 0 25px rgba(0,255,255,0.6)' }}>
-                                <Banknote className="w-8 h-8 text-white" style={{ filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.8))' }} />
+                            <div className="w-16 h-16 border-2 border-cyan-500/50 corner-clip flex items-center justify-center"
+                                style={{ boxShadow: '0 0 25px rgba(0,255,255,0.2)' }}>
+                                <Banknote className="w-8 h-8 text-cyan-400" style={{ filter: 'drop-shadow(0 0 5px rgba(0,255,255,0.5))' }} />
                             </div>
                             <div>
                                 <h1 className="text-4xl font-black text-white uppercase tracking-wider mb-1"
@@ -391,9 +391,9 @@ const AdminBankAccounts = () => {
                             {/* Modal header */}
                             <div className="flex items-center justify-between px-6 py-5 border-b-2 border-cyan-500/20 bg-gray-800/60 relative z-10">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-9 h-9 bg-gradient-to-br from-cyan-500 to-blue-600 corner-clip-sm flex items-center justify-center"
-                                        style={{ boxShadow: '0 0 15px rgba(0,255,255,0.5)' }}>
-                                        <Banknote className="w-5 h-5 text-white" />
+                                    <div className="w-9 h-9 border border-cyan-500/50 corner-clip-sm flex items-center justify-center"
+                                        style={{ boxShadow: '0 0 15px rgba(0,255,255,0.2)' }}>
+                                        <Banknote className="w-5 h-5 text-cyan-400" />
                                     </div>
                                     <h2 className="text-xl font-black text-cyan-400 uppercase tracking-wide"
                                         style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 10px rgba(0,255,255,0.6)' }}>

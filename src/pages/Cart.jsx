@@ -20,8 +20,8 @@ const Cart = () => {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center animate-fade-in">
-                    <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-cyan-500/20 to-magenta-500/20 corner-clip mb-6 border-2 border-cyan-500/50" style={{ boxShadow: '0 0 40px rgba(0, 255, 255, 0.3)' }}>
-                        <ShoppingBag className="w-16 h-16 text-cyan-400" style={{ filter: 'drop-shadow(0 0 10px rgba(0, 255, 255, 0.8))' }} />
+                    <div className="inline-flex items-center justify-center w-32 h-32 bg-gray-900 corner-clip mb-6 border-2 border-cyan-500/50" style={{ boxShadow: '0 0 40px rgba(0, 255, 255, 0.2)' }}>
+                        <ShoppingBag className="w-16 h-16 text-cyan-400" style={{ filter: 'drop-shadow(0 0 10px rgba(0, 255, 255, 0.5))' }} />
                     </div>
                     <h2 className="text-4xl font-bold mb-4 text-cyan-400 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(0, 255, 255, 0.6)' }}>Your cart is empty</h2>
                     <p className="text-gray-400 mb-8 text-lg" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Add some products to get started!</p>

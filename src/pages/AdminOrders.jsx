@@ -194,9 +194,9 @@ const AdminOrders = () => {
                 <div className="absolute inset-0 opacity-5"
                     style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,255,0.1) 2px, rgba(0,255,255,0.1) 4px)' }} />
                 <div className="flex items-center space-x-4 relative z-10">
-                    <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 corner-clip flex items-center justify-center"
-                        style={{ boxShadow: '0 0 25px rgba(0, 255, 255, 0.6)' }}>
-                        <ShoppingCart className="w-8 h-8 text-white" style={{ filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.8))' }} />
+                    <div className="w-16 h-16 border-2 border-cyan-500/50 corner-clip flex items-center justify-center"
+                        style={{ boxShadow: '0 0 25px rgba(0, 255, 255, 0.2)' }}>
+                        <ShoppingCart className="w-8 h-8 text-cyan-400" style={{ filter: 'drop-shadow(0 0 5px rgba(0,255,255,0.5))' }} />
                     </div>
                     <div>
                         <h1 className="text-4xl font-black text-white uppercase tracking-wider mb-1"

@@ -195,8 +195,8 @@ const Orders = () => {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center animate-fade-in max-w-md">
-                    <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-cyan-500/20 to-magenta-500/20 corner-clip mb-6 border-2 border-cyan-500/50" style={{ boxShadow: '0 0 40px rgba(0, 255, 255, 0.3)' }}>
-                        <Package className="w-16 h-16 text-cyan-400" style={{ filter: 'drop-shadow(0 0 10px rgba(0, 255, 255, 0.8))' }} />
+                    <div className="inline-flex items-center justify-center w-32 h-32 bg-gray-900 border-2 border-cyan-500/50 corner-clip mb-6" style={{ boxShadow: '0 0 40px rgba(0, 255, 255, 0.2)' }}>
+                        <Package className="w-16 h-16 text-cyan-400" style={{ filter: 'drop-shadow(0 0 10px rgba(0, 255, 255, 0.5))' }} />
                     </div>
                     <h2 className="text-4xl font-black mb-4 text-cyan-400 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(0, 255, 255, 0.6)' }}>Please Log In</h2>
                     <p className="text-gray-400 mb-8 text-lg" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
@@ -243,8 +243,8 @@ const Orders = () => {
 
                 {orders.length === 0 ? (
                     <div className="text-center py-20 animate-fade-in bg-gradient-to-br from-gray-900 to-gray-800 corner-clip border-2 border-cyan-500/30" style={{ boxShadow: '0 0 30px rgba(0, 255, 255, 0.2)' }}>
-                        <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-cyan-500/20 to-magenta-500/20 corner-clip mb-6 border-2 border-cyan-500/50" style={{ boxShadow: '0 0 40px rgba(0, 255, 255, 0.3)' }}>
-                            <ShoppingBag className="w-16 h-16 text-cyan-400" style={{ filter: 'drop-shadow(0 0 10px rgba(0, 255, 255, 0.8))' }} />
+                        <div className="inline-flex items-center justify-center w-32 h-32 bg-gray-900 border-2 border-cyan-500/50 corner-clip mb-6" style={{ boxShadow: '0 0 40px rgba(0, 255, 255, 0.2)' }}>
+                            <ShoppingBag className="w-16 h-16 text-cyan-400" style={{ filter: 'drop-shadow(0 0 10px rgba(0, 255, 255, 0.5))' }} />
                         </div>
                         <h2 className="text-4xl font-black mb-4 text-cyan-400 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(0, 255, 255, 0.6)' }}>No Orders Yet</h2>
                         <p className="text-gray-400 mb-8 max-w-md mx-auto text-lg" style={{ fontFamily: 'Rajdhani, sans-serif' }}>

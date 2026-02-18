@@ -67,9 +67,9 @@ const Wishlist = () => {
                     <ArrowLeft className="w-4 h-4" /> Back
                 </button>
                 <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-magenta-500/20 to-magenta-600/20 border-2 border-magenta-500/50 corner-clip-sm flex items-center justify-center"
-                        style={{ boxShadow: '0 0 20px rgba(255,0,255,0.3)' }}>
-                        <Heart className="w-6 h-6 text-magenta-400 fill-magenta-400" style={{ filter: 'drop-shadow(0 0 5px rgba(255,0,255,0.8))' }} />
+                    <div className="w-12 h-12 bg-gray-900 border-2 border-magenta-500/50 corner-clip-sm flex items-center justify-center"
+                        style={{ boxShadow: '0 0 20px rgba(255,0,255,0.2)' }}>
+                        <Heart className="w-6 h-6 text-magenta-400 fill-magenta-400" style={{ filter: 'drop-shadow(0 0 5px rgba(255,0,255,0.5))' }} />
                     </div>
                     <div>
                         <h1 className="text-4xl font-black text-white uppercase tracking-wide"

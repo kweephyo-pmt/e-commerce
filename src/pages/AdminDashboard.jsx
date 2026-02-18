@@ -481,9 +481,9 @@ const AdminDashboard = () => {
                         <div className="bg-gray-800/60 corner-clip-sm border border-cyan-500/20 overflow-hidden"
                             style={{ boxShadow: '0 0 20px rgba(0,255,255,0.08)' }}>
                             <div className="flex items-center gap-3 px-4 py-3">
-                                <div className="w-9 h-9 bg-gradient-to-br from-cyan-500 to-blue-600 corner-clip-sm flex items-center justify-center flex-shrink-0"
-                                    style={{ boxShadow: '0 0 12px rgba(0,255,255,0.5)' }}>
-                                    <span className="text-white font-black text-sm" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                                <div className="w-9 h-9 border border-cyan-500/50 corner-clip-sm flex items-center justify-center flex-shrink-0"
+                                    style={{ boxShadow: '0 0 12px rgba(0,255,255,0.2)' }}>
+                                    <span className="text-cyan-400 font-black text-sm" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                                         {user?.displayName?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase()}
                                     </span>
                                 </div>
@@ -522,9 +522,9 @@ const AdminDashboard = () => {
                         <h1 className="text-lg font-black text-cyan-400 uppercase tracking-wider" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(0,255,255,0.8)' }}>
                             {menuItems.find(m => m.id === activeTab)?.label || 'Admin'}
                         </h1>
-                        <div className="w-9 h-9 bg-gradient-to-br from-cyan-500 to-blue-600 corner-clip-sm flex items-center justify-center"
-                            style={{ boxShadow: '0 0 10px rgba(0,255,255,0.5)' }}>
-                            <span className="text-white font-black text-sm" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                        <div className="w-9 h-9 border border-cyan-500/50 corner-clip-sm flex items-center justify-center"
+                            style={{ boxShadow: '0 0 10px rgba(0,255,255,0.3)' }}>
+                            <span className="text-cyan-400 font-black text-sm" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                                 {user?.displayName?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase()}
                             </span>
                         </div>
@@ -539,8 +539,8 @@ const AdminDashboard = () => {
                                 <div className="hidden md:block bg-gray-900 corner-clip p-6 md:p-8 border-2 border-cyan-500/50 relative overflow-hidden" style={{ boxShadow: '0 0 40px rgba(0, 255, 255, 0.4)' }}>
                                     <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 255, 0.1) 2px, rgba(0, 255, 255, 0.1) 4px)' }} />
                                     <div className="flex items-center space-x-4 relative z-10">
-                                        <div className="w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-cyan-500 to-blue-600 corner-clip flex items-center justify-center" style={{ boxShadow: '0 0 30px rgba(0, 255, 255, 0.6)' }}>
-                                            <LayoutDashboard className="w-7 h-7 md:w-8 md:h-8 text-white" style={{ filter: 'drop-shadow(0 0 10px rgba(255, 255, 255, 1))' }} />
+                                        <div className="w-14 h-14 md:w-16 md:h-16 border-2 border-cyan-500/50 corner-clip flex items-center justify-center" style={{ boxShadow: '0 0 30px rgba(0, 255, 255, 0.2)' }}>
+                                            <LayoutDashboard className="w-7 h-7 md:w-8 md:h-8 text-cyan-400" style={{ filter: 'drop-shadow(0 0 10px rgba(0, 255, 255, 0.5))' }} />
                                         </div>
                                         <div>
                                             <h1 className="text-3xl md:text-4xl font-black text-cyan-400 mb-1 uppercase tracking-wider" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(0, 255, 255, 1)' }}>Dashboard</h1>
@@ -754,8 +754,8 @@ const AdminDashboard = () => {
                                 <div className="hidden md:block bg-gray-900 corner-clip p-6 md:p-8 border-2 border-magenta-500/50 relative overflow-hidden" style={{ boxShadow: '0 0 40px rgba(255, 0, 255, 0.4)' }}>
                                     <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 0, 255, 0.1) 2px, rgba(255, 0, 255, 0.1) 4px)' }} />
                                     <div className="flex items-center space-x-4 relative z-10">
-                                        <div className="w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-magenta-500 to-purple-600 corner-clip flex items-center justify-center" style={{ boxShadow: '0 0 30px rgba(255, 0, 255, 0.6)' }}>
-                                            <Package className="w-7 h-7 md:w-8 md:h-8 text-white" style={{ filter: 'drop-shadow(0 0 10px rgba(255, 255, 255, 1))' }} />
+                                        <div className="w-14 h-14 md:w-16 md:h-16 border-2 border-magenta-500/50 corner-clip flex items-center justify-center" style={{ boxShadow: '0 0 30px rgba(255, 0, 255, 0.2)' }}>
+                                            <Package className="w-7 h-7 md:w-8 md:h-8 text-magenta-400" style={{ filter: 'drop-shadow(0 0 10px rgba(255, 0, 255, 0.5))' }} />
                                         </div>
                                         <div>
                                             <h1 className="text-2xl md:text-4xl font-black text-magenta-400 mb-1 uppercase tracking-wider" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(255, 0, 255, 1)' }}>Product Management</h1>

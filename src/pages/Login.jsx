@@ -80,9 +80,9 @@ const Login = () => {
                     <div className="card p-8 animate-fade-in bg-gray-900/50 border-2 border-cyan-500/30" style={{ boxShadow: '0 0 30px rgba(0, 255, 255, 0.3)' }}>
                         {/* Header */}
                         <div className="text-center mb-8">
-                            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 corner-clip-sm mb-4 border-2 border-cyan-500/50"
-                                style={{ boxShadow: '0 0 20px rgba(0, 255, 255, 0.5)' }}>
-                                <KeyRound className="w-8 h-8 text-white" style={{ filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.8))' }} />
+                            <div className="inline-flex items-center justify-center w-16 h-16 border-2 border-cyan-500/50 corner-clip-sm mb-4"
+                                style={{ boxShadow: '0 0 20px rgba(0, 255, 255, 0.2)' }}>
+                                <KeyRound className="w-8 h-8 text-cyan-400" style={{ filter: 'drop-shadow(0 0 5px rgba(0,255,255,0.5))' }} />
                             </div>
                             <h2 className="text-3xl font-black text-cyan-400 mb-2 uppercase tracking-wide"
                                 style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(0,255,255,0.6)' }}>
@@ -156,9 +156,9 @@ const Login = () => {
                     <div className="card p-8 animate-fade-in bg-gray-900/50 border-2 border-green-500/40 text-center"
                         style={{ boxShadow: '0 0 30px rgba(0,255,0,0.2)' }}>
                         {/* Success icon */}
-                        <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 corner-clip mb-6 border-2 border-green-500/50 mx-auto"
-                            style={{ boxShadow: '0 0 30px rgba(0,255,0,0.5)' }}>
-                            <CheckCircle className="w-10 h-10 text-white" style={{ filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.8))' }} />
+                        <div className="inline-flex items-center justify-center w-20 h-20 border-2 border-green-500/50 corner-clip mb-6 mx-auto"
+                            style={{ boxShadow: '0 0 30px rgba(0,255,0,0.2)' }}>
+                            <CheckCircle className="w-10 h-10 text-green-400" style={{ filter: 'drop-shadow(0 0 5px rgba(0,255,0,0.5))' }} />
                         </div>
 
                         <h2 className="text-3xl font-black text-green-400 mb-3 uppercase tracking-wide"
@@ -195,9 +195,9 @@ const Login = () => {
                 <div className="card p-8 animate-fade-in bg-gray-900/50 border-2 border-cyan-500/30" style={{ boxShadow: '0 0 30px rgba(0, 255, 255, 0.3)' }}>
                     {/* Header */}
                     <div className="text-center mb-8">
-                        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-cyan-500 to-magenta-500 corner-clip-sm mb-4 border-2 border-cyan-500/50"
-                            style={{ boxShadow: '0 0 20px rgba(0, 255, 255, 0.5)' }}>
-                            <UserIcon className="w-8 h-8 text-white" style={{ filter: 'drop-shadow(0 0 5px rgba(255, 255, 255, 0.8))' }} />
+                        <div className="inline-flex items-center justify-center w-16 h-16 border-2 border-cyan-500/50 corner-clip-sm mb-4"
+                            style={{ boxShadow: '0 0 20px rgba(0, 255, 255, 0.2)' }}>
+                            <UserIcon className="w-8 h-8 text-cyan-400" style={{ filter: 'drop-shadow(0 0 5px rgba(0, 255, 255, 0.5))' }} />
                         </div>
                         <h2 className="text-3xl font-black text-cyan-400 mb-2 uppercase tracking-wide"
                             style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(0, 255, 255, 0.6)' }}>

@@ -179,9 +179,9 @@ const AdminCategories = () => {
                 <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-transparent"></div>
                 <div className="flex items-center justify-between relative z-10">
                     <div className="flex items-center space-x-4">
-                        <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 corner-clip flex items-center justify-center"
-                            style={{ boxShadow: '0 0 30px rgba(249,115,22,0.7)' }}>
-                            <Tag className="w-8 h-8 text-white" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.9))' }} />
+                        <div className="w-16 h-16 border-2 border-orange-500/50 corner-clip flex items-center justify-center"
+                            style={{ boxShadow: '0 0 30px rgba(249,115,22,0.3)' }}>
+                            <Tag className="w-8 h-8 text-orange-400" style={{ filter: 'drop-shadow(0 0 8px rgba(249,115,22,0.5))' }} />
                         </div>
                         <div>
                             <h1 className="text-4xl font-black text-orange-400 uppercase tracking-wider mb-1"
@@ -356,10 +356,6 @@ const AdminCategories = () => {
                             className="w-full pl-10 pr-4 py-3 bg-gray-800 border-2 border-orange-500/40 corner-clip-sm text-white placeholder-gray-400 focus:outline-none focus:border-orange-400 transition-all font-bold"
                             style={{ fontFamily: 'Rajdhani, sans-serif' }}
                         />
-                    </div>
-                    <div className="text-sm text-gray-300 font-black uppercase" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                        <span className="text-orange-400" style={{ textShadow: '0 0 8px rgba(249,115,22,0.6)' }}>{filtered.length}</span>
-                        {' '}/ {categories.length} categories
                     </div>
                 </div>
             </div>

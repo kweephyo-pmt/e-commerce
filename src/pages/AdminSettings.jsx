@@ -77,9 +77,9 @@ const AdminSettings = () => {
                     <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-transparent"></div>
                     <div className="flex items-center justify-between relative z-10">
                         <div className="flex items-center space-x-4">
-                            <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 corner-clip flex items-center justify-center"
-                                style={{ boxShadow: '0 0 25px rgba(0,255,255,0.6)' }}>
-                                <SettingsIcon className="w-8 h-8 text-white" style={{ filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.8))' }} />
+                            <div className="w-16 h-16 border-2 border-cyan-500/50 corner-clip flex items-center justify-center"
+                                style={{ boxShadow: '0 0 25px rgba(0,255,255,0.2)' }}>
+                                <SettingsIcon className="w-8 h-8 text-cyan-400" style={{ filter: 'drop-shadow(0 0 5px rgba(0,255,255,0.5))' }} />
                             </div>
                             <div>
                                 <h1 className="text-4xl font-black text-white uppercase tracking-wider mb-1"
@@ -195,9 +195,9 @@ const AdminSettings = () => {
                                         <tr key={user.id} className="hover:bg-purple-500/5 transition-colors">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center space-x-3">
-                                                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 corner-clip-sm flex items-center justify-center flex-shrink-0"
-                                                        style={{ boxShadow: '0 0 12px rgba(147,51,234,0.5)' }}>
-                                                        <span className="text-white font-black text-sm" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                                                    <div className="w-10 h-10 border border-purple-500/50 corner-clip-sm flex items-center justify-center flex-shrink-0"
+                                                        style={{ boxShadow: '0 0 12px rgba(147,51,234,0.2)' }}>
+                                                        <span className="text-purple-400 font-black text-sm" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                                                             {user.displayName?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || 'U'}
                                                         </span>
                                                     </div>

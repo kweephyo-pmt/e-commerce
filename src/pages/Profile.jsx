@@ -343,8 +343,8 @@ const Profile = () => {
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between p-4 bg-gray-800/50 corner-clip-sm border-2 border-cyan-500/30" style={{ boxShadow: '0 0 15px rgba(0, 255, 255, 0.2)' }}>
                                         <div className="flex items-center space-x-3">
-                                            <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-cyan-600 corner-clip-sm flex items-center justify-center" style={{ boxShadow: '0 0 15px rgba(0, 255, 255, 0.5)' }}>
-                                                <Package className="w-6 h-6 text-white" />
+                                            <div className="w-12 h-12 border border-cyan-500/50 corner-clip-sm flex items-center justify-center" style={{ boxShadow: '0 0 15px rgba(0, 255, 255, 0.2)' }}>
+                                                <Package className="w-6 h-6 text-cyan-400" />
                                             </div>
                                             <div>
                                                 <p className="text-sm text-gray-400 font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Total Orders</p>
@@ -354,8 +354,8 @@ const Profile = () => {
                                     </div>
                                     <div className="flex items-center justify-between p-4 bg-gray-800/50 corner-clip-sm border-2 border-magenta-500/30" style={{ boxShadow: '0 0 15px rgba(255, 0, 255, 0.2)' }}>
                                         <div className="flex items-center space-x-3">
-                                            <div className="w-12 h-12 bg-gradient-to-br from-magenta-500 to-magenta-600 corner-clip-sm flex items-center justify-center" style={{ boxShadow: '0 0 15px rgba(255, 0, 255, 0.5)' }}>
-                                                <ShoppingBag className="w-6 h-6 text-white" />
+                                            <div className="w-12 h-12 border border-magenta-500/50 corner-clip-sm flex items-center justify-center" style={{ boxShadow: '0 0 15px rgba(255, 0, 255, 0.2)' }}>
+                                                <ShoppingBag className="w-6 h-6 text-magenta-400" />
                                             </div>
                                             <div>
                                                 <p className="text-sm text-gray-400 font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Total Spent</p>
@@ -391,8 +391,8 @@ const Profile = () => {
                             {/* Personal Information */}
                             <div className="bg-gray-900/50 corner-clip-lg shadow-lg p-6 md:p-8 animate-fade-in border-2 border-cyan-500/30" style={{ boxShadow: '0 0 30px rgba(0, 255, 255, 0.2)' }}>
                                 <div className="flex items-center space-x-3 mb-6">
-                                    <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-cyan-600 corner-clip-sm flex items-center justify-center" style={{ boxShadow: '0 0 15px rgba(0, 255, 255, 0.5)' }}>
-                                        <User className="w-5 h-5 text-white" />
+                                    <div className="w-10 h-10 border border-cyan-500/50 corner-clip-sm flex items-center justify-center" style={{ boxShadow: '0 0 15px rgba(0, 255, 255, 0.2)' }}>
+                                        <User className="w-5 h-5 text-cyan-400" />
                                     </div>
                                     <h3 className="text-xl font-black text-cyan-400 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif' }}>Personal Information</h3>
                                 </div>
@@ -449,8 +449,8 @@ const Profile = () => {
                             {/* Shipping Address */}
                             <div className="bg-gray-900/50 corner-clip-lg shadow-lg p-6 md:p-8 animate-fade-in border-2 border-cyan-500/30" style={{ boxShadow: '0 0 30px rgba(0, 255, 255, 0.2)' }}>
                                 <div className="flex items-center space-x-3 mb-6">
-                                    <div className="w-10 h-10 bg-gradient-to-br from-magenta-500 to-magenta-600 corner-clip-sm flex items-center justify-center" style={{ boxShadow: '0 0 15px rgba(255, 0, 255, 0.5)' }}>
-                                        <MapPin className="w-5 h-5 text-white" />
+                                    <div className="w-10 h-10 border border-magenta-500/50 corner-clip-sm flex items-center justify-center" style={{ boxShadow: '0 0 15px rgba(255, 0, 255, 0.2)' }}>
+                                        <MapPin className="w-5 h-5 text-magenta-400" />
                                     </div>
                                     <h3 className="text-xl font-black text-cyan-400 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif' }}>Shipping Address</h3>
                                 </div>
