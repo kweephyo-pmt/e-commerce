@@ -172,21 +172,21 @@ const AdminSettings = () => {
                 </div>
 
                 {/* ── Stats Row ───────────────────────────────────────────── */}
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4 px-1 md:px-0">
                     {[
                         { label: 'Total Users', value: users.length, color: 'cyan', glow: 'rgba(0,255,255,0.4)' },
                         { label: 'Admins', value: adminCount, color: 'yellow', glow: 'rgba(234,179,8,0.4)' },
                         { label: 'Customers', value: users.length - adminCount, color: 'purple', glow: 'rgba(147,51,234,0.4)' },
                     ].map(({ label, value, color, glow }) => (
                         <div key={label}
-                            className={`bg-gray-900 corner-clip-sm p-5 border-2 border-${color}-500/30 relative overflow-hidden`}
+                            className={`bg-gray-900 corner-clip-sm p-4 md:p-5 border-2 border-${color}-500/30 relative overflow-hidden`}
                             style={{ boxShadow: `0 0 20px ${glow}20` }}>
                             <div className={`absolute inset-0 bg-gradient-to-br from-${color}-500/5 to-transparent`}></div>
-                            <p className={`text-3xl font-black text-${color}-400 relative z-10`}
+                            <p className={`text-2xl md:text-3xl font-black text-${color}-400 relative z-10`}
                                 style={{ fontFamily: 'Orbitron, sans-serif', textShadow: `0 0 15px ${glow}` }}>
                                 {value}
                             </p>
-                            <p className="text-gray-400 text-sm font-black uppercase tracking-wide relative z-10"
+                            <p className="text-gray-400 text-[10px] md:text-sm font-black uppercase tracking-wide relative z-10"
                                 style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                 {label}
                             </p>
@@ -201,7 +201,7 @@ const AdminSettings = () => {
                         style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(147,51,234,0.1) 2px, rgba(147,51,234,0.1) 4px)' }}></div>
 
                     {/* Panel Header */}
-                    <div className="flex items-center justify-between px-8 py-5 border-b-2 border-purple-500/20 relative z-10 bg-gray-800/40">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-6 md:px-8 py-5 border-b-2 border-purple-500/20 relative z-10 bg-gray-800/40 gap-4">
                         <div className="flex items-center space-x-3">
                             <Shield className="w-5 h-5 text-purple-400" style={{ filter: 'drop-shadow(0 0 6px rgba(147,51,234,0.8))' }} />
                             <h2 className="text-xl font-black text-purple-400 uppercase tracking-wide"
@@ -211,7 +211,7 @@ const AdminSettings = () => {
                         </div>
 
                         {/* Search */}
-                        <div className="relative w-64">
+                        <div className="relative w-full sm:w-64">
                             <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400" />
                             <input
                                 type="text"
@@ -244,94 +244,167 @@ const AdminSettings = () => {
                                 </p>
                             </div>
                         ) : (
-                            <table className="w-full">
-                                <thead className="bg-gray-800/60 border-b border-purple-500/20">
-                                    <tr>
-                                        {['User', 'Email', 'Role', 'Actions'].map(h => (
-                                            <th key={h} className="px-6 py-4 text-left text-xs font-black text-purple-400 uppercase tracking-widest"
-                                                style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                                {h}
-                                            </th>
+                            <div className="overflow-x-auto">
+                                {/* Desktop Tablet View */}
+                                <table className="w-full hidden md:table">
+                                    <thead className="bg-gray-800/60 border-b border-purple-500/20">
+                                        <tr>
+                                            {['User', 'Email', 'Role', 'Actions'].map(h => (
+                                                <th key={h} className="px-6 py-4 text-left text-xs font-black text-purple-400 uppercase tracking-widest"
+                                                    style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                    {h}
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-purple-500/10">
+                                        {filtered.map((user) => (
+                                            <tr key={user.id} className="hover:bg-purple-500/5 transition-colors">
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center space-x-3">
+                                                        <div className="w-10 h-10 border border-purple-500/50 corner-clip-sm flex items-center justify-center flex-shrink-0"
+                                                            style={{ boxShadow: '0 0 12px rgba(147,51,234,0.2)' }}>
+                                                            <span className="text-purple-400 font-black text-sm" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                                                                {user.displayName?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || 'U'}
+                                                            </span>
+                                                        </div>
+                                                        <p className="font-black text-white" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                            {user.displayName || <span className="text-gray-500 italic">No Name</span>}
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center space-x-2 text-sm text-gray-300">
+                                                        <Mail className="w-4 h-4 text-purple-400 flex-shrink-0" />
+                                                        <span style={{ fontFamily: 'Rajdhani, sans-serif' }}>{user.email}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    {user.isAdmin ? (
+                                                        <span className="inline-flex items-center space-x-1 px-3 py-1 corner-clip-sm text-xs font-black border border-yellow-500/60 bg-yellow-500/10 text-yellow-300 uppercase"
+                                                            style={{ fontFamily: 'Rajdhani, sans-serif', boxShadow: '0 0 10px rgba(234,179,8,0.3)' }}>
+                                                            <Crown className="w-3 h-3" />
+                                                            <span>Admin</span>
+                                                        </span>
+                                                    ) : (
+                                                        <span className="inline-flex items-center px-3 py-1 corner-clip-sm text-xs font-black border border-gray-600/40 bg-gray-700/30 text-gray-400 uppercase"
+                                                            style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                            Customer
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    {(() => {
+                                                        const isSelf = user.id === userProfile?.uid;
+                                                        return (
+                                                            <div className="relative group/btn inline-block">
+                                                                <button
+                                                                    onClick={() => !isSelf && toggleAdminAccess(user.id, user.isAdmin)}
+                                                                    disabled={isSelf}
+                                                                    className={`inline-flex items-center space-x-2 px-4 py-2 corner-clip-sm font-black text-sm uppercase tracking-wide border-2 transition-all ${isSelf
+                                                                        ? 'border-gray-600/40 bg-gray-700/20 text-gray-500 cursor-not-allowed opacity-50'
+                                                                        : user.isAdmin
+                                                                            ? 'border-red-500/60 bg-red-500/10 text-red-300 hover:bg-red-500/20 hover:border-red-400'
+                                                                            : 'border-green-500/60 bg-green-500/10 text-green-300 hover:bg-green-500/20 hover:border-green-400'
+                                                                        }`}
+                                                                    style={{
+                                                                        fontFamily: 'Rajdhani, sans-serif',
+                                                                        boxShadow: isSelf ? 'none' : user.isAdmin ? '0 0 10px rgba(239,68,68,0.2)' : '0 0 10px rgba(0,255,0,0.2)'
+                                                                    }}
+                                                                >
+                                                                    {isSelf ? (
+                                                                        <><Lock className="w-4 h-4" /><span>You</span></>
+                                                                    ) : user.isAdmin ? (
+                                                                        <><UserX className="w-4 h-4" /><span>Revoke Admin</span></>
+                                                                    ) : (
+                                                                        <><Crown className="w-4 h-4" /><span>Make Admin</span></>
+                                                                    )}
+                                                                </button>
+                                                                {isSelf && (
+                                                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-800 border border-gray-600 corner-clip-sm text-xs text-gray-300 font-bold whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none z-10"
+                                                                        style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                                        Can't revoke your own access
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })()}
+                                                </td>
+                                            </tr>
                                         ))}
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-purple-500/10">
+                                    </tbody>
+                                </table>
+
+                                {/* Mobile Card View */}
+                                <div className="md:hidden divide-y divide-purple-500/10">
                                     {filtered.map((user) => (
-                                        <tr key={user.id} className="hover:bg-purple-500/5 transition-colors">
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center space-x-3">
+                                        <div key={user.id} className="p-4 space-y-4">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center space-x-3 text-left">
                                                     <div className="w-10 h-10 border border-purple-500/50 corner-clip-sm flex items-center justify-center flex-shrink-0"
                                                         style={{ boxShadow: '0 0 12px rgba(147,51,234,0.2)' }}>
                                                         <span className="text-purple-400 font-black text-sm" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                                                             {user.displayName?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || 'U'}
                                                         </span>
                                                     </div>
-                                                    <p className="font-black text-white" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                                        {user.displayName || <span className="text-gray-500 italic">No Name</span>}
-                                                    </p>
+                                                    <div>
+                                                        <p className="font-black text-white" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                            {user.displayName || <span className="text-gray-500 italic">No Name</span>}
+                                                        </p>
+                                                        <div className="flex items-center space-x-2 text-xs text-gray-400 mt-0.5">
+                                                            <Mail className="w-3 h-3 text-purple-400" />
+                                                            <span style={{ fontFamily: 'Rajdhani, sans-serif' }} className="truncate max-w-[150px]">{user.email}</span>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center space-x-2 text-sm text-gray-300">
-                                                    <Mail className="w-4 h-4 text-purple-400 flex-shrink-0" />
-                                                    <span style={{ fontFamily: 'Rajdhani, sans-serif' }}>{user.email}</span>
+                                                <div>
+                                                    {user.isAdmin ? (
+                                                        <span className="inline-flex items-center space-x-1 px-2 py-0.5 corner-clip-sm text-[10px] font-black border border-yellow-500/60 bg-yellow-500/10 text-yellow-300 uppercase"
+                                                            style={{ fontFamily: 'Rajdhani, sans-serif', boxShadow: '0 0 10px rgba(234,179,8,0.3)' }}>
+                                                            <Crown className="w-2.5 h-2.5" />
+                                                            <span>Admin</span>
+                                                        </span>
+                                                    ) : (
+                                                        <span className="inline-flex items-center px-2 py-0.5 corner-clip-sm text-[10px] font-black border border-gray-600/40 bg-gray-700/30 text-gray-400 uppercase"
+                                                            style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                            Customer
+                                                        </span>
+                                                    )}
                                                 </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                {user.isAdmin ? (
-                                                    <span className="inline-flex items-center space-x-1 px-3 py-1 corner-clip-sm text-xs font-black border border-yellow-500/60 bg-yellow-500/10 text-yellow-300 uppercase"
-                                                        style={{ fontFamily: 'Rajdhani, sans-serif', boxShadow: '0 0 10px rgba(234,179,8,0.3)' }}>
-                                                        <Crown className="w-3 h-3" />
-                                                        <span>Admin</span>
-                                                    </span>
-                                                ) : (
-                                                    <span className="inline-flex items-center px-3 py-1 corner-clip-sm text-xs font-black border border-gray-600/40 bg-gray-700/30 text-gray-400 uppercase"
-                                                        style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                                        Customer
-                                                    </span>
-                                                )}
-                                            </td>
-                                            <td className="px-6 py-4">
+                                            </div>
+                                            <div className="pt-2">
                                                 {(() => {
                                                     const isSelf = user.id === userProfile?.uid;
                                                     return (
-                                                        <div className="relative group/btn inline-block">
-                                                            <button
-                                                                onClick={() => !isSelf && toggleAdminAccess(user.id, user.isAdmin)}
-                                                                disabled={isSelf}
-                                                                className={`inline-flex items-center space-x-2 px-4 py-2 corner-clip-sm font-black text-sm uppercase tracking-wide border-2 transition-all ${isSelf
-                                                                    ? 'border-gray-600/40 bg-gray-700/20 text-gray-500 cursor-not-allowed opacity-50'
-                                                                    : user.isAdmin
-                                                                        ? 'border-red-500/60 bg-red-500/10 text-red-300 hover:bg-red-500/20 hover:border-red-400'
-                                                                        : 'border-green-500/60 bg-green-500/10 text-green-300 hover:bg-green-500/20 hover:border-green-400'
-                                                                    }`}
-                                                                style={{
-                                                                    fontFamily: 'Rajdhani, sans-serif',
-                                                                    boxShadow: isSelf ? 'none' : user.isAdmin ? '0 0 10px rgba(239,68,68,0.2)' : '0 0 10px rgba(0,255,0,0.2)'
-                                                                }}
-                                                            >
-                                                                {isSelf ? (
-                                                                    <><Lock className="w-4 h-4" /><span>You</span></>
-                                                                ) : user.isAdmin ? (
-                                                                    <><UserX className="w-4 h-4" /><span>Revoke Admin</span></>
-                                                                ) : (
-                                                                    <><Crown className="w-4 h-4" /><span>Make Admin</span></>
-                                                                )}
-                                                            </button>
-                                                            {isSelf && (
-                                                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-800 border border-gray-600 corner-clip-sm text-xs text-gray-300 font-bold whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none z-10"
-                                                                    style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                                                    Can't revoke your own access
-                                                                </div>
+                                                        <button
+                                                            onClick={() => !isSelf && toggleAdminAccess(user.id, user.isAdmin)}
+                                                            disabled={isSelf}
+                                                            className={`w-full inline-flex items-center justify-center space-x-2 px-4 py-2 corner-clip-sm font-black text-xs uppercase tracking-wide border-2 transition-all ${isSelf
+                                                                ? 'border-gray-600/40 bg-gray-700/20 text-gray-500 cursor-not-allowed opacity-50'
+                                                                : user.isAdmin
+                                                                    ? 'border-red-500/60 bg-red-500/10 text-red-300 hover:bg-red-500/20 hover:border-red-400'
+                                                                    : 'border-green-500/60 bg-green-500/10 text-green-300 hover:bg-green-500/20 hover:border-green-400'
+                                                                }`}
+                                                            style={{
+                                                                fontFamily: 'Rajdhani, sans-serif',
+                                                                boxShadow: isSelf ? 'none' : user.isAdmin ? '0 0 10px rgba(239,68,68,0.1)' : '0 0 10px rgba(0,255,0,0.1)'
+                                                            }}
+                                                        >
+                                                            {isSelf ? (
+                                                                <><Lock className="w-3.5 h-3.5" /><span>You (System Admin)</span></>
+                                                            ) : user.isAdmin ? (
+                                                                <><UserX className="w-3.5 h-3.5" /><span>Revoke Admin Access</span></>
+                                                            ) : (
+                                                                <><Crown className="w-3.5 h-3.5" /><span>Grant Admin Access</span></>
                                                             )}
-                                                        </div>
+                                                        </button>
                                                     );
                                                 })()}
-                                            </td>
-                                        </tr>
+                                            </div>
+                                        </div>
                                     ))}
-                                </tbody>
-                            </table>
+                                </div>
+                            </div>
                         )}
                     </div>
 
@@ -353,7 +426,7 @@ const AdminSettings = () => {
                         style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,255,0.1) 2px, rgba(0,255,255,0.1) 4px)' }}></div>
 
                     {/* Panel Header */}
-                    <div className="flex items-center justify-between px-8 py-5 border-b-2 border-cyan-500/20 relative z-10 bg-gray-800/40">
+                    <div className="flex items-center justify-between px-6 md:px-8 py-5 border-b-2 border-cyan-500/20 relative z-10 bg-gray-800/40">
                         <div className="flex items-center space-x-3">
                             <Truck className="w-5 h-5 text-cyan-400" style={{ filter: 'drop-shadow(0 0 6px rgba(0,255,255,0.8))' }} />
                             <h2 className="text-xl font-black text-cyan-400 uppercase tracking-wide"
@@ -363,7 +436,7 @@ const AdminSettings = () => {
                         </div>
                     </div>
 
-                    <div className="px-8 py-6 relative z-10 space-y-6">
+                    <div className="px-6 md:px-8 py-6 relative z-10 space-y-6">
                         {shippingLoading ? (
                             <div className="text-center py-8">
                                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-cyan-500 mx-auto"></div>
