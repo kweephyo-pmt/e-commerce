@@ -50,7 +50,7 @@ const ProductCard = ({ product }) => {
     return (
         <div
             onClick={handleCardClick}
-            className="card group cursor-pointer overflow-hidden transform hover:scale-105 transition-all duration-300 animate-fade-in relative"
+            className="card h-full flex flex-col group cursor-pointer overflow-hidden transform hover:scale-[1.02] transition-all duration-300 animate-fade-in relative"
         >
             {/* Wishlist Button — always visible, solid bg so it shows on any image */}
             <div className="absolute top-3 right-3 z-10">
@@ -109,7 +109,7 @@ const ProductCard = ({ product }) => {
             </div>
 
             {/* Product Info */}
-            <div className="p-4 sm:p-6">
+            <div className="p-4 sm:p-6 flex flex-col flex-grow">
                 <div className="mb-1 sm:mb-2">
                     <span className="text-[10px] sm:text-xs font-bold text-cyan-400 uppercase tracking-wider" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 10px rgba(0, 255, 255, 0.5)' }}>
                         {product.category}
@@ -155,7 +155,7 @@ const ProductCard = ({ product }) => {
                 )}
 
                 {/* Price and Add to Cart */}
-                <div className="space-y-3">
+                <div className="mt-auto space-y-3">
                     <div>
                         {product.discount ? (
                             <div className="flex items-center space-x-2">

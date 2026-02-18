@@ -161,17 +161,14 @@ const Home = () => {
                             {/* Slider Container */}
                             <div
                                 ref={sliderRef}
-                                className="flex items-start gap-4 sm:gap-6 md:gap-8 overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory"
+                                className="flex items-stretch gap-4 sm:gap-6 md:gap-8 overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory px-4 sm:px-0"
                                 style={{
                                     msOverflowStyle: 'none',
                                     scrollbarWidth: 'none',
-                                    paddingLeft: '1rem',
-                                    paddingRight: '1rem',
-                                    margin: '0 -1rem'
                                 }}
                             >
                                 {featuredProducts.map((product) => (
-                                    <div key={product.id} className="min-w-[260px] sm:min-w-[320px] md:min-w-[300px] flex-shrink-0 snap-center">
+                                    <div key={product.id} className="w-64 sm:w-72 md:w-80 flex-shrink-0 snap-center">
                                         <ProductCard product={product} />
                                     </div>
                                 ))}
