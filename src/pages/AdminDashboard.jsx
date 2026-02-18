@@ -559,7 +559,7 @@ const AdminDashboard = () => {
                                         <div className="flex items-center justify-between relative z-10">
                                             <div>
                                                 <p className="text-cyan-200 text-xs md:text-sm font-black uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Total Products</p>
-                                                <h3 className="text-4xl md:text-5xl font-black mt-1 md:mt-2 text-white" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(0, 255, 255, 1)' }}>{totalProducts}</h3>
+                                                <h3 className="text-3xl lg:text-5xl md:text-4xl font-black mt-1 md:mt-2 text-white" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(0, 255, 255, 1)' }}>{totalProducts}</h3>
                                             </div>
                                             <div className="p-3 md:p-4 bg-cyan-500/20 corner-clip border-2 border-cyan-500/50" style={{ boxShadow: '0 0 20px rgba(0, 255, 255, 0.6)' }}>
                                                 <Package className="w-6 h-6 md:w-8 md:h-8 text-cyan-400" style={{ filter: 'drop-shadow(0 0 10px rgba(0, 255, 255, 1))' }} />
@@ -570,12 +570,19 @@ const AdminDashboard = () => {
                                     <div className="bg-gray-900 backdrop-blur-sm p-4 md:p-6 corner-clip border-2 border-green-500/50 relative overflow-hidden" style={{ boxShadow: '0 0 30px rgba(0, 255, 0, 0.5)' }}>
                                         <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-transparent"></div>
                                         <div className="flex items-center justify-between relative z-10">
-                                            <div className="min-w-0 flex-1 mr-3">
-                                                <p className="text-green-200 text-xs md:text-sm font-black uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Inventory Value</p>
-                                                <h3 className="text-3xl md:text-5xl font-black mt-1 md:mt-2 text-white truncate" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(0, 255, 0, 1)' }}>฿{totalValue.toFixed(0)}</h3>
+                                            <div className="min-w-0 flex-1 mr-2">
+                                                <p className="text-green-200 text-[10px] md:text-sm font-black uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Inventory Value</p>
+                                                <h3 className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-black mt-1 text-white leading-tight"
+                                                    style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(0, 255, 0, 0.8)' }}>
+                                                    {totalValue >= 1000000
+                                                        ? `฿${(totalValue / 1000000).toFixed(2)}M`
+                                                        : totalValue >= 100000
+                                                            ? `฿${(totalValue / 1000).toFixed(0)}K`
+                                                            : `฿${totalValue.toLocaleString()}`}
+                                                </h3>
                                             </div>
-                                            <div className="p-3 md:p-4 bg-green-500/20 corner-clip border-2 border-green-500/50 flex-shrink-0" style={{ boxShadow: '0 0 20px rgba(0, 255, 0, 0.6)' }}>
-                                                <DollarSign className="w-6 h-6 md:w-8 md:h-8 text-green-400" style={{ filter: 'drop-shadow(0 0 10px rgba(0, 255, 0, 1))' }} />
+                                            <div className="p-2 md:p-4 bg-green-500/20 corner-clip border-2 border-green-500/50 flex-shrink-0" style={{ boxShadow: '0 0 20px rgba(0, 255, 0, 0.6)' }}>
+                                                <DollarSign className="w-5 h-5 md:w-8 md:h-8 text-green-400" style={{ filter: 'drop-shadow(0 0 10px rgba(0, 255, 0, 1))' }} />
                                             </div>
                                         </div>
                                     </div>
@@ -585,7 +592,7 @@ const AdminDashboard = () => {
                                         <div className="flex items-center justify-between relative z-10">
                                             <div>
                                                 <p className="text-orange-200 text-xs md:text-sm font-black uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Low Stock Items</p>
-                                                <h3 className="text-4xl md:text-5xl font-black mt-1 md:mt-2 text-white" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(255, 165, 0, 1)' }}>{lowStockProducts}</h3>
+                                                <h3 className="text-3xl lg:text-5xl md:text-4xl font-black mt-1 md:mt-2 text-white" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(255, 165, 0, 1)' }}>{lowStockProducts}</h3>
                                             </div>
                                             <div className="p-3 md:p-4 bg-orange-500/20 corner-clip border-2 border-orange-500/50" style={{ boxShadow: '0 0 20px rgba(255, 165, 0, 0.6)' }}>
                                                 <TrendingUp className="w-6 h-6 md:w-8 md:h-8 text-orange-400" style={{ filter: 'drop-shadow(0 0 10px rgba(255, 165, 0, 1))' }} />
