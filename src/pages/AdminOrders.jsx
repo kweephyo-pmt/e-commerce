@@ -13,6 +13,7 @@ const AdminOrders = () => {
     const [expandedOrders, setExpandedOrders] = useState(new Set());
     const [slipModal, setSlipModal] = useState(null); // URL of slip to show full-screen
     const [paymentUpdating, setPaymentUpdating] = useState(null);
+    const [confirmDialog, setConfirmDialog] = useState(null); // { title: string, message: string, onConfirm: function, type: 'danger' | 'success' }
 
     useEffect(() => {
         const ordersRef = collection(db, 'orders');
@@ -94,27 +95,37 @@ const AdminOrders = () => {
         }
     };
 
-    const rejectPayment = async (orderId) => {
-        if (!window.confirm('Reject this payment? The order will be marked as payment rejected.')) return;
-        try {
-            setPaymentUpdating(orderId);
-            await updateDoc(doc(db, 'orders', orderId), {
-                paymentStatus: 'rejected',
-                orderStatus: 'cancelled',
-                updatedAt: serverTimestamp(),
-            });
-            await logActivity({
-                type: 'order', icon: 'ShoppingCart',
-                title: 'Payment Rejected',
-                description: `Order #${orderId.slice(0, 8).toUpperCase()} — Payment slip rejected`,
-                color: 'red'
-            });
-        } catch (e) {
-            console.error('Error rejecting payment:', e);
-            alert('Failed to reject payment');
-        } finally {
-            setPaymentUpdating(null);
-        }
+    const rejectPayment = (orderId) => {
+        setConfirmDialog({
+            title: 'Reject Payment',
+            message: 'Are you sure you want to reject this payment? The order will be marked as payment rejected and the order status will be set to cancelled.',
+            type: 'danger',
+            confirmText: 'Reject Payment',
+            icon: XCircle,
+            onConfirm: async () => {
+                try {
+                    setPaymentUpdating(orderId);
+                    await updateDoc(doc(db, 'orders', orderId), {
+                        paymentStatus: 'rejected',
+                        orderStatus: 'cancelled',
+                        updatedAt: serverTimestamp(),
+                    });
+                    await logActivity({
+                        type: 'order',
+                        icon: 'ShoppingCart',
+                        title: 'Payment Rejected',
+                        description: `Order #${orderId.slice(0, 8).toUpperCase()} — Payment slip rejected`,
+                        color: 'red'
+                    });
+                } catch (e) {
+                    console.error('Error rejecting payment:', e);
+                    alert('Failed to reject payment');
+                } finally {
+                    setPaymentUpdating(null);
+                    setConfirmDialog(null);
+                }
+            }
+        });
     };
 
     const getStatusStyle = (status) => {
@@ -131,7 +142,7 @@ const AdminOrders = () => {
     const getPaymentBadge = (paymentStatus) => {
         switch (paymentStatus) {
             case 'paid': return { label: '✓ PAID', cls: 'text-green-400' };
-            case 'pending_verification': return { label: '⏳ PENDING', cls: 'text-yellow-400 animate-pulse' };
+            case 'pending_verification': return { label: 'PENDING', cls: 'text-yellow-400 animate-pulse' };
             case 'rejected': return { label: '✗ REJECTED', cls: 'text-red-400' };
             default: return null;
         }
@@ -678,6 +689,51 @@ const AdminOrders = () => {
                         <img src={slipModal} alt="Payment slip full view"
                             className="w-full max-h-[80vh] object-contain corner-clip border-2 border-magenta-500/50"
                             style={{ boxShadow: '0 0 40px rgba(255,0,255,0.3)' }} />
+                    </div>
+                </div>
+            )}
+
+            {/* Custom Confirmation Dialog */}
+            {confirmDialog && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setConfirmDialog(null)}>
+                    <div className="w-full max-w-md bg-gray-900 corner-clip border-2 border-magenta-500/50 relative overflow-hidden animate-fade-in"
+                        style={{ boxShadow: '0 0 60px rgba(255,0,255,0.3)' }}
+                        onClick={e => e.stopPropagation()}>
+
+                        {/* Scanline overlay */}
+                        <div className="absolute inset-0 opacity-5 pointer-events-none"
+                            style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,0,255,0.1) 2px, rgba(255,0,255,0.1) 4px)' }} />
+
+                        <div className="px-6 py-8 relative z-10 text-center">
+                            <div className="w-20 h-20 mx-auto border-2 border-magenta-500/50 corner-clip flex items-center justify-center mb-6 bg-magenta-500/10"
+                                style={{ boxShadow: '0 0 20px rgba(255,0,255,0.2)' }}>
+                                {confirmDialog.icon ? <confirmDialog.icon className="w-10 h-10 text-magenta-400" /> : <AlertCircle className="w-10 h-10 text-magenta-400" />}
+                            </div>
+
+                            <h3 className="text-2xl font-black text-magenta-400 uppercase tracking-wide mb-3"
+                                style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 10px rgba(255,0,255,0.6)' }}>
+                                {confirmDialog.title}
+                            </h3>
+
+                            <p className="text-gray-400 font-bold mb-8 leading-relaxed" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                {confirmDialog.message}
+                            </p>
+
+                            <div className="flex gap-4">
+                                <button
+                                    onClick={() => setConfirmDialog(null)}
+                                    className="flex-1 px-6 py-3 bg-gray-800 text-gray-400 font-black uppercase tracking-widest corner-clip border border-gray-700 hover:bg-gray-700 transition-all text-sm"
+                                    style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={confirmDialog.onConfirm}
+                                    className="flex-1 px-6 py-3 bg-magenta-500/20 text-magenta-400 font-black uppercase tracking-widest corner-clip border border-magenta-500/60 hover:bg-magenta-500/30 transition-all text-sm shadow-[0_0_15px_rgba(255,0,255,0.3)]"
+                                    style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                    {confirmDialog.confirmText || 'Confirm'}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

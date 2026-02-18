@@ -1,26 +1,47 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from '../config/firebase';
 import {
     CheckCircle, Package, Truck, Home, ShoppingBag,
-    Banknote, Clock, Shield, Zap, ArrowRight, Mail
+    Banknote, Clock, Shield, Zap, ArrowRight, Mail, AlertCircle, XCircle
 } from 'lucide-react';
 
 const OrderSuccess = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const { orderId, orderTotal, paymentMethod } = location.state || {};
-    const isBankTransfer = paymentMethod === 'bank_transfer';
+    const { orderId, orderTotal: initialTotal, paymentMethod: initialMethod } = location.state || {};
+
+    const [orderData, setOrderData] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    const isBankTransfer = (orderData?.paymentMethod || initialMethod) === 'bank_transfer';
+    const orderStatus = orderData?.orderStatus || 'processing';
+    const paymentStatus = orderData?.paymentStatus || 'pending';
 
     useEffect(() => {
-        if (!orderId) navigate('/');
+        if (!orderId) {
+            navigate('/');
+            return;
+        }
+
+        const unsubscribe = onSnapshot(doc(db, 'orders', orderId), (snapshot) => {
+            if (snapshot.exists()) {
+                setOrderData(snapshot.data());
+            }
+            setLoading(false);
+        });
+
+        return () => unsubscribe();
     }, [orderId, navigate]);
 
     if (!orderId) return null;
 
     // Steps differ based on payment method
-    const steps = isBankTransfer
+    const baseSteps = isBankTransfer
         ? [
             {
+                key: 'verification',
                 num: 1,
                 icon: Banknote,
                 title: 'Payment Verification',
@@ -30,9 +51,9 @@ const OrderSuccess = () => {
                 border: 'border-yellow-500/50',
                 bg: 'from-yellow-500 to-orange-500',
                 textColor: 'text-yellow-400',
-                active: true,
             },
             {
+                key: 'processing',
                 num: 2,
                 icon: Package,
                 title: 'Order Processing',
@@ -42,9 +63,9 @@ const OrderSuccess = () => {
                 border: 'border-cyan-500/30',
                 bg: 'from-gray-600 to-gray-700',
                 textColor: 'text-gray-400',
-                active: false,
             },
             {
+                key: 'shipping',
                 num: 3,
                 icon: Truck,
                 title: 'Shipping',
@@ -54,9 +75,9 @@ const OrderSuccess = () => {
                 border: 'border-cyan-500/30',
                 bg: 'from-gray-600 to-gray-700',
                 textColor: 'text-gray-400',
-                active: false,
             },
             {
+                key: 'delivery',
                 num: 4,
                 icon: CheckCircle,
                 title: 'Delivery',
@@ -66,11 +87,11 @@ const OrderSuccess = () => {
                 border: 'border-cyan-500/30',
                 bg: 'from-gray-600 to-gray-700',
                 textColor: 'text-gray-400',
-                active: false,
             },
         ]
         : [
             {
+                key: 'processing',
                 num: 1,
                 icon: Package,
                 title: 'Order Processing',
@@ -80,9 +101,9 @@ const OrderSuccess = () => {
                 border: 'border-cyan-500/50',
                 bg: 'from-cyan-500 to-blue-500',
                 textColor: 'text-cyan-400',
-                active: true,
             },
             {
+                key: 'shipping',
                 num: 2,
                 icon: Truck,
                 title: 'Shipping Confirmation',
@@ -92,9 +113,9 @@ const OrderSuccess = () => {
                 border: 'border-cyan-500/30',
                 bg: 'from-gray-600 to-gray-700',
                 textColor: 'text-gray-400',
-                active: false,
             },
             {
+                key: 'delivery',
                 num: 3,
                 icon: CheckCircle,
                 title: 'Delivery',
@@ -104,12 +125,38 @@ const OrderSuccess = () => {
                 border: 'border-cyan-500/30',
                 bg: 'from-gray-600 to-gray-700',
                 textColor: 'text-gray-400',
-                active: false,
             },
         ];
 
+    // Calculate active step index
+    const getActiveIndex = () => {
+        if (orderStatus === 'cancelled' || paymentStatus === 'rejected') return -1;
+        if (orderStatus === 'delivered') return isBankTransfer ? 3 : 2;
+        if (orderStatus === 'shipped') return isBankTransfer ? 2 : 1;
+        if (orderStatus === 'processing') return isBankTransfer && paymentStatus === 'pending_verification' ? 0 : (isBankTransfer ? 1 : 0);
+        return 0;
+    };
+
+    const activeIndex = getActiveIndex();
+    const steps = baseSteps.map((step, idx) => ({
+        ...step,
+        active: idx === activeIndex,
+        completed: idx < activeIndex,
+        // Update styling for completed steps
+        bg: idx < activeIndex ? 'from-green-500 to-emerald-600' : idx === activeIndex ? step.bg : 'from-gray-700 to-gray-800',
+        border: idx < activeIndex ? 'border-green-400/50' : idx === activeIndex ? step.border : 'border-gray-700',
+        textColor: idx < activeIndex ? 'text-green-400' : idx === activeIndex ? step.textColor : 'text-gray-500',
+        glow: idx < activeIndex ? 'rgba(34,197,94,0.4)' : step.glow
+    }));
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#0a0e27] via-[#0f172a] to-[#1a1f3a] py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8">
+
+            {loading && (
+                <div className="fixed inset-0 z-50 bg-[#0a0e27]/80 backdrop-blur-sm flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-500"></div>
+                </div>
+            )}
 
             {/* Ambient background glows */}
             <div className="fixed inset-0 pointer-events-none overflow-hidden">
@@ -135,17 +182,23 @@ const OrderSuccess = () => {
                         {/* Main icon box */}
                         <div className="relative w-28 h-28 corner-clip flex items-center justify-center border-2"
                             style={{
-                                background: isBankTransfer
-                                    ? 'linear-gradient(135deg, rgba(234,179,8,0.3) 0%, rgba(249,115,22,0.2) 100%)'
-                                    : 'linear-gradient(135deg, rgba(0,255,255,0.3) 0%, rgba(0,200,100,0.2) 100%)',
-                                borderColor: isBankTransfer ? 'rgba(234,179,8,0.6)' : 'rgba(0,255,255,0.6)',
-                                boxShadow: isBankTransfer
-                                    ? '0 0 60px rgba(234,179,8,0.5), inset 0 0 30px rgba(234,179,8,0.1)'
-                                    : '0 0 60px rgba(0,255,255,0.5), inset 0 0 30px rgba(0,255,255,0.1)',
+                                background: paymentStatus === 'rejected'
+                                    ? 'linear-gradient(135deg, rgba(239,68,68,0.3) 0%, rgba(153,27,27,0.2) 100%)'
+                                    : isBankTransfer
+                                        ? 'linear-gradient(135deg, rgba(234,179,8,0.3) 0%, rgba(249,115,22,0.2) 100%)'
+                                        : 'linear-gradient(135deg, rgba(0,255,255,0.3) 0%, rgba(0,200,100,0.2) 100%)',
+                                borderColor: paymentStatus === 'rejected' ? 'rgba(239,68,68,0.6)' : isBankTransfer ? 'rgba(234,179,8,0.6)' : 'rgba(0,255,255,0.6)',
+                                boxShadow: paymentStatus === 'rejected'
+                                    ? '0 0 60px rgba(239,68,68,0.5), inset 0 0 30px rgba(239,68,68,0.1)'
+                                    : isBankTransfer
+                                        ? '0 0 60px rgba(234,179,8,0.5), inset 0 0 30px rgba(234,179,8,0.1)'
+                                        : '0 0 60px rgba(0,255,255,0.5), inset 0 0 30px rgba(0,255,255,0.1)',
                             }}>
-                            {isBankTransfer
-                                ? <Clock className="w-14 h-14 text-yellow-400" style={{ filter: 'drop-shadow(0 0 12px rgba(234,179,8,1))' }} />
-                                : <CheckCircle className="w-14 h-14 text-cyan-400" style={{ filter: 'drop-shadow(0 0 12px rgba(0,255,255,1))' }} />
+                            {paymentStatus === 'rejected'
+                                ? <XCircle className="w-14 h-14 text-red-500" style={{ filter: 'drop-shadow(0 0 12px rgba(239,68,68,1))' }} />
+                                : isBankTransfer
+                                    ? <Clock className="w-14 h-14 text-yellow-400" style={{ filter: 'drop-shadow(0 0 12px rgba(234,179,8,1))' }} />
+                                    : <CheckCircle className="w-14 h-14 text-cyan-400" style={{ filter: 'drop-shadow(0 0 12px rgba(0,255,255,1))' }} />
                             }
                         </div>
                     </div>
@@ -153,7 +206,18 @@ const OrderSuccess = () => {
                     {/* Title */}
                     <h1 className="text-4xl sm:text-5xl md:text-6xl font-black mb-4 uppercase tracking-wider"
                         style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                        {isBankTransfer ? (
+                        {paymentStatus === 'rejected' ? (
+                            <>
+                                <span className="text-red-500"
+                                    style={{ textShadow: '0 0 30px rgba(239,68,68,0.9), 0 0 60px rgba(239,68,68,0.4)' }}>
+                                    Payment{' '}
+                                </span>
+                                <span className="text-red-400"
+                                    style={{ textShadow: '0 0 30px rgba(239,68,68,0.8)' }}>
+                                    Rejected
+                                </span>
+                            </>
+                        ) : isBankTransfer ? (
                             <>
                                 <span className="text-yellow-400"
                                     style={{ textShadow: '0 0 30px rgba(234,179,8,0.9), 0 0 60px rgba(234,179,8,0.4)' }}>
@@ -181,21 +245,23 @@ const OrderSuccess = () => {
                     {/* Subtitle */}
                     <div className="inline-flex items-center gap-2 px-5 py-2.5 corner-clip-sm border"
                         style={{
-                            background: isBankTransfer ? 'rgba(234,179,8,0.08)' : 'rgba(0,255,255,0.08)',
-                            borderColor: isBankTransfer ? 'rgba(234,179,8,0.3)' : 'rgba(0,255,255,0.3)',
-                            boxShadow: isBankTransfer ? '0 0 20px rgba(234,179,8,0.15)' : '0 0 20px rgba(0,255,255,0.15)',
+                            background: paymentStatus === 'rejected' ? 'rgba(239,68,68,0.08)' : isBankTransfer ? 'rgba(234,179,8,0.08)' : 'rgba(0,255,255,0.08)',
+                            borderColor: paymentStatus === 'rejected' ? 'rgba(239,68,68,0.3)' : isBankTransfer ? 'rgba(234,179,8,0.3)' : 'rgba(0,255,255,0.3)',
+                            boxShadow: paymentStatus === 'rejected' ? '0 0 20px rgba(239,68,68,0.15)' : isBankTransfer ? '0 0 20px rgba(234,179,8,0.15)' : '0 0 20px rgba(0,255,255,0.15)',
                         }}>
-                        {isBankTransfer
-                            ? <Clock className="w-4 h-4 text-yellow-400 flex-shrink-0" />
-                            : <Zap className="w-4 h-4 text-cyan-400 flex-shrink-0" />
+                        {paymentStatus === 'rejected'
+                            ? <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
+                            : isBankTransfer
+                                ? <Clock className="w-4 h-4 text-yellow-400 flex-shrink-0" />
+                                : <Zap className="w-4 h-4 text-cyan-400 flex-shrink-0" />
                         }
                         <span className="font-black uppercase tracking-widest text-sm"
                             style={{
                                 fontFamily: 'Rajdhani, sans-serif',
-                                color: isBankTransfer ? '#fbbf24' : '#67e8f9',
-                                textShadow: isBankTransfer ? '0 0 8px rgba(234,179,8,0.5)' : '0 0 8px rgba(0,255,255,0.5)',
+                                color: paymentStatus === 'rejected' ? '#ef4444' : isBankTransfer ? '#fbbf24' : '#67e8f9',
+                                textShadow: paymentStatus === 'rejected' ? '0 0 8px rgba(239,68,68,0.5)' : isBankTransfer ? '0 0 8px rgba(234,179,8,0.5)' : '0 0 8px rgba(0,255,255,0.5)',
                             }}>
-                            {isBankTransfer ? 'Awaiting Payment Verification' : 'Your order is locked in'}
+                            {paymentStatus === 'rejected' ? 'Action Required: Verification Failed' : isBankTransfer ? 'Awaiting Payment Verification' : 'Your order is locked in'}
                         </span>
                     </div>
                 </div>
