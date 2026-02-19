@@ -17,6 +17,7 @@ const ProductDetails = () => {
     const [relatedProducts, setRelatedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [quantity, setQuantity] = useState(1);
+    const [activeImageIdx, setActiveImageIdx] = useState(0);
     const [reviews, setReviews] = useState([]);
     const [userRating, setUserRating] = useState(0);
     const [userReview, setUserReview] = useState('');
@@ -61,6 +62,9 @@ const ProductDetails = () => {
 
         fetchProduct();
     }, [id, navigate]);
+
+    // Reset active image when product changes
+    useEffect(() => { setActiveImageIdx(0); }, [id]);
 
     // Fetch reviews
     useEffect(() => {
@@ -225,20 +229,71 @@ const ProductDetails = () => {
 
                     {/* Product Details */}
                     <div className="grid md:grid-cols-2 gap-8 md:gap-12 mb-12 md:mb-16">
-                        {/* Product Image */}
-                        <div className="animate-fade-in">
-                            <div className="relative corner-clip overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-cyan-500/50" style={{ boxShadow: '0 0 40px rgba(0, 255, 255, 0.3)' }}>
-                                <img
-                                    src={product.image}
-                                    alt={product.name}
-                                    className="w-full h-64 sm:h-80 md:h-96 lg:h-[500px] object-contain"
-                                />
-                                {product.discount > 0 && (
-                                    <div className="absolute top-4 right-4 bg-gradient-to-r from-magenta-500 to-red-500 text-white px-3 py-1.5 sm:px-4 sm:py-2 corner-clip-sm font-black uppercase text-sm sm:text-base" style={{ fontFamily: 'Orbitron, sans-serif', boxShadow: '0 0 20px rgba(255, 0, 255, 0.8)' }}>
-                                        -{product.discount}%
-                                    </div>
-                                )}
-                            </div>
+                        {/* Product Image Gallery */}
+                        <div className="animate-fade-in space-y-3">
+                            {(() => {
+                                // Support both multi-image (new) and single-image (legacy) products
+                                const productImages = product.images?.length
+                                    ? product.images
+                                    : product.image
+                                        ? [product.image]
+                                        : [];
+                                const safeIdx = Math.min(activeImageIdx, productImages.length - 1);
+
+                                return (
+                                    <>
+                                        {/* Main image */}
+                                        <div
+                                            className="relative corner-clip overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-cyan-500/50"
+                                            style={{ boxShadow: '0 0 40px rgba(0, 255, 255, 0.3)' }}
+                                        >
+                                            <img
+                                                key={safeIdx}
+                                                src={productImages[safeIdx] || ''}
+                                                alt={`${product.name} - view ${safeIdx + 1}`}
+                                                className="w-full h-64 sm:h-80 md:h-96 lg:h-[500px] object-contain animate-fade-in"
+                                            />
+                                            {product.discount > 0 && (
+                                                <div className="absolute top-4 right-4 bg-gradient-to-r from-magenta-500 to-red-500 text-white px-3 py-1.5 sm:px-4 sm:py-2 corner-clip-sm font-black uppercase text-sm sm:text-base" style={{ fontFamily: 'Orbitron, sans-serif', boxShadow: '0 0 20px rgba(255, 0, 255, 0.8)' }}>
+                                                    -{product.discount}%
+                                                </div>
+                                            )}
+                                            {/* Image counter */}
+                                            {productImages.length > 1 && (
+                                                <div className="absolute bottom-3 right-3 bg-gray-900/80 border border-cyan-500/40 corner-clip-sm px-2 py-0.5">
+                                                    <span className="text-xs font-black text-cyan-400" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                                                        {safeIdx + 1}/{productImages.length}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Thumbnail strip */}
+                                        {productImages.length > 1 && (
+                                            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                                                {productImages.map((img, idx) => (
+                                                    <button
+                                                        key={idx}
+                                                        type="button"
+                                                        onClick={() => setActiveImageIdx(idx)}
+                                                        className={`flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 corner-clip-sm overflow-hidden border-2 transition-all duration-200 ${idx === safeIdx
+                                                                ? 'border-cyan-400 scale-105'
+                                                                : 'border-gray-600 hover:border-cyan-500/60 opacity-60 hover:opacity-100'
+                                                            }`}
+                                                        style={idx === safeIdx ? { boxShadow: '0 0 12px rgba(0,255,255,0.6)' } : {}}
+                                                    >
+                                                        <img
+                                                            src={img}
+                                                            alt={`Thumbnail ${idx + 1}`}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </>
+                                );
+                            })()}
                         </div>
 
                         {/* Product Info */}

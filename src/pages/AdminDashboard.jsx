@@ -5,6 +5,7 @@ import { db } from '../config/firebase';
 import { useAuth } from '../context/AuthContext';
 import { logActivity } from '../utils/logActivity';
 import CloudinaryUpload from '../components/CloudinaryUpload';
+import CloudinaryMultiUpload from '../components/CloudinaryMultiUpload';
 import DeleteConfirmModal from '../components/DeleteConfirmModal';
 import AdminOrders from './AdminOrders';
 import AdminCustomers from './AdminCustomers';
@@ -61,7 +62,8 @@ const AdminDashboard = () => {
         description: '',
         price: '',
         discount: '',
-        image: '',
+        images: [],   // array of URLs
+        image: '',    // kept for backward compat — always = images[0]
         category: '',
         rating: '',
         reviews: '',
@@ -193,6 +195,10 @@ const AdminDashboard = () => {
     // Add new product
     const handleAddProduct = async (e) => {
         e.preventDefault();
+        if (!formData.images || formData.images.length === 0) {
+            showToast('Please upload at least one product image', 'error');
+            return;
+        }
         try {
             const productData = {
                 ...formData,
@@ -200,7 +206,9 @@ const AdminDashboard = () => {
                 discount: formData.discount ? parseInt(formData.discount) : 0,
                 rating: formData.rating ? parseFloat(formData.rating) : 0,
                 reviews: formData.reviews ? parseInt(formData.reviews) : 0,
-                stock: formData.stock ? parseInt(formData.stock) : 0
+                stock: formData.stock ? parseInt(formData.stock) : 0,
+                images: formData.images,
+                image: formData.images[0] || '',  // backward compat
             };
 
             await addDoc(collection(db, 'products'), productData);
@@ -223,6 +231,10 @@ const AdminDashboard = () => {
     // Update existing product
     const handleUpdateProduct = async (e) => {
         e.preventDefault();
+        if (!formData.images || formData.images.length === 0) {
+            showToast('Please upload at least one product image', 'error');
+            return;
+        }
         try {
             const productData = {
                 ...formData,
@@ -230,7 +242,9 @@ const AdminDashboard = () => {
                 discount: formData.discount ? parseInt(formData.discount) : 0,
                 rating: formData.rating ? parseFloat(formData.rating) : 0,
                 reviews: formData.reviews ? parseInt(formData.reviews) : 0,
-                stock: formData.stock ? parseInt(formData.stock) : 0
+                stock: formData.stock ? parseInt(formData.stock) : 0,
+                images: formData.images,
+                image: formData.images[0] || '',  // backward compat
             };
 
             await updateDoc(doc(db, 'products', editingProduct.id), productData);
@@ -308,12 +322,19 @@ const AdminDashboard = () => {
     // Start editing a product
     const startEdit = (product) => {
         setEditingProduct(product);
+        // Support both old (single image) and new (array) products
+        const existingImages = product.images?.length
+            ? product.images
+            : product.image
+                ? [product.image]
+                : [];
         setFormData({
             name: product.name,
             description: product.description,
             price: product.price.toString(),
             discount: product.discount?.toString() || '',
-            image: product.image,
+            images: existingImages,
+            image: existingImages[0] || '',
             category: product.category,
             rating: product.rating?.toString() || '',
             reviews: product.reviews?.toString() || '',
@@ -330,6 +351,7 @@ const AdminDashboard = () => {
             description: '',
             price: '',
             discount: '',
+            images: [],
             image: '',
             category: '',
             rating: '',
@@ -1052,25 +1074,27 @@ const AdminDashboard = () => {
                                                 </div>
                                             </div>
 
-                                            {/* Product Image Section */}
+                                            {/* Product Images Section */}
                                             <div className="bg-gray-800/50 p-6 corner-clip-sm border-2 border-purple-500/30 relative overflow-hidden">
                                                 <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-transparent"></div>
-                                                <h3 className="text-lg font-black text-purple-400 mb-4 flex items-center uppercase tracking-wide relative z-10" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                <h3 className="text-lg font-black text-purple-400 mb-1 flex items-center uppercase tracking-wide relative z-10" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                                     <ImageIcon className="w-5 h-5 mr-2" style={{ filter: 'drop-shadow(0 0 5px rgba(147, 51, 234, 0.8))' }} />
-                                                    Product Image
+                                                    Product Images
                                                 </h3>
+                                                <p className="text-xs text-purple-300/60 mb-4 relative z-10 font-bold uppercase" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                    Upload up to 8 images · First image shown as main photo
+                                                </p>
                                                 <div className="relative z-10">
-                                                    <CloudinaryUpload
-                                                        currentImage={formData.image}
-                                                        onUploadSuccess={(url) => {
-                                                            setFormData(prev => ({ ...prev, image: url }));
+                                                    <CloudinaryMultiUpload
+                                                        images={formData.images || []}
+                                                        onChange={(urls) => {
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                images: urls,
+                                                                image: urls[0] || ''
+                                                            }));
                                                         }}
-                                                    />
-                                                    <input
-                                                        type="hidden"
-                                                        name="image"
-                                                        value={formData.image}
-                                                        required
+                                                        maxImages={8}
                                                     />
                                                 </div>
                                             </div>
