@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { doc, getDoc, collection, getDocs, query, where, limit, addDoc, updateDoc, orderBy } from 'firebase/firestore';
+import { doc, onSnapshot, collection, getDocs, query, where, limit, addDoc, updateDoc, orderBy } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -26,43 +26,48 @@ const ProductDetails = () => {
     const [submittingReview, setSubmittingReview] = useState(false);
     const [toast, setToast] = useState(null);
 
-    // Fetch product details
+    // Real-time product listener
     useEffect(() => {
-        const fetchProduct = async () => {
-            try {
-                setLoading(true);
-                const docRef = doc(db, 'products', id);
-                const docSnap = await getDoc(docRef);
+        setLoading(true);
+        const docRef = doc(db, 'products', id);
 
+        const unsubscribe = onSnapshot(
+            docRef,
+            async (docSnap) => {
                 if (docSnap.exists()) {
                     const productData = { id: docSnap.id, ...docSnap.data() };
                     setProduct(productData);
 
-                    // Fetch related products from the same category
+                    // Fetch related products once per category (still one-shot is fine here)
                     if (productData.category) {
-                        const q = query(
-                            collection(db, 'products'),
-                            where('category', '==', productData.category),
-                            limit(4)
-                        );
-                        const querySnapshot = await getDocs(q);
-                        const related = querySnapshot.docs
-                            .map(doc => ({ id: doc.id, ...doc.data() }))
-                            .filter(p => p.id !== id); // Exclude current product
-                        setRelatedProducts(related);
+                        try {
+                            const q = query(
+                                collection(db, 'products'),
+                                where('category', '==', productData.category),
+                                limit(4)
+                            );
+                            const querySnapshot = await getDocs(q);
+                            const related = querySnapshot.docs
+                                .map(d => ({ id: d.id, ...d.data() }))
+                                .filter(p => p.id !== id);
+                            setRelatedProducts(related);
+                        } catch (err) {
+                            console.error('Error fetching related products:', err);
+                        }
                     }
                 } else {
-                    console.error('Product not found');
+                    // Product was deleted by admin
                     navigate('/products');
                 }
-            } catch (error) {
-                console.error('Error fetching product:', error);
-            } finally {
+                setLoading(false);
+            },
+            (error) => {
+                console.error('Error listening to product:', error);
                 setLoading(false);
             }
-        };
+        );
 
-        fetchProduct();
+        return () => unsubscribe();
     }, [id, navigate]);
 
     // Reset active image when product changes
