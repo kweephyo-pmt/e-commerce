@@ -94,6 +94,15 @@ A full-featured cyberpunk-themed e-commerce web application built with **React**
 
 ---
 
+## Admin Account
+
+```bash
+admin@gamezone.com
+admin123
+```
+
+---
+
 ## ⚙️ Installation & Setup
 
 ### Prerequisites
