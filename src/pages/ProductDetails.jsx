@@ -4,7 +4,7 @@ import { doc, getDoc, collection, getDocs, query, where, limit, addDoc, updateDo
 import { db } from '../config/firebase';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { ShoppingCart, ArrowLeft, Package, Truck, Shield, Star, MessageSquare, User } from 'lucide-react';
+import { ShoppingCart, ArrowLeft, Package, Truck, Shield, Star, MessageSquare, ChevronLeft, ChevronRight, X, ZoomIn } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import Toast from '../components/Toast';
 
@@ -18,6 +18,8 @@ const ProductDetails = () => {
     const [loading, setLoading] = useState(true);
     const [quantity, setQuantity] = useState(1);
     const [activeImageIdx, setActiveImageIdx] = useState(0);
+    const [lightboxOpen, setLightboxOpen] = useState(false);
+    const [lightboxIdx, setLightboxIdx] = useState(0);
     const [reviews, setReviews] = useState([]);
     const [userRating, setUserRating] = useState(0);
     const [userReview, setUserReview] = useState('');
@@ -64,7 +66,44 @@ const ProductDetails = () => {
     }, [id, navigate]);
 
     // Reset active image when product changes
-    useEffect(() => { setActiveImageIdx(0); }, [id]);
+    useEffect(() => { setActiveImageIdx(0); setLightboxOpen(false); }, [id]);
+
+    // Keyboard navigation — gallery always, lightbox takes priority when open
+    useEffect(() => {
+        if (!product) return;
+        const imgs = product.images?.length
+            ? product.images
+            : product.image ? [product.image] : [];
+        if (imgs.length <= 1) return; // nothing to navigate
+
+        const handler = (e) => {
+            if (e.key === 'Escape') {
+                setLightboxOpen(false);
+                return;
+            }
+            if (e.key === 'ArrowRight') {
+                if (lightboxOpen) {
+                    setLightboxIdx(i => (i + 1) % imgs.length);
+                } else {
+                    setActiveImageIdx(i => (i + 1) % imgs.length);
+                }
+            }
+            if (e.key === 'ArrowLeft') {
+                if (lightboxOpen) {
+                    setLightboxIdx(i => (i - 1 + imgs.length) % imgs.length);
+                } else {
+                    setActiveImageIdx(i => (i - 1 + imgs.length) % imgs.length);
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handler);
+        if (lightboxOpen) document.body.style.overflow = 'hidden';
+        return () => {
+            window.removeEventListener('keydown', handler);
+            document.body.style.overflow = '';
+        };
+    }, [lightboxOpen, product]);
 
     // Fetch reviews
     useEffect(() => {
@@ -240,27 +279,62 @@ const ProductDetails = () => {
                                         : [];
                                 const safeIdx = Math.min(activeImageIdx, productImages.length - 1);
 
+                                const goNext = (e) => { e.stopPropagation(); setActiveImageIdx((safeIdx + 1) % productImages.length); };
+                                const goPrev = (e) => { e.stopPropagation(); setActiveImageIdx((safeIdx - 1 + productImages.length) % productImages.length); };
+
                                 return (
                                     <>
                                         {/* Main image */}
                                         <div
-                                            className="relative corner-clip overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-cyan-500/50"
+                                            className="relative corner-clip overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-cyan-500/50 group cursor-zoom-in"
                                             style={{ boxShadow: '0 0 40px rgba(0, 255, 255, 0.3)' }}
+                                            onClick={() => { setLightboxIdx(safeIdx); setLightboxOpen(true); }}
                                         >
                                             <img
                                                 key={safeIdx}
                                                 src={productImages[safeIdx] || ''}
                                                 alt={`${product.name} - view ${safeIdx + 1}`}
-                                                className="w-full h-64 sm:h-80 md:h-96 lg:h-[500px] object-contain animate-fade-in"
+                                                className="w-full h-64 sm:h-80 md:h-96 lg:h-[500px] object-contain animate-fade-in transition-transform duration-300 group-hover:scale-105"
                                             />
+
+
+
+                                            {/* Discount badge */}
                                             {product.discount > 0 && (
-                                                <div className="absolute top-4 right-4 bg-gradient-to-r from-magenta-500 to-red-500 text-white px-3 py-1.5 sm:px-4 sm:py-2 corner-clip-sm font-black uppercase text-sm sm:text-base" style={{ fontFamily: 'Orbitron, sans-serif', boxShadow: '0 0 20px rgba(255, 0, 255, 0.8)' }}>
+                                                <div className="absolute top-4 left-4 bg-gradient-to-r from-magenta-500 to-red-500 text-white px-3 py-1.5 sm:px-4 sm:py-2 corner-clip-sm font-black uppercase text-sm sm:text-base pointer-events-none" style={{ fontFamily: 'Orbitron, sans-serif', boxShadow: '0 0 20px rgba(255, 0, 255, 0.8)' }}>
                                                     -{product.discount}%
                                                 </div>
                                             )}
-                                            {/* Image counter */}
+
+                                            {/* Prev arrow */}
                                             {productImages.length > 1 && (
-                                                <div className="absolute bottom-3 right-3 bg-gray-900/80 border border-cyan-500/40 corner-clip-sm px-2 py-0.5">
+                                                <button
+                                                    type="button"
+                                                    onClick={goPrev}
+                                                    className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center bg-gray-900/80 hover:bg-gray-900 border-2 border-cyan-500/50 hover:border-cyan-400 corner-clip-sm text-cyan-400 hover:text-white transition-all opacity-0 group-hover:opacity-100 z-10"
+                                                    style={{ boxShadow: '0 0 15px rgba(0,255,255,0.3)' }}
+                                                    aria-label="Previous image"
+                                                >
+                                                    <ChevronLeft className="w-5 h-5" />
+                                                </button>
+                                            )}
+
+                                            {/* Next arrow */}
+                                            {productImages.length > 1 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={goNext}
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center bg-gray-900/80 hover:bg-gray-900 border-2 border-cyan-500/50 hover:border-cyan-400 corner-clip-sm text-cyan-400 hover:text-white transition-all opacity-0 group-hover:opacity-100 z-10"
+                                                    style={{ boxShadow: '0 0 15px rgba(0,255,255,0.3)' }}
+                                                    aria-label="Next image"
+                                                >
+                                                    <ChevronRight className="w-5 h-5" />
+                                                </button>
+                                            )}
+
+                                            {/* Counter */}
+                                            {productImages.length > 1 && (
+                                                <div className="absolute bottom-3 right-3 bg-gray-900/80 border border-cyan-500/40 corner-clip-sm px-2 py-0.5 pointer-events-none">
                                                     <span className="text-xs font-black text-cyan-400" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                                                         {safeIdx + 1}/{productImages.length}
                                                     </span>
@@ -270,15 +344,15 @@ const ProductDetails = () => {
 
                                         {/* Thumbnail strip */}
                                         {productImages.length > 1 && (
-                                            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                                            <div className="flex gap-2 overflow-x-auto pb-3" style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(0,255,255,0.5) rgba(255,255,255,0.05)' }}>
                                                 {productImages.map((img, idx) => (
                                                     <button
                                                         key={idx}
                                                         type="button"
                                                         onClick={() => setActiveImageIdx(idx)}
                                                         className={`flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 corner-clip-sm overflow-hidden border-2 transition-all duration-200 ${idx === safeIdx
-                                                                ? 'border-cyan-400 scale-105'
-                                                                : 'border-gray-600 hover:border-cyan-500/60 opacity-60 hover:opacity-100'
+                                                            ? 'border-cyan-400 scale-105'
+                                                            : 'border-gray-600 hover:border-cyan-500/60 opacity-60 hover:opacity-100'
                                                             }`}
                                                         style={idx === safeIdx ? { boxShadow: '0 0 12px rgba(0,255,255,0.6)' } : {}}
                                                     >
@@ -591,6 +665,112 @@ const ProductDetails = () => {
                     )}
                 </div>
             </div>
+
+            {/* ── Lightbox ─────────────────────────────────────────────────── */}
+            {lightboxOpen && (() => {
+                const productImages = product?.images?.length
+                    ? product.images
+                    : product?.image ? [product.image] : [];
+                const safeLbIdx = Math.min(lightboxIdx, productImages.length - 1);
+                const lbNext = () => setLightboxIdx((safeLbIdx + 1) % productImages.length);
+                const lbPrev = () => setLightboxIdx((safeLbIdx - 1 + productImages.length) % productImages.length);
+                return (
+                    <div
+                        className="fixed inset-0 z-[9999] flex items-center justify-center"
+                        style={{ background: 'rgba(0,0,0,0.95)' }}
+                        onClick={() => setLightboxOpen(false)}
+                    >
+                        {/* Scanline overlay */}
+                        <div className="absolute inset-0 pointer-events-none opacity-10"
+                            style={{ backgroundImage: 'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,255,0.15) 2px,rgba(0,255,255,0.15) 4px)' }} />
+
+                        {/* Close button */}
+                        <button
+                            type="button"
+                            onClick={() => setLightboxOpen(false)}
+                            className="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center bg-gray-900/90 border-2 border-cyan-500/60 hover:border-cyan-400 corner-clip-sm text-cyan-400 hover:text-white transition-all"
+                            style={{ boxShadow: '0 0 15px rgba(0,255,255,0.4)' }}
+                            aria-label="Close"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+
+                        {/* Counter */}
+                        {productImages.length > 1 && (
+                            <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-gray-900/90 border border-cyan-500/40 corner-clip-sm px-4 py-1.5">
+                                <span className="text-sm font-black text-cyan-400" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                                    {safeLbIdx + 1} / {productImages.length}
+                                </span>
+                            </div>
+                        )}
+
+                        {/* Prev arrow */}
+                        {productImages.length > 1 && (
+                            <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); lbPrev(); }}
+                                className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-10 w-11 h-11 sm:w-14 sm:h-14 flex items-center justify-center bg-gray-900/90 hover:bg-gray-800 border-2 border-cyan-500/60 hover:border-cyan-400 corner-clip-sm text-cyan-400 hover:text-white transition-all"
+                                style={{ boxShadow: '0 0 20px rgba(0,255,255,0.4)' }}
+                                aria-label="Previous image"
+                            >
+                                <ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8" />
+                            </button>
+                        )}
+
+                        {/* Main lightbox image */}
+                        <div
+                            className="relative max-w-[90vw] max-h-[85vh] flex items-center justify-center"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <img
+                                key={safeLbIdx}
+                                src={productImages[safeLbIdx]}
+                                alt={`${product.name} - ${safeLbIdx + 1}`}
+                                className="max-w-full max-h-[85vh] object-contain corner-clip"
+                                style={{ boxShadow: '0 0 60px rgba(0,255,255,0.25)', border: '2px solid rgba(0,255,255,0.3)' }}
+                            />
+                        </div>
+
+                        {/* Next arrow */}
+                        {productImages.length > 1 && (
+                            <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); lbNext(); }}
+                                className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-10 w-11 h-11 sm:w-14 sm:h-14 flex items-center justify-center bg-gray-900/90 hover:bg-gray-800 border-2 border-cyan-500/60 hover:border-cyan-400 corner-clip-sm text-cyan-400 hover:text-white transition-all"
+                                style={{ boxShadow: '0 0 20px rgba(0,255,255,0.4)' }}
+                                aria-label="Next image"
+                            >
+                                <ChevronRight className="w-6 h-6 sm:w-8 sm:h-8" />
+                            </button>
+                        )}
+
+                        {/* Thumbnail strip */}
+                        {productImages.length > 1 && (
+                            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 overflow-x-auto max-w-[90vw] pb-1">
+                                {productImages.map((img, idx) => (
+                                    <button
+                                        key={idx}
+                                        type="button"
+                                        onClick={(e) => { e.stopPropagation(); setLightboxIdx(idx); }}
+                                        className={`flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 corner-clip-sm overflow-hidden border-2 transition-all ${idx === safeLbIdx
+                                            ? 'border-cyan-400 scale-110'
+                                            : 'border-gray-600 opacity-50 hover:opacity-90 hover:border-cyan-500/60'
+                                            }`}
+                                        style={idx === safeLbIdx ? { boxShadow: '0 0 12px rgba(0,255,255,0.8)' } : {}}
+                                    >
+                                        <img src={img} alt={`lb-thumb-${idx}`} className="w-full h-full object-cover" />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Keyboard hint */}
+                        <div className="absolute bottom-4 right-4 text-xs text-gray-600 font-bold uppercase" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                            ESC to close · ← → to navigate
+                        </div>
+                    </div>
+                );
+            })()}
         </>
     );
 };

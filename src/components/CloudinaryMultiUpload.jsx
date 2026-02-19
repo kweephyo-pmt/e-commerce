@@ -35,6 +35,13 @@ const CloudinaryMultiUpload = ({ images = [], onChange, maxImages = 8 }) => {
         }
 
         try {
+            // Stale-closure fix: snapshot existing images at widget-open time.
+            // New uploads are pushed into `sessionUploads` (a plain mutable array),
+            // so every success callback sees all previous uploads in this session.
+            // This prevents photo 2 from overwriting photo 1.
+            const baseImages = [...images];
+            const sessionUploads = [];
+
             const widget = window.cloudinary.createUploadWidget(
                 {
                     cloudName,
@@ -58,11 +65,9 @@ const CloudinaryMultiUpload = ({ images = [], onChange, maxImages = 8 }) => {
                         return;
                     }
                     if (result.event === 'success') {
-                        const url = result.info.secure_url;
-                        // Accumulate as they come in (widget calls success per file)
-                        onChange([...images, url]);
-                        setUploading(false);
-                        setError('');
+                        // Append to session accumulator, then merge with base snapshot
+                        sessionUploads.push(result.info.secure_url);
+                        onChange([...baseImages, ...sessionUploads]);
                     }
                     if (result.event === 'close') {
                         setUploading(false);
