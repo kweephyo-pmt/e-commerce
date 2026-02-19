@@ -83,16 +83,16 @@ const ProductDetails = () => {
             }
             if (e.key === 'ArrowRight') {
                 if (lightboxOpen) {
-                    setLightboxIdx(i => (i + 1) % imgs.length);
+                    setLightboxIdx(i => Math.min(i + 1, imgs.length - 1));
                 } else {
-                    setActiveImageIdx(i => (i + 1) % imgs.length);
+                    setActiveImageIdx(i => Math.min(i + 1, imgs.length - 1));
                 }
             }
             if (e.key === 'ArrowLeft') {
                 if (lightboxOpen) {
-                    setLightboxIdx(i => (i - 1 + imgs.length) % imgs.length);
+                    setLightboxIdx(i => Math.max(i - 1, 0));
                 } else {
-                    setActiveImageIdx(i => (i - 1 + imgs.length) % imgs.length);
+                    setActiveImageIdx(i => Math.max(i - 1, 0));
                 }
             }
         };
@@ -279,8 +279,8 @@ const ProductDetails = () => {
                                         : [];
                                 const safeIdx = Math.min(activeImageIdx, productImages.length - 1);
 
-                                const goNext = (e) => { e.stopPropagation(); setActiveImageIdx((safeIdx + 1) % productImages.length); };
-                                const goPrev = (e) => { e.stopPropagation(); setActiveImageIdx((safeIdx - 1 + productImages.length) % productImages.length); };
+                                const goNext = (e) => { e.stopPropagation(); setActiveImageIdx(i => Math.min(i + 1, productImages.length - 1)); };
+                                const goPrev = (e) => { e.stopPropagation(); setActiveImageIdx(i => Math.max(i - 1, 0)); };
 
                                 return (
                                     <>
@@ -672,8 +672,8 @@ const ProductDetails = () => {
                     ? product.images
                     : product?.image ? [product.image] : [];
                 const safeLbIdx = Math.min(lightboxIdx, productImages.length - 1);
-                const lbNext = () => setLightboxIdx((safeLbIdx + 1) % productImages.length);
-                const lbPrev = () => setLightboxIdx((safeLbIdx - 1 + productImages.length) % productImages.length);
+                const lbNext = () => setLightboxIdx(Math.min(safeLbIdx + 1, productImages.length - 1));
+                const lbPrev = () => setLightboxIdx(Math.max(safeLbIdx - 1, 0));
                 return (
                     <div
                         className="fixed inset-0 z-[9999] flex items-center justify-center"
