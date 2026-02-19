@@ -19,6 +19,8 @@ import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import ResetPassword from './pages/ResetPassword';
 import Wishlist from './pages/Wishlist';
+import Privacy from './pages/Privacy';
+import TermsOfService from './pages/TermsOfService';
 
 function AppContent() {
   const location = useLocation();
@@ -41,6 +43,8 @@ function AppContent() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/wishlist" element={<Wishlist />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms_of_service" element={<TermsOfService />} />
         <Route
           path="/admin/dashboard"
           element={

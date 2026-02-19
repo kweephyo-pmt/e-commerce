@@ -119,9 +119,13 @@ const Footer = () => {
                         &copy; {new Date().getFullYear()} <span className="text-cyan-500/70">TECHNO WORLD</span>. ALL SYSTEMS OPERATIONAL.
                     </p>
                     <div className="flex space-x-8">
-                        {['Privacy Policy', 'Terms of Service', 'Cookie Policy'].map((item) => (
-                            <Link key={item} to="/" className="text-gray-600 hover:text-gray-400 text-xs font-black uppercase tracking-tighter transition-colors" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                {item}
+                        {[
+                            { name: 'Privacy Policy', path: '/privacy' },
+                            { name: 'Terms of Service', path: '/terms_of_service' },
+                            { name: 'Cookie Policy', path: '/privacy' }
+                        ].map((item) => (
+                            <Link key={item.name} to={item.path} className="text-gray-600 hover:text-gray-400 text-xs font-black uppercase tracking-tighter transition-colors" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                {item.name}
                             </Link>
                         ))}
                     </div>
