@@ -2,7 +2,7 @@
 
 ![Techno World Banner](./public/Techno%20World.png)
 
-A full-featured cyberpunk-themed e-commerce web application built with **React**, **Vite**, **Firebase**, and **Node.js**. Features a real-time admin dashboard, bank transfer payment verification, secure role-based authentication, Cloudinary image uploads, and a complete order management system.
+A full-featured cyberpunk-themed e-commerce web application built with **React**, **Vite**, and **Firebase**. Features a real-time admin dashboard, bank transfer payment verification, secure role-based authentication, Cloudinary image uploads, and a complete order management system.
 
 ---
 
@@ -48,19 +48,19 @@ A full-featured cyberpunk-themed e-commerce web application built with **React**
 
 ### 🛍️ Customer-Facing
 - **Product Browsing** — Filter by category, price range, and star rating via a dynamic sidebar
-- **Product Details** — Image gallery, stock status, reviews & ratings
+- **Product Details** — Multi-image gallery with lightbox viewer, stock status, reviews & ratings
 - **Smart Cart** — Add/remove items, adjust quantities, real-time totals
 - **Bank Transfer Checkout** — Upload payment slip; admin verifies before order is confirmed
 - **Real-time Order Tracking** — Status updates live (Pending → Processing → Shipped → Delivered)
 - **Order Success Page** — Reflects payment confirmation in real-time without refresh
-- **User Profile** — Manage personal info, shipping address (auto-filled at checkout)
+- **User Profile** — Manage personal info and shipping address (auto-filled at checkout)
 - **Reviews & Ratings** — Leave and view product reviews
 - **Wishlist** — Save products for later
 - **Authentication** — Email/password and Google sign-in via Firebase Auth
 
 ### 🛡️ Admin Dashboard
 - **Overview Dashboard** — Live stats: total sales, orders, products, and real-time activity feed
-- **Product Management** — Full CRUD with Cloudinary image uploads, category assignment, real-time stock updates
+- **Product Management** — Full CRUD with multi-image Cloudinary uploads, category assignment, real-time stock updates
 - **Order Management** — Confirm or reject bank transfer payments; stock only deducted on confirmation
 - **Customer Management** — View all users, order counts, and total spend (excludes cancelled/rejected orders)
 - **Category Management** — Create, edit, and delete product categories
@@ -73,7 +73,6 @@ A full-featured cyberpunk-themed e-commerce web application built with **React**
 
 ## 🛠️ Tech Stack
 
-### Frontend
 | Technology | Purpose |
 |---|---|
 | React 18 + Vite | UI framework & build tool |
@@ -85,21 +84,14 @@ A full-featured cyberpunk-themed e-commerce web application built with **React**
 | Firebase Firestore | Real-time database |
 | Cloudinary | Product image hosting & uploads |
 
-### Backend
-| Technology | Purpose |
-|---|---|
-| Node.js + Express | Payment server |
-| Cloudinary API | Slip image upload endpoint |
-| dotenv + CORS | Config & security |
-
 ---
 
 ## ⚙️ Installation & Setup
 
 ### Prerequisites
-- Node.js v16+
-- Firebase project (Auth + Firestore enabled)
-- Cloudinary account
+- Node.js v18+
+- A [Firebase](https://firebase.google.com/) project with **Authentication** and **Firestore** enabled
+- A [Cloudinary](https://cloudinary.com/) account with an unsigned upload preset
 
 ---
 
@@ -111,15 +103,19 @@ cd e-commerce
 
 ---
 
-### 2. Frontend Setup
-
-Install dependencies:
+### 2. Install Dependencies
 ```bash
 npm install
 ```
 
+---
+
+### 3. Configure Environment Variables
+
 Create a `.env` file in the **root** directory:
+
 ```env
+# Firebase
 VITE_FIREBASE_API_KEY=your_api_key
 VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=your_project_id
@@ -127,41 +123,21 @@ VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 VITE_FIREBASE_APP_ID=your_app_id
 
+# Cloudinary
 VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name
-VITE_CLOUDINARY_UPLOAD_PRESET=your_upload_preset
+VITE_CLOUDINARY_UPLOAD_PRESET=your_unsigned_upload_preset
 ```
 
-Start the dev server:
-```bash
-npm run dev
-```
+> **Tip:** Copy `.env.example` and fill in your values.
 
 ---
 
-### 3. Backend Setup
-
-Navigate to the server directory and install dependencies:
+### 4. Start the Development Server
 ```bash
-cd server
-npm install
-```
-
-Create a `.env` file in the `server/` directory:
-```env
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
-PORT=4242
-```
-
-Start the server:
-```bash
-npm start
-# or with auto-reload:
 npm run dev
 ```
 
-> Both the frontend (`npm run dev` in root) and backend (`npm start` in `server/`) must be running for slip uploads to work.
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ---
 
@@ -170,7 +146,7 @@ npm run dev
 ```
 ├── src/
 │   ├── components/         # Reusable UI (Navbar, Toast, FilterSidebar, CloudinaryUpload, etc.)
-│   ├── context/            # Global state (AuthContext, CartContext, AdminContext, WishlistContext)
+│   ├── context/            # Global state (AuthContext, CartContext, WishlistContext)
 │   ├── pages/              # All pages
 │   │   ├── Home.jsx
 │   │   ├── Products.jsx
@@ -194,7 +170,6 @@ npm run dev
 │   ├── config/
 │   │   └── firebase.js             # Firebase initialization
 │   └── App.jsx
-├── server/                         # Node.js + Express server (slip upload)
 ├── firestore.rules                 # Firestore security rules
 ├── vercel.json                     # Vercel deployment config
 └── public/
@@ -225,7 +200,7 @@ npm run dev
 - Regular users attempting to access `/admin/dashboard` are redirected to `/`
 
 ### Payment Flow
-- Customer uploads bank transfer slip at checkout
+- Customer uploads bank transfer slip at checkout (stored via Cloudinary)
 - Stock is **not** deducted until admin confirms payment
 - Admin confirms → stock decremented, order moves to Processing
 - Admin rejects → order cancelled, stock untouched
@@ -234,15 +209,12 @@ npm run dev
 
 ## 🚀 Deployment
 
-### Frontend — Vercel
-The project includes a `vercel.json` for SPA routing. Deploy via:
+### Vercel (Recommended)
+The project includes a `vercel.json` for SPA routing. Deploy in one command:
 ```bash
 vercel --prod
 ```
-Or connect the GitHub repo directly in the Vercel dashboard.
-
-### Backend — Render / Railway
-Deploy the `server/` directory as a separate Node.js service. Set the Cloudinary environment variables in the platform dashboard.
+Or connect the GitHub repo directly in the [Vercel dashboard](https://vercel.com/dashboard) and add your `.env` variables under **Project → Settings → Environment Variables**.
 
 ---
 
