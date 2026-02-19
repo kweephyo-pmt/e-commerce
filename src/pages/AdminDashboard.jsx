@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, orderBy, query, limit } from 'firebase/firestore';
 import { db } from '../config/firebase';
@@ -70,6 +70,8 @@ const AdminDashboard = () => {
         stock: '',
         isFeatured: false
     });
+
+    const mainRef = useRef(null);
 
     const { signOut, user, userProfile } = useAuth();
     const navigate = useNavigate();
@@ -342,6 +344,10 @@ const AdminDashboard = () => {
             isFeatured: product.isFeatured || false
         });
         setShowAddForm(false);
+        // Scroll to top of the main content area
+        if (mainRef.current) {
+            mainRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+        }
     };
 
     // Reset form
@@ -581,7 +587,7 @@ const AdminDashboard = () => {
                 </aside>
 
                 {/* Main Content */}
-                <main className="flex-1 overflow-y-auto flex flex-col">
+                <main ref={mainRef} className="flex-1 overflow-y-auto flex flex-col">
                     {/* Mobile top bar */}
                     <div className="md:hidden flex items-center justify-between px-4 py-3 bg-gray-900/95 border-b-2 border-cyan-500/30 sticky top-0 z-30"
                         style={{ boxShadow: '0 0 20px rgba(0,255,255,0.15)' }}>
