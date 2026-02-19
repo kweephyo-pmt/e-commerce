@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { collection, addDoc, serverTimestamp, doc, getDoc, runTransaction } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, getDoc, onSnapshot, runTransaction } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { logActivity } from '../utils/logActivity';
 
@@ -68,24 +68,27 @@ const Checkout = () => {
         fetchUserProfile();
     }, [user]);
 
-    // Fetch active bank account from Firestore
+    // Real-time listener for active bank account
     useEffect(() => {
-        const fetchBankAccount = async () => {
-            setBankLoading(true);
-            try {
-                const snap = await getDoc(doc(db, 'settings', 'bankAccounts'));
+        setBankLoading(true);
+        const unsub = onSnapshot(
+            doc(db, 'settings', 'bankAccounts'),
+            (snap) => {
                 if (snap.exists()) {
                     const data = snap.data();
                     const active = (data.accounts || []).find(a => a.id === data.activeId);
                     setBankInfo(active || null);
+                } else {
+                    setBankInfo(null);
                 }
-            } catch (e) {
+                setBankLoading(false);
+            },
+            (e) => {
                 console.error('Failed to load bank account:', e);
-            } finally {
                 setBankLoading(false);
             }
-        };
-        fetchBankAccount();
+        );
+        return () => unsub();
     }, []);
 
     // Fetch shipping settings
