@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { collection, onSnapshot, query, limit, where, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, query, limit, where, doc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { ArrowRight, ShoppingBag, Truck, Shield, Headphones, ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
@@ -31,6 +31,21 @@ const features = [
 const Home = () => {
     const [featuredProducts, setFeaturedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [hero, setHero] = useState({
+        titleLine1: 'Level Up Your',
+        titleLine2: 'Gaming Experience',
+        subtitle: 'Explore cutting-edge gaming gear, high-performance tech, and premium accessories. Unleash your potential with lightning-fast delivery.',
+        bgImageUrl: 'https://images.unsplash.com/photo-1587202372634-32705e3bf49c?w=1920&h=1080&fit=crop',
+        heroImageUrl: 'https://images.unsplash.com/photo-1593640408182-31c70c8268f5?w=800&h=600&fit=crop',
+    });
+
+    // Real-time hero banner settings
+    useEffect(() => {
+        const unsub = onSnapshot(doc(db, 'settings', 'hero'), (snap) => {
+            if (snap.exists()) setHero(prev => ({ ...prev, ...snap.data() }));
+        });
+        return () => unsub();
+    }, []);
 
     // Real-time listener for featured products
     useEffect(() => {
@@ -79,19 +94,18 @@ const Home = () => {
             {/* Hero Section */}
             <section className="relative overflow-hidden py-12 sm:py-16 md:py-24 lg:py-32">
                 {/* Gaming PC Background with Blur */}
-                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1587202372634-32705e3bf49c?w=1920&h=1080&fit=crop')" }}></div>
+                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url('${hero.bgImageUrl}')` }}></div>
                 <div className="absolute inset-0 backdrop-blur-md bg-black/60"></div>
                 <div className="absolute inset-0 bg-gradient-to-br from-gray-900/80 via-black/70 to-gray-900/80"></div>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                     <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
                         <div className="animate-slide-up text-center md:text-left">
                             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-4 md:mb-6 leading-tight uppercase tracking-wider" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                                <span className="text-cyan-400" style={{ textShadow: '0 0 30px rgba(0, 255, 255, 0.8)' }}>Level Up Your</span>
-                                <span className="block text-gradient mt-2" style={{ textShadow: '0 0 30px rgba(255, 0, 255, 0.6)' }}>Gaming Experience</span>
+                                <span className="text-cyan-400" style={{ textShadow: '0 0 30px rgba(0, 255, 255, 0.8)' }}>{hero.titleLine1}</span>
+                                <span className="block text-gradient mt-2" style={{ textShadow: '0 0 30px rgba(255, 0, 255, 0.6)' }}>{hero.titleLine2}</span>
                             </h1>
                             <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-6 md:mb-8 leading-relaxed font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                Explore cutting-edge gaming gear, high-performance tech, and premium accessories.
-                                Unleash your potential with lightning-fast delivery.
+                                {hero.subtitle}
                             </p>
                             <div className="flex flex-col sm:flex-row flex-wrap gap-3 md:gap-4 justify-center md:justify-start">
                                 <Link to="/products" className="btn-primary inline-flex items-center justify-center space-x-2">
@@ -108,7 +122,7 @@ const Home = () => {
                             <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-magenta-400 rounded-3xl blur-3xl opacity-30 animate-pulse"></div>
                             <div className="relative corner-clip-lg overflow-hidden border-4 border-cyan-500/50" style={{ boxShadow: '0 0 40px rgba(0, 255, 255, 0.4)' }}>
                                 <img
-                                    src="https://images.unsplash.com/photo-1593640408182-31c70c8268f5?w=800&h=600&fit=crop"
+                                    src={hero.heroImageUrl}
                                     alt="Gaming PC Setup"
                                     className="w-full h-full object-cover"
                                 />
