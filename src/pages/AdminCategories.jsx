@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import {
     Tag, Plus, Edit2, Trash2, Save, X, Search, Hash, Package, AlertTriangle
 } from 'lucide-react';
+import DeleteConfirmModal from '../components/DeleteConfirmModal';
 
 const AdminCategories = () => {
     const { userProfile } = useAuth();
@@ -19,6 +20,7 @@ const AdminCategories = () => {
     const [editingCategory, setEditingCategory] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
     const [toast, setToast] = useState(null);
+    const [deleteModal, setDeleteModal] = useState({ open: false, catId: null, catName: '' });
     const [formData, setFormData] = useState({ name: '', description: '', color: '#00ffff' });
     const [saving, setSaving] = useState(false);
 
@@ -113,11 +115,21 @@ const AdminCategories = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    const handleDelete = async (catId) => {
-        if (!window.confirm('Delete this category? Products using it will not be affected.')) return;
+    const openDeleteModal = (catId) => {
+        const catName = categories.find(c => c.id === catId)?.name || 'Category';
+        setDeleteModal({ open: true, catId, catName });
+    };
+
+    const closeDeleteModal = () => {
+        if (deletingId) return; // prevent close while deleting
+        setDeleteModal({ open: false, catId: null, catName: '' });
+    };
+
+    const handleDelete = async () => {
+        const { catId, catName } = deleteModal;
+        if (!catId) return;
         try {
             setDeletingId(catId);
-            const catName = categories.find(c => c.id === catId)?.name || 'Category';
             await deleteDoc(doc(db, 'categories', catId));
             await logActivity({
                 type: 'category', icon: 'Tag',
@@ -127,6 +139,7 @@ const AdminCategories = () => {
                 admin: adminInfo
             });
             showToast('Category deleted!', 'success');
+            setDeleteModal({ open: false, catId: null, catName: '' });
             fetchCategories();
         } catch (error) {
             console.error('Error deleting category:', error);
@@ -161,6 +174,14 @@ const AdminCategories = () => {
 
     return (
         <div className="space-y-4 md:space-y-6">
+            <DeleteConfirmModal
+                isOpen={deleteModal.open}
+                onClose={closeDeleteModal}
+                onConfirm={handleDelete}
+                itemName={deleteModal.catName}
+                itemType="Category"
+                isDeleting={!!deletingId}
+            />
             {/* Toast */}
             {toast && (
                 <div className="fixed top-4 right-4 z-50">
@@ -460,7 +481,7 @@ const AdminCategories = () => {
                                             </button>
                                             {/* Delete */}
                                             <button
-                                                onClick={() => handleDelete(cat.id)}
+                                                onClick={() => openDeleteModal(cat.id)}
                                                 disabled={deletingId === cat.id}
                                                 className="inline-flex items-center space-x-1 px-3 py-1.5 corner-clip-sm text-xs font-black uppercase border-2 border-red-500/40 bg-red-500/10 text-red-300 hover:bg-red-500/20 hover:border-red-400 transition-all disabled:opacity-50"
                                                 style={{ fontFamily: 'Rajdhani, sans-serif', boxShadow: '0 0 8px rgba(239,68,68,0.2)' }}

@@ -130,7 +130,7 @@ const Wishlist = () => {
                                     onClick={() => navigate(`/product/${product.id}`)}>
                                     <img src={product.image} alt={product.name}
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                                    {product.discount && (
+                                    {product.discount > 0 && (
                                         <div className="absolute top-3 left-3 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-black px-2 py-1 corner-clip-sm">
                                             -{product.discount}%
                                         </div>
@@ -170,7 +170,7 @@ const Wishlist = () => {
                                         <span className="text-xl font-black text-gradient">
                                             ฿{discountedPrice.toFixed(2)}
                                         </span>
-                                        {product.discount && (
+                                        {product.discount > 0 && (
                                             <span className="text-sm text-gray-500 line-through">
                                                 ฿{product.price.toFixed(2)}
                                             </span>

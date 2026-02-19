@@ -5,6 +5,7 @@ import { db } from '../config/firebase';
 import { useAuth } from '../context/AuthContext';
 import { logActivity } from '../utils/logActivity';
 import CloudinaryUpload from '../components/CloudinaryUpload';
+import DeleteConfirmModal from '../components/DeleteConfirmModal';
 import AdminOrders from './AdminOrders';
 import AdminCustomers from './AdminCustomers';
 import AdminSettings from './AdminSettings';
@@ -51,8 +52,10 @@ const AdminDashboard = () => {
     const [recentActivity, setRecentActivity] = useState([]);
     const [showAllActivity, setShowAllActivity] = useState(false);
     const [categories, setCategories] = useState([]);
-    const [dashboardStartTime] = useState(Date.now()); // Track when dashboard was opened
-    const [notificationSound] = useState(new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3')); // Subtle futuristic beep
+    const [dashboardStartTime] = useState(Date.now());
+    const [notificationSound] = useState(new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3'));
+    const [deleteModal, setDeleteModal] = useState({ open: false, productId: null, productName: '' });
+    const [isDeletingProduct, setIsDeletingProduct] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         description: '',
@@ -248,13 +251,21 @@ const AdminDashboard = () => {
     };
 
     // Delete product
-    const handleDeleteProduct = async (productId) => {
-        if (!window.confirm('Are you sure you want to delete this product?')) {
-            return;
-        }
+    const openDeleteModal = (productId) => {
+        const productName = products.find(p => p.id === productId)?.name || 'Product';
+        setDeleteModal({ open: true, productId, productName });
+    };
 
+    const closeDeleteModal = () => {
+        if (isDeletingProduct) return;
+        setDeleteModal({ open: false, productId: null, productName: '' });
+    };
+
+    const handleDeleteProduct = async () => {
+        const { productId, productName } = deleteModal;
+        if (!productId) return;
         try {
-            const productName = products.find(p => p.id === productId)?.name || 'Product';
+            setIsDeletingProduct(true);
             await deleteDoc(doc(db, 'products', productId));
             await logActivity({
                 type: 'product', icon: 'Package',
@@ -264,9 +275,12 @@ const AdminDashboard = () => {
                 admin: { uid: userProfile?.uid, name: userProfile?.displayName, email: userProfile?.email }
             });
             showToast('Product deleted successfully!', 'success');
+            setDeleteModal({ open: false, productId: null, productName: '' });
         } catch (error) {
             console.error('Error deleting product:', error);
             showToast('Failed to delete product', 'error');
+        } finally {
+            setIsDeletingProduct(false);
         }
     };
 
@@ -376,6 +390,14 @@ const AdminDashboard = () => {
 
     return (
         <>
+            <DeleteConfirmModal
+                isOpen={deleteModal.open}
+                onClose={closeDeleteModal}
+                onConfirm={handleDeleteProduct}
+                itemName={deleteModal.productName}
+                itemType="Product"
+                isDeleting={isDeletingProduct}
+            />
             {/* Toast Notification */}
             {toast.show && (
                 <div className="fixed top-4 right-4 z-[9999] animate-slide-in-right">
@@ -1175,7 +1197,7 @@ const AdminDashboard = () => {
                                                                         <button onClick={() => startEdit(product)} className="p-2 text-cyan-400 hover:bg-cyan-500/20 corner-clip-sm border-2 border-cyan-500/50 hover:border-cyan-400 transition-all" title="Edit" style={{ boxShadow: '0 0 10px rgba(0, 255, 255, 0.2)' }}>
                                                                             <Edit2 className="w-4 h-4" style={{ filter: 'drop-shadow(0 0 5px rgba(0, 255, 255, 0.6))' }} />
                                                                         </button>
-                                                                        <button onClick={() => handleDeleteProduct(product.id)} className="p-2 text-red-400 hover:bg-red-500/20 corner-clip-sm border-2 border-red-500/50 hover:border-red-400 transition-all" title="Delete" style={{ boxShadow: '0 0 10px rgba(255, 0, 0, 0.2)' }}>
+                                                                        <button onClick={() => openDeleteModal(product.id)} className="p-2 text-red-400 hover:bg-red-500/20 corner-clip-sm border-2 border-red-500/50 hover:border-red-400 transition-all" title="Delete" style={{ boxShadow: '0 0 10px rgba(255, 0, 0, 0.2)' }}>
                                                                             <Trash2 className="w-4 h-4" style={{ filter: 'drop-shadow(0 0 5px rgba(255, 0, 0, 0.6))' }} />
                                                                         </button>
                                                                     </div>
@@ -1210,7 +1232,7 @@ const AdminDashboard = () => {
                                                             <button onClick={() => startEdit(product)} className="p-2 text-cyan-400 hover:bg-cyan-500/20 corner-clip-sm border-2 border-cyan-500/50 transition-all">
                                                                 <Edit2 className="w-4 h-4" />
                                                             </button>
-                                                            <button onClick={() => handleDeleteProduct(product.id)} className="p-2 text-red-400 hover:bg-red-500/20 corner-clip-sm border-2 border-red-500/50 transition-all">
+                                                            <button onClick={() => openDeleteModal(product.id)} className="p-2 text-red-400 hover:bg-red-500/20 corner-clip-sm border-2 border-red-500/50 transition-all">
                                                                 <Trash2 className="w-4 h-4" />
                                                             </button>
                                                         </div>
