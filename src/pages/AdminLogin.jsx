@@ -12,15 +12,29 @@ const AdminLogin = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const { user, isAdmin } = useAuth();
+    const { user, isAdmin, loading: authLoading } = useAuth();
     const navigate = useNavigate();
 
-    // If already logged in as admin, redirect to dashboard
+    // specific redirect logic
     useEffect(() => {
-        if (user && isAdmin) {
-            navigate('/admin/dashboard');
+        if (authLoading) return; // Wait for auth check
+
+        if (user) {
+            if (isAdmin) {
+                navigate('/admin/dashboard');
+            } else {
+                navigate('/');
+            }
         }
-    }, [user, isAdmin, navigate]);
+    }, [user, isAdmin, authLoading, navigate]);
+
+    if (authLoading) {
+        return (
+            <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-500"></div>
+            </div>
+        );
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
