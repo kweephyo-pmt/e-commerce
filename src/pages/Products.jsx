@@ -1,5 +1,5 @@
 import { useState, useEffect, Fragment } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot, getDocs } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
@@ -28,44 +28,46 @@ const Products = () => {
         onSaleOnly: false
     });
 
-    // Fetch products and ratings from Firestore
+    // Real-time products listener + one-time ratings fetch
     useEffect(() => {
-        const fetchProductsAndRatings = async () => {
+        setLoading(true);
+
+        // Fetch reviews once (ratings rarely change mid-session)
+        const fetchRatings = async (productsData) => {
             try {
-                setLoading(true);
-
-                // Fetch products
-                const productsSnapshot = await getDocs(collection(db, 'products'));
-                const productsData = productsSnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-                setAllProducts(productsData);
-
-                // Fetch all reviews
                 const reviewsSnapshot = await getDocs(collection(db, 'reviews'));
                 const reviews = reviewsSnapshot.docs.map(doc => doc.data());
-
-                // Calculate ratings for each product
                 const ratingsMap = {};
                 productsData.forEach(product => {
-                    const productReviews = reviews.filter(review => review.productId === product.id);
-                    if (productReviews.length > 0) {
-                        const avgRating = productReviews.reduce((sum, review) => sum + review.rating, 0) / productReviews.length;
-                        ratingsMap[product.id] = avgRating;
-                    } else {
-                        ratingsMap[product.id] = 0;
-                    }
+                    const productReviews = reviews.filter(r => r.productId === product.id);
+                    ratingsMap[product.id] = productReviews.length > 0
+                        ? productReviews.reduce((sum, r) => sum + r.rating, 0) / productReviews.length
+                        : 0;
                 });
                 setProductRatings(ratingsMap);
-            } catch (error) {
-                console.error('Error fetching products and ratings:', error);
-            } finally {
-                setLoading(false);
+            } catch (err) {
+                console.error('Error fetching ratings:', err);
             }
         };
 
-        fetchProductsAndRatings();
+        // onSnapshot keeps the product list live — fires immediately on mount,
+        // then again whenever a product is added, updated, or deleted.
+        const unsubscribe = onSnapshot(
+            collection(db, 'products'),
+            (snapshot) => {
+                const productsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                setAllProducts(productsData);
+                fetchRatings(productsData);
+                setLoading(false);
+            },
+            (error) => {
+                console.error('Error listening to products:', error);
+                setLoading(false);
+            }
+        );
+
+        // Clean up listener when component unmounts
+        return () => unsubscribe();
     }, []);
 
     // Filter and sort products
