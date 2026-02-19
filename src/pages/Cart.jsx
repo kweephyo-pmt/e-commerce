@@ -1,12 +1,40 @@
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../config/firebase';
 
 const Cart = () => {
     const { cartItems, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart();
     const { user } = useAuth();
     const navigate = useNavigate();
+
+    const [shippingSettings, setShippingSettings] = useState({ flatFee: 50, freeThreshold: 1500 });
+
+    useEffect(() => {
+        const fetchShippingSettings = async () => {
+            try {
+                const snap = await getDoc(doc(db, 'settings', 'shipping'));
+                if (snap.exists()) {
+                    const d = snap.data();
+                    setShippingSettings({
+                        flatFee: d.flatFee ?? 50,
+                        freeThreshold: d.freeThreshold ?? 1500,
+                    });
+                }
+            } catch (e) {
+                console.error('Failed to load shipping settings:', e);
+            }
+        };
+        fetchShippingSettings();
+    }, []);
+
+    const subtotal = getCartTotal();
+    const shipping = subtotal >= shippingSettings.freeThreshold ? 0 : shippingSettings.flatFee;
+    const tax = subtotal * 0.07;
+    const total = subtotal + shipping + tax;
 
     const handleCheckout = () => {
         if (!user) {
@@ -158,22 +186,29 @@ const Cart = () => {
                             <div className="space-y-4 mb-6">
                                 <div className="flex justify-between text-gray-300">
                                     <span className="font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Subtotal</span>
-                                    <span className="font-bold text-cyan-400">฿{getCartTotal().toFixed(2)}</span>
+                                    <span className="font-bold text-cyan-400">฿{subtotal.toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between text-gray-300">
                                     <span className="font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Shipping</span>
-                                    <span className="font-bold text-cyan-400">FREE</span>
+                                    <span className={`font-bold ${shipping === 0 ? 'text-magenta-400' : 'text-cyan-400'}`}>
+                                        {shipping === 0 ? 'FREE' : `฿${shipping.toFixed(2)}`}
+                                    </span>
                                 </div>
+                                {shipping > 0 && (
+                                    <div className="text-xs text-gray-500 font-bold -mt-2" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                        Free shipping on orders ฿{shippingSettings.freeThreshold.toFixed(0)}+
+                                    </div>
+                                )}
                                 <div className="flex justify-between text-gray-300">
                                     <span className="font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Tax (estimated)</span>
-                                    <span className="font-bold text-cyan-400">฿{(getCartTotal() * 0.07).toFixed(2)}</span>
+                                    <span className="font-bold text-cyan-400">฿{tax.toFixed(2)}</span>
                                 </div>
 
                                 <div className="border-t border-cyan-500/30 pt-4">
                                     <div className="flex justify-between items-center">
                                         <span className="text-xl font-black text-magenta-400 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif' }}>Total</span>
                                         <span className="text-3xl font-black text-gradient" style={{ textShadow: '0 0 20px rgba(0, 255, 255, 0.5)' }}>
-                                            ฿{(getCartTotal() * 1.07).toFixed(2)}
+                                            ฿{total.toFixed(2)}
                                         </span>
                                     </div>
                                 </div>
