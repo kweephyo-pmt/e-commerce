@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import { AuthProvider } from './context/AuthContext';
 import { AdminProvider } from './context/AdminContext';
 import { CartProvider } from './context/CartContext';
@@ -63,6 +64,7 @@ function App() {
           <CartProvider>
             <WishlistProvider>
               <AppContent />
+              <Analytics />
             </WishlistProvider>
           </CartProvider>
         </AdminProvider>
