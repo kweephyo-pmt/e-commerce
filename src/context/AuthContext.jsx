@@ -66,43 +66,64 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
-                // Check if user is admin
-                try {
-                    const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-                    const userData = userDoc.data();
-                    const adminStatus = userData?.isAdmin === true;
+                // Helper to load user profile and admin status from Firestore.
+                // Retries once after a short delay to handle auth-token propagation lag.
+                const loadUserData = async (retryOnPermissionError = true) => {
+                    try {
+                        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+                        const userData = userDoc.data();
+                        const adminStatus = userData?.isAdmin === true;
 
-                    setIsAdmin(adminStatus);
-                    setUser(firebaseUser);
-                    setUserProfile({
-                        uid: firebaseUser.uid,
-                        email: firebaseUser.email,
-                        displayName: userData?.displayName || firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Admin',
-                        photoURL: userData?.photoURL || firebaseUser.photoURL || null,
-                        phone: userData?.phone || null,
-                    });
+                        setIsAdmin(adminStatus);
+                        // Set user AFTER Firestore read so dependents (WishlistContext etc.)
+                        // don't fire before the auth token is fully propagated.
+                        setUser(firebaseUser);
+                        setUserProfile({
+                            uid: firebaseUser.uid,
+                            email: firebaseUser.email,
+                            displayName: userData?.displayName || firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+                            photoURL: userData?.photoURL || firebaseUser.photoURL || null,
+                            phone: userData?.phone || null,
+                        });
 
-                    // Redirect based on user type
-                    const currentPath = window.location.pathname;
-
-                    // If admin tries to access customer pages (but not admin login page), redirect to admin dashboard
-                    if (adminStatus && !currentPath.startsWith('/admin')) {
-                        window.location.href = '/admin/dashboard';
+                        // Redirect based on user type
+                        const currentPath = window.location.pathname;
+                        if (adminStatus && !currentPath.startsWith('/admin')) {
+                            window.location.href = '/admin/dashboard';
+                        } else if (!adminStatus && currentPath.startsWith('/admin/dashboard')) {
+                            window.location.href = '/';
+                        }
+                    } catch (error) {
+                        // Auth token can take a moment to propagate to Firestore after sign-in.
+                        // Retry once after 1.5 s before giving up.
+                        if (retryOnPermissionError && error.code === 'permission-denied') {
+                            console.warn('Auth token not yet propagated, retrying in 1.5s...');
+                            await new Promise(res => setTimeout(res, 1500));
+                            return loadUserData(false);
+                        }
+                        console.error('Error checking admin status:', error);
+                        // Fall back: expose the Firebase user without admin privileges
+                        setIsAdmin(false);
+                        setUser(firebaseUser);
+                        setUserProfile({
+                            uid: firebaseUser.uid,
+                            email: firebaseUser.email,
+                            displayName: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+                            photoURL: firebaseUser.photoURL || null,
+                            phone: null,
+                        });
+                    } finally {
+                        setLoading(false);
                     }
-                    // If regular user tries to access admin pages, redirect to home
-                    else if (!adminStatus && currentPath.startsWith('/admin/dashboard')) {
-                        window.location.href = '/';
-                    }
-                } catch (error) {
-                    console.error('Error checking admin status:', error);
-                    setIsAdmin(false);
-                }
+                };
+
+                await loadUserData();
             } else {
                 setUser(null);
                 setUserProfile(null);
                 setIsAdmin(false);
+                setLoading(false);
             }
-            setLoading(false);
         });
 
         return unsubscribe;

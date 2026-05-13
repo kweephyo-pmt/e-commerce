@@ -2,59 +2,61 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
+
     // Helper function to check if user is admin
+    // Uses exists() guard to safely handle missing user documents
     function isAdmin() {
-      return request.auth != null && 
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+      return request.auth != null &&
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('isAdmin', false) == true;
     }
-    
+
     // Users collection - users can read/write their own data, admins can write any user data
     match /users/{userId} {
       allow read: if request.auth != null;
       allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
     }
-    
+
     // Products collection - anyone can read, admins can write
     // BUT authenticated users can update ONLY stock and updatedAt (for checkout)
     match /products/{productId} {
       allow read: if true;  // Public read access
-      
+
       // Admins can create and delete products
       allow create, delete: if isAdmin();
-      
+
       // Admins can update any field
       allow update: if isAdmin();
-      
+
       // Authenticated users can update ONLY stock and updatedAt fields (for checkout)
-      allow update: if request.auth != null && 
+      allow update: if request.auth != null &&
                       request.resource.data.diff(resource.data).affectedKeys()
                         .hasOnly(['stock', 'updatedAt']);
     }
-    
+
     // Orders collection - users can read/write their own orders, admins can read/write all orders
     match /orders/{orderId} {
       // Users can read their own orders, admins can read all orders
-      allow read: if request.auth != null && 
+      allow read: if request.auth != null &&
                      (resource.data.userId == request.auth.uid || isAdmin());
-      
+
       // Users can create their own orders
-      allow create: if request.auth != null && 
+      allow create: if request.auth != null &&
                        request.resource.data.userId == request.auth.uid;
-      
+
       // Users can update/delete their own orders, admins can update/delete all orders
-      allow update, delete: if request.auth != null && 
+      allow update, delete: if request.auth != null &&
                                (resource.data.userId == request.auth.uid || isAdmin());
     }
-    
+
     // Reviews collection - anyone can read, authenticated users can create
     match /reviews/{reviewId} {
       allow read: if true;  // Public read access
       allow create: if request.auth != null;
-      allow update, delete: if request.auth != null && 
+      allow update, delete: if request.auth != null &&
                                (resource.data.userId == request.auth.uid || isAdmin());
     }
-    
+
     // Categories collection - anyone can read, admins can write
     match /categories/{categoryId} {
       allow read: if true;  // Public read access
@@ -72,7 +74,7 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
-    // Wishlists - users can only access their own
+    // Wishlists - users can only access their own wishlist (no isAdmin needed)
     match /wishlists/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
