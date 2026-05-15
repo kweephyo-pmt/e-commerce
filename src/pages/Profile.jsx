@@ -5,6 +5,7 @@ import { User, Mail, Phone, MapPin, Calendar, Edit2, Save, X, Package, ShoppingB
 import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import Toast from '../components/Toast';
+import { useCurrency } from '../context/CurrencyContext';
 
 const Profile = () => {
     const { user } = useAuth();
@@ -14,6 +15,7 @@ const Profile = () => {
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [toast, setToast] = useState(null);
+    const { formatPrice } = useCurrency();
     const [orderStats, setOrderStats] = useState({
         totalOrders: 0,
         totalSpent: 0
@@ -359,7 +361,7 @@ const Profile = () => {
                                             </div>
                                             <div>
                                                 <p className="text-sm text-gray-400 font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Total Spent</p>
-                                                <p className="text-2xl font-black text-magenta-400" style={{ fontFamily: 'Orbitron, sans-serif' }}>฿{orderStats.totalSpent.toFixed(2)}</p>
+                                                <p className="text-2xl font-black text-magenta-400" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(orderStats.totalSpent)}</p>
                                             </div>
                                         </div>
                                     </div>

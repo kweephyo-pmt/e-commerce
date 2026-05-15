@@ -4,6 +4,7 @@ import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAuth } from '../context/AuthContext';
 import { Package, Truck, CheckCircle, Clock, ShoppingBag, ChevronDown, ChevronUp, Calendar, MapPin, CreditCard, Search, Filter, X, Banknote, AlertCircle } from 'lucide-react';
+import { useCurrency } from '../context/CurrencyContext';
 
 const Orders = () => {
     const { user } = useAuth();
@@ -11,6 +12,7 @@ const Orders = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [expandedOrder, setExpandedOrder] = useState(null);
+    const { formatPrice } = useCurrency();
 
     // Filters and search
     const [searchQuery, setSearchQuery] = useState('');
@@ -408,7 +410,7 @@ const Orders = () => {
                                                         <div className="text-right">
                                                             <p className="text-xs text-gray-400 uppercase tracking-wide font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Total</p>
                                                             <p className="text-2xl font-black text-gradient" style={{ textShadow: '0 0 15px rgba(0, 255, 255, 0.5)' }}>
-                                                                ฿{order.total?.toFixed(2)}
+                                                                {formatPrice(order.total)}
                                                             </p>
                                                         </div>
                                                         <button
@@ -491,11 +493,11 @@ const Orders = () => {
                                                                     <div className="flex-1 min-w-0">
                                                                         <h5 className="font-bold truncate text-white" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{item.name}</h5>
                                                                         <p className="text-sm text-gray-400 font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                                                            Qty: {item.quantity} × ฿{item.price?.toFixed(2)}
+                                                                            Qty: {item.quantity} × {formatPrice(item.price)}
                                                                         </p>
                                                                     </div>
                                                                     <p className="font-black text-cyan-400" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 10px rgba(0, 255, 255, 0.5)' }}>
-                                                                        ฿{(item.quantity * item.price)?.toFixed(2)}
+                                                                        {formatPrice(item.quantity * item.price)}
                                                                     </p>
                                                                 </div>
                                                             ))}
@@ -553,7 +555,7 @@ const Orders = () => {
                                                                     )}
                                                                     <div className="flex justify-between">
                                                                         <span className="text-gray-400 font-bold">Subtotal</span>
-                                                                        <span className="font-bold text-white">฿{order.subtotal?.toFixed(2)}</span>
+                                                                        <span className="font-bold text-white">{formatPrice(order.subtotal)}</span>
                                                                     </div>
                                                                     <div className="flex justify-between">
                                                                         <span className="text-gray-400 font-bold">Shipping</span>
@@ -561,18 +563,18 @@ const Orders = () => {
                                                                             {order.shipping === 0 ? (
                                                                                 <span className="text-magenta-400">FREE</span>
                                                                             ) : (
-                                                                                `฿${order.shipping?.toFixed(2)}`
+                                                                                formatPrice(order.shipping)
                                                                             )}
                                                                         </span>
                                                                     </div>
                                                                     <div className="flex justify-between">
                                                                         <span className="text-gray-400 font-bold">Tax (7%)</span>
-                                                                        <span className="font-bold text-white">฿{order.tax?.toFixed(2)}</span>
+                                                                        <span className="font-bold text-white">{formatPrice(order.tax)}</span>
                                                                     </div>
                                                                     <div className="border-t border-cyan-500/30 pt-2 flex justify-between items-center">
                                                                         <span className="font-black text-cyan-400 uppercase" style={{ fontFamily: 'Orbitron, sans-serif' }}>Total</span>
                                                                         <span className="font-black text-2xl text-gradient" style={{ textShadow: '0 0 15px rgba(0, 255, 255, 0.5)' }}>
-                                                                            ฿{order.total?.toFixed(2)}
+                                                                            {formatPrice(order.total)}
                                                                         </span>
                                                                     </div>
                                                                 </div>

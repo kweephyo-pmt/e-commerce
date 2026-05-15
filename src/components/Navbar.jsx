@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useAdmin } from '../context/AdminContext';
 import { useWishlist } from '../context/WishlistContext';
+import { useCurrency } from '../context/CurrencyContext';
 
 const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -12,6 +13,7 @@ const Navbar = () => {
     const { getCartItemsCount } = useCart();
     const { isAdmin } = useAdmin();
     const { wishlist } = useWishlist();
+    const { currency, toggleCurrency, currencyInfo } = useCurrency();
 
     const handleSignOut = async () => {
         try {
@@ -108,6 +110,19 @@ const Navbar = () => {
                                 </div>
                             </Link>
                         )}
+
+                        {/* Currency Toggle */}
+                        <button
+                            onClick={toggleCurrency}
+                            title={`Switch to ${currency === 'THB' ? 'Myanmar Kyat (K)' : 'Thai Baht (฿)'}`}
+                            className="hidden md:flex items-center gap-1.5 px-3 py-1.5 corner-clip-sm border-2 border-cyan-500/40 hover:border-cyan-400 bg-cyan-500/10 hover:bg-cyan-500/20 transition-all duration-200 group"
+                            style={{ boxShadow: '0 0 12px rgba(0,255,255,0.15)' }}
+                        >
+                            <span className="text-base leading-none">{currencyInfo.flag}</span>
+                            <span className="text-xs font-black text-cyan-400 uppercase tracking-wider group-hover:text-cyan-300 transition-colors" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                                {currencyInfo.code}
+                            </span>
+                        </button>
 
                         {/* Cart */}
                         <Link to="/cart" className="relative group">
@@ -241,6 +256,23 @@ const Navbar = () => {
                                     <span>Admin Dashboard</span>
                                 </Link>
                             )}
+
+                            {/* Currency Toggle — mobile */}
+                            <button
+                                onClick={toggleCurrency}
+                                className="flex items-center gap-3 p-3 corner-clip-sm border-2 border-cyan-500/30 hover:border-cyan-400 bg-cyan-500/10 hover:bg-cyan-500/20 transition-all duration-200 text-left"
+                                style={{ fontFamily: 'Rajdhani, sans-serif' }}
+                            >
+                                <span className="text-lg">{currencyInfo.flag}</span>
+                                <div className="flex flex-col leading-tight">
+                                    <span className="text-xs font-black text-cyan-400 uppercase tracking-wider" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                                        {currencyInfo.code}
+                                    </span>
+                                    <span className="text-xs text-gray-400 font-bold">
+                                        Tap to switch to {currency === 'THB' ? '🇲🇲 MMK' : '🇹🇭 THB'}
+                                    </span>
+                                </div>
+                            </button>
                         </div>
                     </div>
                 )}

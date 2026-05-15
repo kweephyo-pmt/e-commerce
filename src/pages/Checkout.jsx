@@ -9,11 +9,13 @@ import { useAuth } from '../context/AuthContext';
 import { collection, addDoc, serverTimestamp, doc, getDoc, onSnapshot, runTransaction } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { logActivity } from '../utils/logActivity';
+import { useCurrency } from '../context/CurrencyContext';
 
 const Checkout = () => {
     const { cartItems, getCartTotal, clearCart } = useCart();
     const { user } = useAuth();
     const navigate = useNavigate();
+    const { formatPrice } = useCurrency();
 
     const [currentStep, setCurrentStep] = useState(1);
     const [formData, setFormData] = useState({
@@ -438,7 +440,7 @@ const Checkout = () => {
                                     <div className="bg-gradient-to-r from-cyan-500/20 to-magenta-500/20 border-2 border-cyan-500/50 corner-clip-sm p-5 mb-6" style={{ boxShadow: '0 0 20px rgba(0,255,255,0.2)' }}>
                                         <p className="text-gray-400 text-sm font-bold uppercase tracking-widest mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Amount to Transfer</p>
                                         <div className="flex items-center justify-between">
-                                            <span className="text-4xl font-black text-gradient" style={{ fontFamily: 'Orbitron, sans-serif' }}>฿{total.toFixed(2)}</span>
+                                            <span className="text-4xl font-black text-gradient" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(total)}</span>
                                             <button onClick={() => copyToClipboard(total.toFixed(2), 'amount')}
                                                 className="flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300 font-bold border border-cyan-500/40 px-3 py-1.5 corner-clip-sm transition-all hover:bg-cyan-500/10"
                                                 style={{ fontFamily: 'Rajdhani, sans-serif' }}>
@@ -583,7 +585,7 @@ const Checkout = () => {
                                                     <h4 className="font-black text-white text-sm mb-1 line-clamp-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{item.name}</h4>
                                                     <p className="text-xs text-gray-400 mb-2 font-bold">{item.category}</p>
                                                     <p className="text-lg font-black text-cyan-400" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                                                        ฿{((item.discount ? item.price * (1 - item.discount / 100) : item.price) * item.quantity).toFixed(2)}
+                                                        {formatPrice((item.discount ? item.price * (1 - item.discount / 100) : item.price) * item.quantity)}
                                                     </p>
                                                 </div>
                                             </div>
@@ -593,24 +595,24 @@ const Checkout = () => {
                                 <div className="space-y-3 pt-4 border-t border-cyan-500/30">
                                     <div className="flex justify-between text-gray-300">
                                         <span className="font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Subtotal</span>
-                                        <span className="font-black text-white" style={{ fontFamily: 'Orbitron, sans-serif' }}>฿{subtotal.toFixed(2)}</span>
+                                        <span className="font-black text-white" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(subtotal)}</span>
                                     </div>
                                     <div className="flex justify-between text-gray-300">
                                         <span className="font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Shipping</span>
                                         <span className={`font-black ${shipping === 0 ? 'text-magenta-400' : 'text-white'}`} style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                                            {shipping === 0 ? 'FREE' : `฿${shipping.toFixed(2)}`}
+                                            {shipping === 0 ? 'FREE' : formatPrice(shipping)}
                                         </span>
                                     </div>
                                     <div className="flex justify-between text-gray-300">
                                         <span className="font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Tax (7% VAT)</span>
-                                        <span className="font-black text-white" style={{ fontFamily: 'Orbitron, sans-serif' }}>฿{tax.toFixed(2)}</span>
+                                        <span className="font-black text-white" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(tax)}</span>
                                     </div>
                                 </div>
                                 <div className="mt-4 bg-gradient-to-r from-cyan-500/20 to-magenta-500/20 -mx-6 px-6 py-5 border-t border-cyan-500/50">
                                     <div className="flex justify-between items-center">
                                         <span className="text-lg font-black text-cyan-400 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif' }}>Total</span>
                                         <div className="text-right">
-                                            <div className="text-3xl font-black text-gradient" style={{ textShadow: '0 0 20px rgba(0,255,255,0.6)' }}>฿{total.toFixed(2)}</div>
+                                            <div className="text-3xl font-black text-gradient" style={{ textShadow: '0 0 20px rgba(0,255,255,0.6)' }}>{formatPrice(total)}</div>
                                             <div className="text-xs text-gray-400 mt-1 font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Including VAT</div>
                                         </div>
                                     </div>

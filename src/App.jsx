@@ -8,6 +8,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import { WishlistProvider } from './context/WishlistContext';
+import { CurrencyProvider } from './context/CurrencyContext';
 import Home from './pages/Home';
 import Products from './pages/Products';
 import ProductDetails from './pages/ProductDetails';
@@ -64,9 +65,11 @@ function App() {
         <AdminProvider>
           <CartProvider>
             <WishlistProvider>
-              <AppContent />
-              <Analytics />
-              <SpeedInsights />
+              <CurrencyProvider>
+                <AppContent />
+                <Analytics />
+                <SpeedInsights />
+              </CurrencyProvider>
             </WishlistProvider>
           </CartProvider>
         </AdminProvider>

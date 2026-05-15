@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { ShoppingCart, ArrowLeft, Package, Truck, Shield, Star, MessageSquare, ChevronLeft, ChevronRight, X, ZoomIn } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import Toast from '../components/Toast';
+import { useCurrency } from '../context/CurrencyContext';
 
 const ProductDetails = () => {
     const { id } = useParams();
@@ -25,6 +26,7 @@ const ProductDetails = () => {
     const [userReview, setUserReview] = useState('');
     const [submittingReview, setSubmittingReview] = useState(false);
     const [toast, setToast] = useState(null);
+    const { formatPrice } = useCurrency();
 
     // Real-time product listener
     useEffect(() => {
@@ -410,11 +412,11 @@ const ProductDetails = () => {
                             <div className="mb-4 md:mb-6">
                                 <div className="flex items-center space-x-3 md:space-x-4">
                                     <span className="text-3xl sm:text-4xl md:text-5xl font-black text-gradient" style={{ textShadow: '0 0 20px rgba(0, 255, 255, 0.5)' }}>
-                                        ฿{calculateDiscountedPrice().toFixed(2)}
+                                        {formatPrice(calculateDiscountedPrice())}
                                     </span>
                                     {product.discount > 0 && (
                                         <span className="text-lg sm:text-xl md:text-2xl text-gray-500 line-through">
-                                            ฿{product.price.toFixed(2)}
+                                            {formatPrice(product.price)}
                                         </span>
                                     )}
                                 </div>

@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useAuth } from '../context/AuthContext';
 import { useProductRating } from '../hooks/useProductRating';
+import { useCurrency } from '../context/CurrencyContext';
 
 const ProductCard = ({ product }) => {
     const [showAddedMessage, setShowAddedMessage] = useState(false);
@@ -15,6 +16,7 @@ const ProductCard = ({ product }) => {
     const { user } = useAuth();
     const navigate = useNavigate();
     const { rating, reviewCount } = useProductRating(product.id);
+    const { formatPrice } = useCurrency();
 
     const wishlisted = isWishlisted(product.id);
 
@@ -160,15 +162,15 @@ const ProductCard = ({ product }) => {
                         {product.discount ? (
                             <div className="flex items-center space-x-2">
                                 <span className="text-xl sm:text-2xl font-bold text-gradient">
-                                    ฿{(product.price * (1 - product.discount / 100)).toFixed(2)}
+                                    {formatPrice(product.price * (1 - product.discount / 100))}
                                 </span>
                                 <span className="text-[10px] sm:text-sm text-gray-400 line-through">
-                                    ฿{product.price.toFixed(2)}
+                                    {formatPrice(product.price)}
                                 </span>
                             </div>
                         ) : (
                             <span className="text-xl sm:text-2xl font-bold text-gradient">
-                                ฿{product.price.toFixed(2)}
+                                {formatPrice(product.price)}
                             </span>
                         )}
                         {/* Stock indicator */}

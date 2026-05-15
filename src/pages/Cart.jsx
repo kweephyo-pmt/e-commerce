@@ -5,11 +5,13 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
+import { useCurrency } from '../context/CurrencyContext';
 
 const Cart = () => {
     const { cartItems, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart();
     const { user } = useAuth();
     const navigate = useNavigate();
+    const { formatPrice } = useCurrency();
 
     const [shippingSettings, setShippingSettings] = useState({ flatFee: 50, freeThreshold: 1500 });
 
@@ -147,18 +149,18 @@ const Cart = () => {
                                         {/* Price */}
                                         <div className="text-right">
                                             <div className="text-2xl font-bold text-gradient">
-                                                ฿{((item.discount ? item.price * (1 - item.discount / 100) : item.price) * item.quantity).toFixed(2)}
+                                                {formatPrice((item.discount ? item.price * (1 - item.discount / 100) : item.price) * item.quantity)}
                                             </div>
                                             <div className="text-sm text-gray-400">
                                                 {item.discount ? (
                                                     <>
-                                                        <span className="text-magenta-400 font-bold">฿{(item.price * (1 - item.discount / 100)).toFixed(2)}</span>
+                                                        <span className="text-magenta-400 font-bold">{formatPrice(item.price * (1 - item.discount / 100))}</span>
                                                         {' '}
-                                                        <span className="line-through text-gray-500">฿{item.price.toFixed(2)}</span>
+                                                        <span className="line-through text-gray-500">{formatPrice(item.price)}</span>
                                                         {' each'}
                                                     </>
                                                 ) : (
-                                                    `฿${item.price.toFixed(2)} each`
+                                                    `${formatPrice(item.price)} each`
                                                 )}
                                             </div>
                                         </div>
@@ -186,29 +188,29 @@ const Cart = () => {
                             <div className="space-y-4 mb-6">
                                 <div className="flex justify-between text-gray-300">
                                     <span className="font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Subtotal</span>
-                                    <span className="font-bold text-cyan-400">฿{subtotal.toFixed(2)}</span>
+                                    <span className="font-bold text-cyan-400">{formatPrice(subtotal)}</span>
                                 </div>
                                 <div className="flex justify-between text-gray-300">
                                     <span className="font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Shipping</span>
                                     <span className={`font-bold ${shipping === 0 ? 'text-magenta-400' : 'text-cyan-400'}`}>
-                                        {shipping === 0 ? 'FREE' : `฿${shipping.toFixed(2)}`}
+                                        {shipping === 0 ? 'FREE' : formatPrice(shipping)}
                                     </span>
                                 </div>
                                 {shipping > 0 && (
                                     <div className="text-xs text-gray-500 font-bold -mt-2" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                        Free shipping on orders ฿{shippingSettings.freeThreshold.toFixed(0)}+
+                                        Free shipping on orders {formatPrice(shippingSettings.freeThreshold)}+
                                     </div>
                                 )}
                                 <div className="flex justify-between text-gray-300">
                                     <span className="font-bold uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Tax (estimated)</span>
-                                    <span className="font-bold text-cyan-400">฿{tax.toFixed(2)}</span>
+                                    <span className="font-bold text-cyan-400">{formatPrice(tax)}</span>
                                 </div>
 
                                 <div className="border-t border-cyan-500/30 pt-4">
                                     <div className="flex justify-between items-center">
                                         <span className="text-xl font-black text-magenta-400 uppercase tracking-wide" style={{ fontFamily: 'Orbitron, sans-serif' }}>Total</span>
                                         <span className="text-3xl font-black text-gradient" style={{ textShadow: '0 0 20px rgba(0, 255, 255, 0.5)' }}>
-                                            ฿{total.toFixed(2)}
+                                            {formatPrice(total)}
                                         </span>
                                     </div>
                                 </div>

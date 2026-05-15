@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { collection, getDocs, doc, updateDoc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { Settings as SettingsIcon, Users, Mail, Crown, UserX, RefreshCw, Shield, Lock, Truck, Save, Gamepad2, Image } from 'lucide-react';
+import { Settings as SettingsIcon, Users, Mail, Crown, UserX, RefreshCw, Shield, Lock, Truck, Save, Gamepad2, Image, DollarSign, ArrowRightLeft } from 'lucide-react';
 import Toast from '../components/Toast';
 import { useAuth } from '../context/AuthContext';
 import { logActivity } from '../utils/logActivity';
@@ -18,6 +18,11 @@ const AdminSettings = () => {
     const [shippingForm, setShippingForm] = useState({ flatFee: 100, freeThreshold: 1500 });
     const [shippingLoading, setShippingLoading] = useState(false);
     const [shippingSaving, setShippingSaving] = useState(false);
+
+    // Currency / exchange rate settings
+    const [currencyForm, setCurrencyForm] = useState({ thbToMmk: 130 });
+    const [currencyLoading, setCurrencyLoading] = useState(false);
+    const [currencySaving, setCurrencySaving] = useState(false);
 
     // Footer settings
     const [footerForm, setFooterForm] = useState({
@@ -45,6 +50,7 @@ const AdminSettings = () => {
     useEffect(() => {
         fetchUsers();
         fetchShippingSettings();
+        fetchCurrencySettings();
         fetchFooterSettings();
         fetchHeroSettings();
     }, []);
@@ -178,6 +184,47 @@ const AdminSettings = () => {
             setToast({ message: 'Failed to save shipping settings', type: 'error' });
         } finally {
             setShippingSaving(false);
+        }
+    };
+
+    const fetchCurrencySettings = async () => {
+        setCurrencyLoading(true);
+        try {
+            const snap = await getDoc(doc(db, 'settings', 'currency'));
+            if (snap.exists()) {
+                const d = snap.data();
+                setCurrencyForm({ thbToMmk: d.thbToMmk ?? 130 });
+            }
+        } catch (e) {
+            console.error('Failed to load currency settings:', e);
+        } finally {
+            setCurrencyLoading(false);
+        }
+    };
+
+    const saveCurrencySettings = async () => {
+        const rate = parseFloat(currencyForm.thbToMmk);
+        if (isNaN(rate) || rate <= 0) {
+            setToast({ message: 'Exchange rate must be a positive number', type: 'error' });
+            return;
+        }
+        setCurrencySaving(true);
+        try {
+            await setDoc(doc(db, 'settings', 'currency'), { thbToMmk: rate }, { merge: true });
+            setCurrencyForm({ thbToMmk: rate });
+            await logActivity({
+                type: 'settings', icon: 'Settings',
+                title: 'Exchange Rate Updated',
+                description: `THB → MMK rate set to ${rate}`,
+                color: 'cyan',
+                admin: adminInfo
+            });
+            setToast({ message: 'Exchange rate saved!', type: 'success' });
+        } catch (e) {
+            console.error('Failed to save currency settings:', e);
+            setToast({ message: 'Failed to save exchange rate', type: 'error' });
+        } finally {
+            setCurrencySaving(false);
         }
     };
 
@@ -598,6 +645,83 @@ const AdminSettings = () => {
                                     style={{ fontFamily: 'Rajdhani, sans-serif', boxShadow: '0 0 15px rgba(0,255,255,0.2)' }}>
                                     <Save className="w-4 h-4" />
                                     {shippingSaving ? 'Saving...' : 'Save Shipping Settings'}
+                                </button>
+                            </>
+                        )}
+                    </div>
+                </div>
+
+                {/* ── Currency Exchange Rate ───────────────────────────────── */}
+                <div className="bg-gray-900 corner-clip border-2 border-yellow-500/30 relative overflow-hidden"
+                    style={{ boxShadow: '0 0 30px rgba(234,179,8,0.1)' }}>
+                    <div className="absolute inset-0 opacity-5"
+                        style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(234,179,8,0.1) 2px, rgba(234,179,8,0.1) 4px)' }}></div>
+
+                    {/* Panel Header */}
+                    <div className="flex items-center justify-between px-6 md:px-8 py-5 border-b-2 border-yellow-500/20 relative z-10 bg-gray-800/40">
+                        <div className="flex items-center space-x-3">
+                            <ArrowRightLeft className="w-5 h-5 text-yellow-400" style={{ filter: 'drop-shadow(0 0 6px rgba(234,179,8,0.8))' }} />
+                            <h2 className="text-xl font-black text-yellow-400 uppercase tracking-wide"
+                                style={{ fontFamily: 'Rajdhani, sans-serif', textShadow: '0 0 10px rgba(234,179,8,0.6)' }}>
+                                Currency Exchange Rate
+                            </h2>
+                        </div>
+                    </div>
+
+                    <div className="px-6 md:px-8 py-6 relative z-10 space-y-6">
+                        {currencyLoading ? (
+                            <div className="text-center py-8">
+                                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-yellow-500 mx-auto"></div>
+                            </div>
+                        ) : (
+                            <>
+                                {/* Rate input */}
+                                <div className="max-w-sm">
+                                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2"
+                                        style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                        1 THB (฿) = ? MMK (K)
+                                    </label>
+                                    <p className="text-xs text-gray-500 font-bold mb-3" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                        This rate is applied globally. Changes take effect immediately for all users.
+                                    </p>
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex items-center gap-2 px-4 py-3 bg-gray-800/60 border-2 border-yellow-500/20 corner-clip-sm">
+                                            <span className="text-yellow-400 font-black text-lg">฿</span>
+                                            <span className="text-white font-black text-lg" style={{ fontFamily: 'Orbitron, sans-serif' }}>1</span>
+                                        </div>
+                                        <ArrowRightLeft className="w-5 h-5 text-yellow-400 flex-shrink-0" />
+                                        <div className="relative flex-1">
+                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-yellow-400 font-black text-lg">K</span>
+                                            <input
+                                                type="number"
+                                                min="1"
+                                                step="0.1"
+                                                value={currencyForm.thbToMmk}
+                                                onChange={e => setCurrencyForm({ thbToMmk: e.target.value })}
+                                                className="w-full pl-9 pr-4 py-3 bg-gray-800 border-2 border-yellow-500/30 corner-clip-sm text-white font-black text-lg focus:outline-none focus:border-yellow-400 transition-all"
+                                                style={{ fontFamily: 'Orbitron, sans-serif' }}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Live preview */}
+                                <div className="p-4 bg-yellow-500/5 corner-clip-sm border border-yellow-500/20 text-sm font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                    <span className="text-gray-400">Preview: </span>
+                                    <span className="text-yellow-400">
+                                        ฿100 THB → K{Math.round(100 * (parseFloat(currencyForm.thbToMmk) || 0)).toLocaleString('en-US')} MMK
+                                        &nbsp;·&nbsp;
+                                        ฿1,000 THB → K{Math.round(1000 * (parseFloat(currencyForm.thbToMmk) || 0)).toLocaleString('en-US')} MMK
+                                    </span>
+                                </div>
+
+                                <button
+                                    onClick={saveCurrencySettings}
+                                    disabled={currencySaving}
+                                    className="flex items-center gap-2 px-6 py-3 bg-yellow-500/20 text-yellow-400 font-black uppercase tracking-widest corner-clip-sm border-2 border-yellow-500/60 hover:bg-yellow-500/30 transition-all disabled:opacity-50"
+                                    style={{ fontFamily: 'Rajdhani, sans-serif', boxShadow: '0 0 15px rgba(234,179,8,0.2)' }}>
+                                    <Save className="w-4 h-4" />
+                                    {currencySaving ? 'Saving...' : 'Save Exchange Rate'}
                                 </button>
                             </>
                         )}

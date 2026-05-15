@@ -6,6 +6,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
+import { useCurrency } from '../context/CurrencyContext';
 
 const Wishlist = () => {
     const { wishlist, toggleWishlist } = useWishlist();
@@ -14,6 +15,7 @@ const Wishlist = () => {
     const navigate = useNavigate();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const { formatPrice } = useCurrency();
 
     // Fetch full product data for each wishlisted ID
     useEffect(() => {
@@ -168,11 +170,11 @@ const Wishlist = () => {
                                     {/* Price */}
                                     <div className="flex items-center gap-2">
                                         <span className="text-xl font-black text-gradient">
-                                            ฿{discountedPrice.toFixed(2)}
+                                            {formatPrice(discountedPrice)}
                                         </span>
                                         {product.discount > 0 && (
                                             <span className="text-sm text-gray-500 line-through">
-                                                ฿{product.price.toFixed(2)}
+                                                {formatPrice(product.price)}
                                             </span>
                                         )}
                                     </div>

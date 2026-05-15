@@ -6,6 +6,7 @@ import {
     CheckCircle, Package, Truck, Home, ShoppingBag,
     Banknote, Clock, Shield, Zap, ArrowRight, Mail, AlertCircle, XCircle
 } from 'lucide-react';
+import { useCurrency } from '../context/CurrencyContext';
 
 const OrderSuccess = () => {
     const location = useLocation();
@@ -14,6 +15,7 @@ const OrderSuccess = () => {
 
     const [orderData, setOrderData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const { formatPrice } = useCurrency();
 
     const orderTotal = orderData?.total ?? initialTotal;
     const isBankTransfer = (orderData?.paymentMethod || initialMethod) === 'bank_transfer';
@@ -338,10 +340,10 @@ const OrderSuccess = () => {
                                             style={{ fontFamily: 'Rajdhani, sans-serif' }}>Amount Charged</p>
                                         <p className="font-black text-3xl text-red-400"
                                             style={{ textShadow: '0 0 20px rgba(239,68,68,0.5)' }}>
-                                            ฿0.00
+                                            {formatPrice(0)}
                                         </p>
                                         <p className="text-xs text-gray-500 font-bold mt-1 line-through" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                            Original: ฿{orderTotal?.toFixed(2) ?? '—'}
+                                            Original: {orderTotal != null ? formatPrice(orderTotal) : '—'}
                                         </p>
                                     </div>
                                     <div className="w-12 h-12 corner-clip-sm bg-red-500/10 border-2 border-red-500/30 flex items-center justify-center">
@@ -357,7 +359,7 @@ const OrderSuccess = () => {
                                         style={{ fontFamily: 'Rajdhani, sans-serif' }}>Total Amount</p>
                                     <p className="font-black text-3xl text-gradient"
                                         style={{ textShadow: '0 0 20px rgba(0,255,255,0.5)' }}>
-                                        ฿{orderTotal?.toFixed(2) ?? '—'}
+                                        {orderTotal != null ? formatPrice(orderTotal) : '—'}
                                     </p>
                                 </div>
                                 <div className="w-12 h-12 corner-clip-sm bg-magenta-500/10 border-2 border-magenta-500/30 flex items-center justify-center">
