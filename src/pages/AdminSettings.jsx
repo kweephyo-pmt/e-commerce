@@ -174,7 +174,7 @@ const AdminSettings = () => {
             await logActivity({
                 type: 'settings', icon: 'Settings',
                 title: 'Shipping Settings Updated',
-                description: `Flat fee: ฿${flatFee} · Free shipping above ฿${freeThreshold}`,
+                description: `Flat fee: K${flatFee} · Free shipping above K${freeThreshold}`,
                 color: 'yellow',
                 admin: adminInfo
             });
@@ -586,13 +586,13 @@ const AdminSettings = () => {
                                     <div>
                                         <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2"
                                             style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                            Flat Shipping Fee (฿)
+                                            Flat Shipping Fee (K)
                                         </label>
                                         <p className="text-xs text-gray-500 font-bold mb-3" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                             Charged when order is below the free threshold.
                                         </p>
                                         <div className="relative">
-                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400 font-black text-lg">฿</span>
+                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400 font-black text-lg">K</span>
                                             <input
                                                 type="number"
                                                 min="0"
@@ -609,13 +609,13 @@ const AdminSettings = () => {
                                     <div>
                                         <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2"
                                             style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                            Free Shipping Threshold (฿)
+                                            Free Shipping Threshold (K)
                                         </label>
                                         <p className="text-xs text-gray-500 font-bold mb-3" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                             Orders at or above this amount get free shipping.
                                         </p>
                                         <div className="relative">
-                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400 font-black text-lg">฿</span>
+                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400 font-black text-lg">K</span>
                                             <input
                                                 type="number"
                                                 min="0"
@@ -633,8 +633,8 @@ const AdminSettings = () => {
                                 <div className="p-4 bg-cyan-500/5 corner-clip-sm border border-cyan-500/20 text-sm font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                     <span className="text-gray-400">Preview: </span>
                                     <span className="text-cyan-400">
-                                        Orders under ฿{parseFloat(shippingForm.freeThreshold) || 0} → ฿{parseFloat(shippingForm.flatFee) || 0} shipping fee.
-                                        Orders ฿{parseFloat(shippingForm.freeThreshold) || 0}+ → FREE shipping.
+                                        Orders under K{parseFloat(shippingForm.freeThreshold) || 0} → K{parseFloat(shippingForm.flatFee) || 0} shipping fee.
+                                        Orders K{parseFloat(shippingForm.freeThreshold) || 0}+ → FREE shipping.
                                     </span>
                                 </div>
 

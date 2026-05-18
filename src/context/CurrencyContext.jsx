@@ -48,13 +48,14 @@ export const CurrencyProvider = ({ children }) => {
   }, []);
 
   const formatPrice = useCallback(
-    (thbPrice) => {
-      if (thbPrice == null) return '-';
-      if (currency === 'MMK') {
-        const mmk = thbPrice * exchangeRate;
-        return `K${Math.round(mmk).toLocaleString('en-US')}`;
+    (mmkPrice) => {
+      if (mmkPrice == null) return '-';
+      if (currency === 'THB') {
+        const thb = mmkPrice / exchangeRate;
+        return `฿${Number(thb).toFixed(2)}`;
       }
-      return `฿${Number(thbPrice).toFixed(2)}`;
+      // Default: MMK
+      return `K${Math.round(mmkPrice).toLocaleString('en-US')}`;
     },
     [currency, exchangeRate]
   );

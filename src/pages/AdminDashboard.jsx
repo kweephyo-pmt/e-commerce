@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, orderBy, query, limit } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAuth } from '../context/AuthContext';
+import { useCurrency } from '../context/CurrencyContext';
 import { logActivity } from '../utils/logActivity';
 import CloudinaryUpload from '../components/CloudinaryUpload';
 import CloudinaryMultiUpload from '../components/CloudinaryMultiUpload';
@@ -74,6 +75,7 @@ const AdminDashboard = () => {
     const mainRef = useRef(null);
 
     const { signOut, user, userProfile } = useAuth();
+    const { formatPrice, exchangeRate } = useCurrency();
     const navigate = useNavigate();
 
     // Save active tab to localStorage whenever it changes
@@ -106,13 +108,13 @@ const AdminDashboard = () => {
 
                         if (typeof Notification !== 'undefined' && document.visibilityState === 'hidden' && Notification.permission === 'granted') {
                             new Notification('New Order Received!', {
-                                body: `${order.userName} placed an order for ฿${order.total.toFixed(2)}`,
+                                body: `${order.userName} placed an order for ${formatPrice(order.total)}`,
                                 icon: '/favicon.ico'
                             });
                         }
 
                         showToast(
-                            `New Order! ${order.userName} — ฿${order.total.toFixed(2)}`,
+                            `New Order! ${order.userName} — ${formatPrice(order.total)}`,
                             'success',
                             { label: 'VIEW', onClick: () => setActiveTab('orders') }
                         );
@@ -649,11 +651,7 @@ const AdminDashboard = () => {
                                                 <p className="text-green-200 text-[10px] md:text-sm font-black uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Inventory Value</p>
                                                 <h3 className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-black mt-1 text-white leading-tight"
                                                     style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(0, 255, 0, 0.8)' }}>
-                                                    {totalValue >= 1000000
-                                                        ? `฿${(totalValue / 1000000).toFixed(2)}M`
-                                                        : totalValue >= 100000
-                                                            ? `฿${(totalValue / 1000).toFixed(0)}K`
-                                                            : `฿${totalValue.toLocaleString()}`}
+                                                    {formatPrice(totalValue)}
                                                 </h3>
                                             </div>
                                             <div className="p-2 md:p-4 bg-green-500/20 corner-clip border-2 border-green-500/50 flex-shrink-0" style={{ boxShadow: '0 0 20px rgba(0, 255, 0, 0.6)' }}>
@@ -1009,11 +1007,11 @@ const AdminDashboard = () => {
                                                 <div className="grid md:grid-cols-2 gap-6 relative z-10">
                                                     <div>
                                                         <label className="block text-sm font-black text-green-300 mb-2 uppercase tracking-wide" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-                                                            Price (฿) *
+                                                            Price (MMK) *
                                                         </label>
                                                         <div className="relative">
                                                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-green-400 font-black" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                                                                ฿
+                                                                K
                                                             </span>
                                                             <input
                                                                 type="number"
@@ -1055,26 +1053,41 @@ const AdminDashboard = () => {
                                                     {/* Price Preview */}
                                                     {formData.price && (
                                                         <div className="md:col-span-2 bg-gray-900/80 p-4 corner-clip-sm border-2 border-green-500/40" style={{ boxShadow: '0 0 15px rgba(0, 255, 0, 0.15)' }}>
-                                                            <p className="text-sm text-green-400 mb-2 uppercase font-black" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Price Preview:</p>
-                                                            <div className="flex items-center space-x-3">
-                                                                {formData.discount > 0 ? (
-                                                                    <>
+                                                            <p className="text-sm text-green-400 mb-3 uppercase font-black" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Price Preview:</p>
+                                                            {formData.discount > 0 ? (
+                                                                <div className="space-y-1">
+                                                                    {/* MMK — primary (entered directly) */}
+                                                                    <div className="flex items-center gap-3 flex-wrap">
                                                                         <span className="text-3xl font-black text-green-400" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(0, 255, 0, 0.8)' }}>
-                                                                            ฿{(formData.price * (1 - formData.discount / 100)).toFixed(2)}
+                                                                            K{Math.round(parseFloat(formData.price) * (1 - formData.discount / 100)).toLocaleString('en-US')}
                                                                         </span>
                                                                         <span className="text-xl text-gray-500 line-through" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                                                                            ฿{parseFloat(formData.price).toFixed(2)}
+                                                                            K{Math.round(parseFloat(formData.price)).toLocaleString('en-US')}
                                                                         </span>
                                                                         <span className="bg-red-500/20 text-red-400 border border-red-500/50 px-3 py-1 corner-clip-sm text-sm font-black" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                                                                             -{formData.discount}%
                                                                         </span>
-                                                                    </>
-                                                                ) : (
-                                                                    <span className="text-3xl font-black text-green-400" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(0, 255, 0, 0.8)' }}>
-                                                                        ฿{parseFloat(formData.price).toFixed(2)}
+                                                                    </div>
+                                                                    {/* THB — reference */}
+                                                                    <div className="flex items-center gap-2 text-sm font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                                        <span className="text-gray-500 uppercase tracking-wide text-xs">THB ref:</span>
+                                                                        <span className="text-gray-400">฿{(parseFloat(formData.price) * (1 - formData.discount / 100) / exchangeRate).toFixed(2)}</span>
+                                                                        <span className="text-gray-600 line-through text-xs">฿{(parseFloat(formData.price) / exchangeRate).toFixed(2)}</span>
+                                                                    </div>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="space-y-1">
+                                                                    {/* MMK — primary (entered directly) */}
+                                                                    <span className="text-3xl font-black text-green-400 block" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(0, 255, 0, 0.8)' }}>
+                                                                        K{Math.round(parseFloat(formData.price)).toLocaleString('en-US')}
                                                                     </span>
-                                                                )}
-                                                            </div>
+                                                                    {/* THB — reference */}
+                                                                    <div className="flex items-center gap-2 text-sm font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+                                                                        <span className="text-gray-500 uppercase tracking-wide text-xs">THB ref:</span>
+                                                                        <span className="text-gray-400">฿{(parseFloat(formData.price) / exchangeRate).toFixed(2)}</span>
+                                                                    </div>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     )}
                                                 </div>
@@ -1208,7 +1221,7 @@ const AdminDashboard = () => {
                                                                     <span className="px-3 py-1 bg-magenta-500/20 text-magenta-300 corner-clip-sm text-sm font-black border border-magenta-500/50" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{product.category}</span>
                                                                 </td>
                                                                 <td className="px-6 py-4">
-                                                                    <div className="font-black text-white" style={{ fontFamily: 'Orbitron, sans-serif' }}>฿{product.price.toFixed(2)}</div>
+                                                                    <div className="font-black text-white" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(product.price)}</div>
                                                                     {product.discount > 0 && <div className="text-sm text-red-400">-{product.discount}%</div>}
                                                                 </td>
                                                                 <td className="px-6 py-4">
@@ -1247,7 +1260,7 @@ const AdminDashboard = () => {
                                                             <p className="font-black text-white text-sm truncate" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{product.name}</p>
                                                             <div className="flex items-center gap-2 mt-1 flex-wrap">
                                                                 <span className="text-xs px-2 py-0.5 bg-magenta-500/20 text-magenta-300 corner-clip-sm border border-magenta-500/40" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{product.category}</span>
-                                                                <span className="font-black text-cyan-400 text-sm" style={{ fontFamily: 'Orbitron, sans-serif' }}>฿{product.price.toFixed(2)}</span>
+                                                                <span className="font-black text-cyan-400 text-sm" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(product.price)}</span>
                                                                 {product.discount > 0 && <span className="text-xs text-red-400">-{product.discount}%</span>}
                                                             </div>
                                                             <p className={`text-xs font-bold mt-1 ${product.stock > 10 ? 'text-green-400' : 'text-orange-400'}`} style={{ fontFamily: 'Rajdhani, sans-serif' }}>Stock: {product.stock || 0}</p>

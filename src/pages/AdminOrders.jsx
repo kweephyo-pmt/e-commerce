@@ -3,10 +3,12 @@ import { collection, onSnapshot, doc, updateDoc, serverTimestamp, runTransaction
 import { db } from '../config/firebase';
 import { logActivity } from '../utils/logActivity';
 import { useAuth } from '../context/AuthContext';
+import { useCurrency } from '../context/CurrencyContext';
 import { Package, Truck, CheckCircle, Clock, Calendar, User, MapPin, Mail, Phone, Search, ShoppingCart, ChevronDown, ChevronRight, Banknote, XCircle, Eye, X, AlertCircle, Filter, LayoutList } from 'lucide-react';
 
 const AdminOrders = () => {
     const { userProfile } = useAuth();
+    const { formatPrice } = useCurrency();
     const adminInfo = { uid: userProfile?.uid, name: userProfile?.displayName, email: userProfile?.email };
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -103,7 +105,7 @@ const AdminOrders = () => {
             await logActivity({
                 type: 'order', icon: 'ShoppingCart',
                 title: 'Payment Confirmed',
-                description: `Order #${orderId.slice(0, 8).toUpperCase()} · ฿${orderData.total?.toFixed(2)} — Payment verified`,
+                description: `Order #${orderId.slice(0, 8).toUpperCase()} · ${formatPrice(orderData.total)} — Payment verified`,
                 color: 'green',
                 admin: adminInfo
             });
@@ -470,7 +472,7 @@ const AdminOrders = () => {
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        <div className="font-black text-cyan-400" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 8px rgba(0,255,255,0.5)' }}>฿{order.total?.toFixed(2)}</div>
+                                                        <div className="font-black text-cyan-400" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 8px rgba(0,255,255,0.5)' }}>{formatPrice(order.total)}</div>
                                                         {(() => { const pb = getPaymentBadge(order.paymentStatus); return pb ? <div className={`text-xs font-black mt-1 ${pb.cls}`} style={{ fontFamily: 'Rajdhani, sans-serif' }}>{pb.label}</div> : null; })()}
                                                         {order.paymentMethod === 'bank_transfer' && (
                                                             <div className="text-xs text-gray-500 font-bold mt-0.5 flex items-center gap-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}><Banknote className="w-3 h-3" /> Bank Transfer</div>
@@ -512,7 +514,7 @@ const AdminOrders = () => {
                                                                             </div>
                                                                             <div className="text-right">
                                                                                 <div className="text-sm text-gray-200 font-black" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Qty: {item.quantity}</div>
-                                                                                <div className="font-black text-cyan-400" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 8px rgba(0,255,255,0.5)' }}>฿{(item.price * item.quantity).toFixed(2)}</div>
+                                                                                <div className="font-black text-cyan-400" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 8px rgba(0,255,255,0.5)' }}>{formatPrice(item.price * item.quantity)}</div>
                                                                                 {item.discount > 0 && <div className="text-xs text-red-400 font-black" style={{ fontFamily: 'Rajdhani, sans-serif' }}>-{item.discount}% off</div>}
                                                                             </div>
                                                                         </div>
@@ -569,10 +571,10 @@ const AdminOrders = () => {
                                                                             <div>Subtotal:</div><div>Shipping:</div><div>Tax:</div><div className="text-white">Total:</div>
                                                                         </div>
                                                                         <div className="space-y-1 text-right font-black" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                                                                            <div className="text-gray-300">฿{order.subtotal?.toFixed(2)}</div>
-                                                                            <div className="text-gray-300">฿{order.shipping?.toFixed(2)}</div>
-                                                                            <div className="text-gray-300">฿{order.tax?.toFixed(2)}</div>
-                                                                            <div className="text-cyan-400" style={{ textShadow: '0 0 10px rgba(0,255,255,0.7)' }}>฿{order.total?.toFixed(2)}</div>
+                                                                            <div className="text-gray-300">{formatPrice(order.subtotal)}</div>
+                                                                            <div className="text-gray-300">{formatPrice(order.shipping)}</div>
+                                                                            <div className="text-gray-300">{formatPrice(order.tax)}</div>
+                                                                            <div className="text-cyan-400" style={{ textShadow: '0 0 10px rgba(0,255,255,0.7)' }}>{formatPrice(order.total)}</div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -610,7 +612,7 @@ const AdminOrders = () => {
                                                 </div>
                                                 <p className="text-xs text-gray-400 truncate mt-0.5">{order.userName} • {order.userEmail}</p>
                                                 <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                                    <span className="font-black text-cyan-400 text-sm" style={{ fontFamily: 'Orbitron, sans-serif' }}>฿{order.total?.toFixed(2)}</span>
+                                                    <span className="font-black text-cyan-400 text-sm" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(order.total)}</span>
                                                     {(() => { const pb = getPaymentBadge(order.paymentStatus); return pb ? <span className={`text-[10px] font-black ${pb.cls}`} style={{ fontFamily: 'Rajdhani, sans-serif' }}>{pb.label}</span> : null; })()}
                                                     <span className="text-[10px] text-gray-500" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{order.items?.length} item(s)</span>
                                                 </div>
@@ -668,7 +670,7 @@ const AdminOrders = () => {
                                                                     <p className="font-black text-white text-xs truncate" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{item.name}</p>
                                                                     <p className="text-[10px] text-gray-400">Qty: {item.quantity}</p>
                                                                 </div>
-                                                                <span className="font-black text-cyan-400 text-xs flex-shrink-0" style={{ fontFamily: 'Orbitron, sans-serif' }}>฿{(item.price * item.quantity).toFixed(0)}</span>
+                                                                <span className="font-black text-cyan-400 text-xs flex-shrink-0" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatPrice(item.price * item.quantity)}</span>
                                                             </div>
                                                         ))}
                                                     </div>
@@ -676,7 +678,7 @@ const AdminOrders = () => {
                                                     {/* Order total summary */}
                                                     <div className="flex justify-between text-xs pt-2 border-t border-cyan-500/20">
                                                         <span className="text-gray-400 font-black uppercase" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Total</span>
-                                                        <span className="font-black text-cyan-400" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 8px rgba(0,255,255,0.6)' }}>฿{order.total?.toFixed(2)}</span>
+                                                        <span className="font-black text-cyan-400" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 8px rgba(0,255,255,0.6)' }}>{formatPrice(order.total)}</span>
                                                     </div>
 
                                                     {/* Payment slip actions */}

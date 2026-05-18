@@ -2,12 +2,22 @@ import { useState, useEffect } from 'react';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { Users, Search, Mail, Phone, MapPin, Calendar, ShoppingBag, DollarSign, Filter } from 'lucide-react';
+import { useCurrency } from '../context/CurrencyContext';
 
 const AdminCustomers = () => {
     const [customers, setCustomers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
+    const { formatPrice } = useCurrency();
+
+    // Short-form formatter for stat cards (avoids overflow)
+    const formatShort = (mmk) => {
+        if (mmk >= 1_000_000_000) return `K${(mmk / 1_000_000_000).toFixed(1)}B`;
+        if (mmk >= 1_000_000) return `K${(mmk / 1_000_000).toFixed(1)}M`;
+        if (mmk >= 1_000) return `K${(mmk / 1_000).toFixed(1)}K`;
+        return `K${Math.round(mmk).toLocaleString('en-US')}`;
+    };
 
     useEffect(() => {
         fetchCustomers();
@@ -184,10 +194,10 @@ const AdminCustomers = () => {
                         <div className="w-10 h-10 md:w-14 md:h-14 bg-purple-500/20 corner-clip-sm flex items-center justify-center border border-purple-500/40 flex-shrink-0">
                             <DollarSign className="w-5 h-5 md:w-7 md:h-7 text-purple-400" style={{ filter: 'drop-shadow(0 0 5px rgba(147,51,234,0.8))' }} />
                         </div>
-                        <div className="sm:text-right">
+                        <div className="sm:text-right min-w-0 flex-1">
                             <p className="text-purple-400/70 text-[10px] md:text-xs font-black uppercase tracking-wide mb-0.5 md:mb-1" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Total Revenue</p>
-                            <p className="text-2xl sm:text-3xl md:text-5xl font-black text-purple-400 truncate" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(147,51,234,0.8)' }}>
-                                ฿{(stats.totalRevenue / 1000).toFixed(1)}K
+                            <p className="text-xl sm:text-2xl md:text-3xl font-black text-purple-400 truncate" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 15px rgba(147,51,234,0.8)' }}>
+                                {formatShort(stats.totalRevenue)}
                             </p>
                         </div>
                     </div>
@@ -330,7 +340,7 @@ const AdminCustomers = () => {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className="font-black text-green-400" style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 8px rgba(0,255,0,0.5)' }}>
-                                                    ฿{customer.totalSpent.toFixed(2)}
+                                                    {formatPrice(customer.totalSpent)}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4">
@@ -379,7 +389,7 @@ const AdminCustomers = () => {
                                         )}
                                         <div className="flex items-center gap-2 mt-2 flex-wrap">
                                             <span className="text-xs px-2 py-0.5 border border-cyan-500/40 bg-cyan-500/10 text-cyan-400 corner-clip-sm" style={{ fontFamily: 'Rajdhani, sans-serif' }}>{customer.totalOrders} orders</span>
-                                            <span className="text-xs font-black text-green-400" style={{ fontFamily: 'Orbitron, sans-serif' }}>฿{customer.totalSpent.toFixed(0)}</span>
+                                            <span className="text-xs font-black text-green-400" style={{ fontFamily: 'Orbitron, sans-serif' }}>{formatShort(customer.totalSpent)}</span>
                                             {customer.totalOrders > 0 ? (
                                                 <span className="text-xs px-2 py-0.5 border border-green-500/50 bg-green-500/10 text-green-400 corner-clip-sm" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Active</span>
                                             ) : (
