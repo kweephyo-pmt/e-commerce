@@ -13,6 +13,7 @@ import Toast from '../components/Toast';
 
 // ── Thai bank list for the dropdown ─────────────────────────────────────────
 const THAI_BANKS = [
+    'KBZ Pay(KPay)',
     'Kasikorn Bank (KBank)',
     'Bangkok Bank (BBL)',
     'Siam Commercial Bank (SCB)',
@@ -477,7 +478,7 @@ const AdminBankAccounts = () => {
                                         style={{ fontFamily: 'Rajdhani, sans-serif' }}>Account Name *</label>
                                     <input type="text" value={form.accountName}
                                         onChange={e => setForm({ ...form, accountName: e.target.value })}
-                                        placeholder="e.g. Phyo Min Thein"
+                                        placeholder="e.g.  John Doe"
                                         className={`w-full bg-gray-800 border-2 corner-clip-sm text-white px-4 py-2.5 focus:outline-none transition-all font-bold text-sm placeholder-gray-600 ${formErrors.accountName ? 'border-red-500' : 'border-cyan-500/30 focus:border-cyan-400'}`}
                                         style={{ fontFamily: 'Rajdhani, sans-serif' }} />
                                     {formErrors.accountName && <p className="mt-1 text-xs text-red-400 font-bold">{formErrors.accountName}</p>}

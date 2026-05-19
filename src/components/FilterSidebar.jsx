@@ -172,14 +172,14 @@ const FilterSidebar = ({
                                     <div className="flex-1">
                                         <label className="block text-xs text-gray-400 mb-1 uppercase tracking-wide font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Min</label>
                                         <div className="px-3 py-2 bg-gray-900/80 text-cyan-400 border-2 border-cyan-500/50 font-black text-sm corner-clip-sm" style={{ fontFamily: 'Orbitron, sans-serif', boxShadow: '0 0 15px rgba(0, 255, 255, 0.3), inset 0 0 10px rgba(0, 255, 255, 0.1)' }}>
-                                            ฿{selectedPriceRange.min}
+                                            K{selectedPriceRange.min}
                                         </div>
                                     </div>
                                     <span className="text-cyan-400 font-bold text-xl mt-5" style={{ textShadow: '0 0 10px rgba(0, 255, 255, 0.8)' }}>—</span>
                                     <div className="flex-1">
                                         <label className="block text-xs text-gray-400 mb-1 uppercase tracking-wide font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Max</label>
                                         <div className="px-3 py-2 bg-gray-900/80 text-cyan-400 border-2 border-cyan-500/50 font-black text-sm corner-clip-sm" style={{ fontFamily: 'Orbitron, sans-serif', boxShadow: '0 0 15px rgba(0, 255, 255, 0.3), inset 0 0 10px rgba(0, 255, 255, 0.1)' }}>
-                                            ฿{selectedPriceRange.max}
+                                            K{selectedPriceRange.max}
                                         </div>
                                     </div>
                                 </div>
